@@ -20,7 +20,10 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-extern "C" int *getFrameIds( char *cfile, int filenameLen );
+// API for sml
+    // Get a count of frames
+extern "C" int loadFrames( char *cfile, int filenameLen );
+extern "C" void getFrames( int *frameBuf );
 
 CsAndGs *allFrames;
 std::vector<int> *frameIds;
@@ -51,12 +54,15 @@ CsAndGs *getFrames( cv::VideoCapture &cap ) {
     return allFrames;
 }
 
-int *getFrameIds( char *cfile, int filenameLen ) {
+int loadFrames( char *cfile, int filenameLen ) {
     string filename( cfile, filenameLen );
     vidCap = new cv::VideoCapture( filename );
     getFrames( *vidCap );
-    cout << "num FrameIds = " << frameIds->size() << endl;
-    return &(*(frameIds->begin()));
+    return frameIds->size();
+}
+
+void getFrames( int *dst ) {
+    std::copy( frameIds->begin(), frameIds->end(), dst );
 }
 
 FrameSet getKeyframes( FrameSet &frames ) {
@@ -82,48 +88,34 @@ FrameSet getSDs( const FrameSet &frames, const FrameSet &keyFrames ) {
     return SDs;
 }
 
-int main( int, char **argv ) {
-    string filename = argv[1];
-    cv::VideoCapture cap( filename );
-    CsAndGs &allFrames = *getFrames( cap );
-
-    FrameSet keyframes = getKeyframes( allFrames.grays );
-    TRACECOUNT( "Keyframes", keyframes.size() );
-
-    FrameSet SDs = getSDs( allFrames.grays, keyframes );
-    //std::for_each( SDs.begin(), SDs.end(), std::bind1st( std::ptr_fun( showNwait ), "SDs" ) );
-
-    SkinMaskSet skinMasks = generateSkinMasks( allFrames.colors );
-    /*
-     *std::for_each( skinMasks.begin(), skinMasks.end(),
-     *               std::mem_fun_ref( &SkinMask::showNwait ) );
-     */
-
-    FrameSet skinMasked; skinMasked.reserve( SDs.size() );
-    Zip( SDs.begin(), SDs.end(), skinMasks.begin(), skinMasks.end(),
-         std::back_inserter( skinMasked ), maskFrame );
-    /*
-     *std::for_each( skinMasked.begin(), skinMasked.end(),
-     *               std::bind1st( std::ptr_fun( showNwait ), "masked" ) );
-     */
-
-    FrameSet edges = getDilatedEdges( skinMasked );
-    //FrameSet edges = getEdges( skinMasked );
-    std::for_each( edges.begin(), edges.end(),
-                   std::bind1st( std::ptr_fun( showNwait ), "edges" ) );
-
-    FrameSet edgeMasked = negateAndMask( skinMasked, edges );
-    /*
-     *std::for_each( edgeMasked.begin(), edgeMasked.end(),
-     *               std::bind1st( std::ptr_fun( showNwait ), "edges2" ) );
-     */
-
-    FrameSet smallsRemoved = removeSmallConnectedComponents( edgeMasked );
-    /*
-     *std::for_each( smallsRemoved.begin(), smallsRemoved.end(),
-     *               std::bind1st( std::ptr_fun( showNwait ), "smalls removed" ) );
-     */
-
-    return 0;
-}
+/*
+ *int main( int, char **argv ) {
+ *    string filename = argv[1];
+ *    cv::VideoCapture cap( filename );
+ *    CsAndGs &allFrames = *getFrames( cap );
+ *
+ *    FrameSet keyframes = getKeyframes( allFrames.grays );
+ *    TRACECOUNT( "Keyframes", keyframes.size() );
+ *
+ *    FrameSet SDs = getSDs( allFrames.grays, keyframes );
+ *    //std::for_each( SDs.begin(), SDs.end(), std::bind1st( std::ptr_fun( showNwait ), "SDs" ) );
+ *
+ *    SkinMaskSet skinMasks = generateSkinMasks( allFrames.colors );
+ *
+ *    FrameSet skinMasked; skinMasked.reserve( SDs.size() );
+ *    Zip( SDs.begin(), SDs.end(), skinMasks.begin(), skinMasks.end(),
+ *         std::back_inserter( skinMasked ), maskFrame );
+ *
+ *    FrameSet edges = getDilatedEdges( skinMasked );
+ *    //FrameSet edges = getEdges( skinMasked );
+ *    std::for_each( edges.begin(), edges.end(),
+ *                   std::bind1st( std::ptr_fun( showNwait ), "edges" ) );
+ *
+ *    FrameSet edgeMasked = negateAndMask( skinMasked, edges );
+ *
+ *    FrameSet smallsRemoved = removeSmallConnectedComponents( edgeMasked );
+ *
+ *    return 0;
+ *}
+ */
 
