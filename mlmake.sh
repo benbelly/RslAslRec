@@ -1,3 +1,4 @@
+#!/bin/sh
 mlton \
       -link-opt -L/home/ben/opencv/lib \
       -link-opt -lstdc++ \
