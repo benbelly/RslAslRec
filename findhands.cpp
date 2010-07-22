@@ -88,34 +88,32 @@ FrameSet getSDs( const FrameSet &frames, const FrameSet &keyFrames ) {
     return SDs;
 }
 
-/*
- *int main( int, char **argv ) {
- *    string filename = argv[1];
- *    cv::VideoCapture cap( filename );
- *    CsAndGs &allFrames = *getFrames( cap );
- *
- *    FrameSet keyframes = getKeyframes( allFrames.grays );
- *    TRACECOUNT( "Keyframes", keyframes.size() );
- *
- *    FrameSet SDs = getSDs( allFrames.grays, keyframes );
- *    //std::for_each( SDs.begin(), SDs.end(), std::bind1st( std::ptr_fun( showNwait ), "SDs" ) );
- *
- *    SkinMaskSet skinMasks = generateSkinMasks( allFrames.colors );
- *
- *    FrameSet skinMasked; skinMasked.reserve( SDs.size() );
- *    Zip( SDs.begin(), SDs.end(), skinMasks.begin(), skinMasks.end(),
- *         std::back_inserter( skinMasked ), maskFrame );
- *
- *    FrameSet edges = getDilatedEdges( skinMasked );
- *    //FrameSet edges = getEdges( skinMasked );
- *    std::for_each( edges.begin(), edges.end(),
- *                   std::bind1st( std::ptr_fun( showNwait ), "edges" ) );
- *
- *    FrameSet edgeMasked = negateAndMask( skinMasked, edges );
- *
- *    FrameSet smallsRemoved = removeSmallConnectedComponents( edgeMasked );
- *
- *    return 0;
- *}
- */
+int main( int, char **argv ) {
+    string filename = argv[1];
+    cv::VideoCapture cap( filename );
+    CsAndGs &allFrames = *getFrames( cap );
+
+    FrameSet keyframes = getKeyframes( allFrames.grays );
+    TRACECOUNT( "Keyframes", keyframes.size() );
+
+    FrameSet SDs = getSDs( allFrames.grays, keyframes );
+    //std::for_each( SDs.begin(), SDs.end(), std::bind1st( std::ptr_fun( showNwait ), "SDs" ) );
+
+    SkinMaskSet skinMasks = generateSkinMasks( allFrames.colors );
+
+    FrameSet skinMasked; skinMasked.reserve( SDs.size() );
+    Zip( SDs.begin(), SDs.end(), skinMasks.begin(), skinMasks.end(),
+         std::back_inserter( skinMasked ), maskFrame );
+
+    FrameSet edges = getDilatedEdges( skinMasked );
+    //FrameSet edges = getEdges( skinMasked );
+    std::for_each( edges.begin(), edges.end(),
+                   std::bind1st( std::ptr_fun( showNwait ), "edges" ) );
+
+    FrameSet edgeMasked = negateAndMask( skinMasked, edges );
+
+    FrameSet smallsRemoved = removeSmallConnectedComponents( edgeMasked );
+
+    return 0;
+}
 
