@@ -1,6 +1,6 @@
 EXECUTABLE=findhands
 OBJS = findhands.o frame.o keyframeselect.o keyframedist.o skinmask.o \
-	   edgedetection.o logging.o
+	   FrameDB.o edgedetection.o logging.o
 
 CC=g++
 DEBUG=-g -DTRACE
