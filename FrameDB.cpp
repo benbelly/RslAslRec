@@ -1,12 +1,27 @@
 
 #include <numeric>
 
+#include "logging.h"
+
 #include "keyframeselect.h"
+#include "keyframedist.h"
+#include "skinmask.h"
+#include "edgedetection.h"
 #include "FrameDB.h"
+#include "utility.h"
+
+#include "FrameDBHelpers.h"
+
+FrameDB *FDB;
 
 FrameDB::FrameDB( string vFile ) : videoFile( vFile ) {
+    FDB = this;
+}
+
+void FrameDB::findHands() {
     loadVideo();
     findKeyframes();
+    makeSDs();
 }
 
 FrameSet FrameDB::getItem( FrameDB::Accessor f ) const {
@@ -16,36 +31,35 @@ FrameSet FrameDB::getItem( FrameDB::Accessor f ) const {
     return os;
 }
 
-Frame getOriginal( FrameDB::RowType p ) {
-    return p.second.original;
+void FrameDB::setItem( FrameDB::Setter s, FrameSet vals ) {
+    TwoFor( db.begin(), db.end(), vals.begin(), vals.end(),
+            std::ptr_fun( s ) );
 }
 
 FrameSet FrameDB::originals() const {
     return getItem( getOriginal );
 }
 
-Frame getGray( FrameDB::RowType p ) {
-    return p.second.gray;
-}
-
 FrameSet FrameDB::grays() const {
     return getItem( getGray );
-}
-
-Frame getSkin( FrameDB::RowType p ) {
-    return p.second.skinMask;
 }
 
 FrameSet FrameDB::skins() const {
     return getItem( getSkin );
 }
 
-Frame getSD( FrameDB::RowType p ) {
-    return p.second.SD;
-}
-
 FrameSet FrameDB::sds() const {
     return getItem( getSD );
+}
+
+FrameDB::FrameData::FrameData( int i, const cv::Mat &img ) :
+    id( i ),
+    original( i ),
+    gray( i, img.size(), image_types::gray )
+{
+    img.copyTo( original.mat );
+    skinMask = generateSkinMask( original );
+    cv::cvtColor( img, gray.mat, CV_BGR2GRAY );
 }
 
 void FrameDB::loadVideo() {
@@ -55,20 +69,41 @@ void FrameDB::loadVideo() {
     cv::Mat img;
     while( cap.grab() ) {
         cap.retrieve( img );
-        Frame color( i, img.size(), img.type() );
-        img.copyTo( color.mat );
-        Frame gray( i, img.size(), CV_8UC1 );
-        cv::cvtColor( img, gray.mat, CV_RGB2GRAY );
-        db[i] = FrameData( i++, color, gray );
+        db[i] = FrameData( i, img );
+        ++i;
     }
 }
 
 void FrameDB::findKeyframes() {
-    keyframes.reserve( db.size() / 5 );
-
-    keyframes.push_back( gray( 0 ) );
     FrameSet graySet = grays();
+    Frame firstKeyframe = graySet[0];
+    keyframes.push_back( firstKeyframe );
     std::accumulate( graySet.begin() + 1, graySet.end(),
-                     keyframes[0],
+                     firstKeyframe,
                      AccumKeyframes( keyframes ) );
+}
+
+void FrameDB::makeSDs() {
+    FrameSet SDs = maskedSDs( generateInitialSDs() );
+    FrameSet edges = getDilatedEdges( SDs );
+    FrameSet negated = negateAndMask( SDs, edges );
+    FrameSet cleaned = removeSmallConnectedComponents( negated );
+    setItem( setSD, cleaned );
+}
+
+FrameSet FrameDB::generateInitialSDs() {
+    FrameSet SDs; SDs.reserve( db.size() );
+    FrameSet frames = grays();
+    FrameSet bigKeys = gray8bitTogray16bit( keyframes );
+    std::transform( frames.begin(), frames.end(), std::back_inserter( SDs ),
+                    std::bind1st( std::ptr_fun( avgDist ), bigKeys ) );
+    return SDs;
+}
+  
+FrameSet FrameDB::maskedSDs( FrameSet SDs ) {
+    FrameSet skinMasked; skinMasked.reserve( SDs.size() );
+    FrameSet skinMasks = skins();
+    Zip( SDs.begin(), SDs.end(), skinMasks.begin(), skinMasks.end(),
+         std::back_inserter( skinMasked ), maskFrame );
+    return skinMasked;
 }

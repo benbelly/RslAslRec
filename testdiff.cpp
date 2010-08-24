@@ -8,38 +8,26 @@
 
 using std::vector;
 
-vector<cv::Mat> getSkins( vector<cv::Mat> &mats ) {
-    vector<cv::Mat> masks;
-
-    CvAdaptiveSkinDetector filter;
-
-    for( int i = 0; i < mats.size(); ++i ) {
-        cv::Mat maskMat( mats[i].size(), CV_8UC1 );
-        IplImage src = (IplImage)mats[i],
-                 msk = (IplImage)maskMat;
-        filter.process( &src, &msk );
-        masks.push_back( maskMat );
-    }
-    return masks;
-}
-
 int main( int, char **argv ) {
     cv::VideoCapture cap( argv[1] );
 
     cv::Mat img;
-    vector<cv::Mat> mats;
+    vector<cv::Mat> mats, grays;
 
     while( cap.grab() ) {
         cap.retrieve( img );
-        cv::Mat grab( img.size(), img.type() );
+        cv::Mat grab = cv::Mat::zeros( img.size(), img.type() );
         img.copyTo( grab );
         mats.push_back( grab );
+        cv::Mat gray = cv::Mat::zeros( img.size(), img.type() );
+        cv::cvtColor( img, gray, CV_BGR2GRAY );
+        grays.push_back( gray );
     }
 
-    vector<cv::Mat> masks = getSkins( mats );
-
-    for( int i = 0; i < masks.size(); ++i ) {
-        cv::imshow( "mask", masks[i] );
+    for( unsigned int i = 0; i < grays.size(); ++i ) {
+        cv::Mat b = cv::Mat::zeros( grays[i].size(), grays[i].type() );
+        grays[i].convertTo( b, CV_16UC1, 255 );
+        cv::imshow( "mask", b );
         cv::waitKey();
     }
 }

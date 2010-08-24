@@ -4,10 +4,13 @@ OBJS = findhands.o frame.o keyframeselect.o keyframedist.o skinmask.o \
 
 CC=g++
 DEBUG=-g -DTRACE
-INCLUDE=-I/home/ben/opencv/include -I/home/ben/opencv/include/opencv #-I/usr/include/opencv
-LIBS=-L/home/ben/opencv/lib -lcxcore -lcv -lhighgui -lcvaux -lml
+INCLUDE=-I/home/ben/opencv/include -I/home/ben/opencv/include/opencv #-I/usr/include/opencv 
+LIBS=-lcxcore -lcv -lhighgui -lcvaux -lml -L/home/ben/opencv/lib 
 CFLAGS=-Wall -c $(DEBUG) $(INCLUDE)
 LFLAGS=-Wall $(DEBUG) $(LIBS)
+
+#test: testdiff.cpp
+#		$(CC) $(INCLUDE) $(LFLAGS) testdiff.cpp -o testdiff
 
 all: $(OBJS) $(EXECUTABLE)
 		@echo "\nBuild is complete."

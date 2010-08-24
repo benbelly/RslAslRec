@@ -9,24 +9,30 @@
 #include "logging.h"
 #include "skinmask.h"
 
-SkinMask generateSkinMask( Frame frame ) {
-    cv::Mat maskMat( frame.size(), CV_8UC1 );
+Frame generateSkinMask( Frame frame ) {
+    cv::Mat maskMat = cv::Mat::zeros( frame.size(), image_types::gray );
     IplImage srcImg = (IplImage)frame.mat,
              mask = (IplImage)maskMat;
     CvAdaptiveSkinDetector filter( 1, CvAdaptiveSkinDetector::MORPHING_METHOD_ERODE_DILATE );
     filter.process( &srcImg, &mask );
-    return SkinMask( frame, maskMat );
+    return Frame( frame.id, maskMat );
 }
 
-SkinMaskSet generateSkinMasks( FrameSet &frames ) {
-    SkinMaskSet masks; masks.reserve( frames.size() );
+FrameSet generateSkinMasks( FrameSet &frames ) {
+    FrameSet masks; masks.reserve( frames.size() );
     std::transform( frames.begin(), frames.end(), std::back_inserter( masks ),
                     std::ptr_fun( generateSkinMask ) );
     return masks;
 }
 
-Frame maskFrame( Frame &f, SkinMask &sk ) {
-    Frame masked( f.id, f.size(), f.type() );
-    f.mat.copyTo( masked.mat, sk.mask );
-    return masked;
+Frame maskFrame( Frame &f, Frame &sk ) {
+    cv::Mat masked = cv::Mat::zeros( masked.size(), masked.type() );
+    f.mat.copyTo( masked, sk.mat );
+    /*
+     *cv::imshow( "gray", f.mat );
+     *cv::imshow( "skin", sk.mat );
+     *cv::imshow( "masked", masked );
+     *cv::waitKey();
+     */
+    return Frame ( f.id, masked );
 }

@@ -15,15 +15,15 @@ using std::string;
 class FrameDB {
     public:
         FrameDB( string videoFile );
+        void findHands();
 
         struct FrameData {
             int id;
             Frame original,
-                  gray,
                   skinMask,
+                  gray,
                   SD;
-            FrameData( int i, Frame &o, Frame &g ) :
-                id( i ), original( o ), gray( g ) { }
+            FrameData( int i, const cv::Mat &img );
             // Don't use. Provide for std::map
             FrameData() {}
         };
@@ -53,9 +53,18 @@ class FrameDB {
 
         void loadVideo();
         void findKeyframes();
+        void makeSDs();
+
+        FrameSet generateInitialSDs();
+        FrameSet maskedSDs( FrameSet );
 
         typedef Frame (*Accessor)( RowType );
         FrameSet getItem( Accessor ) const;
+
+        typedef void (*Setter)( RowType &, const Frame & );
+        void setItem( Setter, FrameSet vals );
 };
+
+extern FrameDB *FDB;
 
 #endif

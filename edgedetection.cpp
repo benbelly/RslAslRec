@@ -1,15 +1,17 @@
 
 #include "edgedetection.h"
 #include "consts.h"
+#include "FrameDB.h"
+#include "utility.h"
 
 cv::Mat doDilate( cv::Mat mat ) {
-    cv::Mat dilated( mat.size(), mat.type() );
+    cv::Mat dilated = cv::Mat::zeros( mat.size(), mat.type() );
     cv::dilate( mat, dilated, cv::Mat() );
     return dilated;
 }
 
 Frame getEdge( Frame f, bool dilate ) {
-    cv::Mat edges( f.size(), f.type() );
+    cv::Mat edges = cv::Mat::zeros( f.size(), f.type() );
     cv::Canny( f.mat, edges, 3, 9 );
     if( dilate )
         edges = doDilate( edges );
@@ -38,7 +40,9 @@ uchar maskPixel( uchar sd, uchar mask ) {
 
 Frame negateAndMaskFrame( Frame SD, Frame mask ) {
     Frame result( SD.id, SD.size(), SD.type() );
-    Zip( SD.mat.datastart, SD.mat.dataend, mask.mat.datastart, mask.mat.dataend,
+    cv::Mat valid = cv::Mat::zeros( mask.mat.size(), mask.mat.type() );
+    mask.mat.copyTo( valid, FDB->skin( SD.id ).mat );
+    Zip( SD.mat.datastart, SD.mat.dataend, valid.datastart, valid.dataend,
          result.mat.datastart, maskPixel );
     return result;
 }
@@ -63,7 +67,7 @@ ContourSet getSmallContours( ContourSet &c ) {
 }
 
 Frame removeComponentsFromFrame( Frame f ) {
-    Frame clean( f.id, f.size(), f.type() );
+    Frame clean( f.id );
     ContourSet contours;
     cv::findContours( f.mat, contours,
                       CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE );

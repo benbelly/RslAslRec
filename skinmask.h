@@ -7,15 +7,8 @@
 #include "opencv/highgui.h"
 #include "frame.h"
 
-struct SkinMask {
-    SkinMask( Frame &f, cv::Mat &m ) : frame( f ), mask( m ) { }
-    Frame frame; // frame being masked
-    cv::Mat mask;
-    void showNwait() { cv::imshow( "mask", mask ); cv::waitKey(); }
-};
-typedef std::vector<SkinMask> SkinMaskSet;
+Frame generateSkinMask( Frame frame );
+FrameSet generateSkinMasks( FrameSet &frames );
 
-SkinMaskSet generateSkinMasks( FrameSet &frames );
-
-Frame maskFrame( Frame &f, SkinMask &sk );
+Frame maskFrame( Frame &f, Frame &sk );
 #endif

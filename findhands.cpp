@@ -14,7 +14,10 @@
 #include "keyframedist.h"
 #include "skinmask.h"
 #include "edgedetection.h"
+#include "utility.h"
 #include "logging.h"
+
+#include "FrameDB.h"
 
 using std::string;
 using std::cerr;
@@ -22,97 +25,18 @@ using std::endl;
 
 // API for sml
     // Get a count of frames
-extern "C" int loadFrames( char *cfile, int filenameLen );
-extern "C" void getFrames( int *frameBuf );
-
-CsAndGs *allFrames;
-std::vector<int> *frameIds;
-cv::VideoCapture *vidCap;
-
-CsAndGs *getFrames( cv::VideoCapture &cap ) {
-    double numFrames = cap.get( CV_CAP_PROP_FRAME_COUNT );
-
-    allFrames = new CsAndGs();
-    frameIds = new std::vector<int>(); frameIds->reserve( numFrames );
-
-    allFrames->colors.reserve( numFrames );
-    allFrames->grays.reserve( numFrames );
-
-    int i = 0;
-    cv::Mat img;
-    while( cap.grab() ) {
-        cap.retrieve( img );
-        Frame color( i, img.size(), img.type() );
-        img.copyTo( color.mat );
-        Frame gray( i, img.size(), CV_8UC1 );
-        cv::cvtColor( img, (gray.mat), CV_RGB2GRAY );
-        allFrames->colors.push_back( color );
-        allFrames->grays.push_back( gray );
-        frameIds->push_back( i++ );
-    }
-    //cerr << "Got " << frames.size() << " frames of expected " << numFrames << endl;
-    return allFrames;
-}
-
-int loadFrames( char *cfile, int filenameLen ) {
-    string filename( cfile, filenameLen );
-    vidCap = new cv::VideoCapture( filename );
-    getFrames( *vidCap );
-    return frameIds->size();
-}
-
-void getFrames( int *dst ) {
-    std::copy( frameIds->begin(), frameIds->end(), dst );
-}
-
-FrameSet getKeyframes( FrameSet &frames ) {
-    FrameSet keyframes;
-    keyframes.reserve( frames.size() ); // can't get bigger than this
-
-    keyframes.push_back( frames[0] );
-    std::accumulate( frames.begin() + 1, frames.end(),
-                     frames[0],
-                     AccumKeyframes( keyframes ) );
-
-    return keyframes;
-}
-
-FrameSet getSDs( const FrameSet &frames, const FrameSet &keyFrames ) {
-    // I happen to know these get converted to 16 bit FRAMES times if I
-    // don't do it ahead of time
-    FrameSet bigKeys = gray8bitTogray16bit( keyFrames );
-    FrameSet SDs;
-    SDs.reserve( frames.size() );
-    std::transform( frames.begin(), frames.end(), std::back_inserter( SDs ),
-                    std::bind1st( std::ptr_fun( avgDist ), bigKeys ) );
-    return SDs;
-}
+/*
+ *extern "C" int loadFrames( char *cfile, int filenameLen );
+ *extern "C" void getFrames( int *frameBuf );
+ */
 
 int main( int, char **argv ) {
     string filename = argv[1];
-    cv::VideoCapture cap( filename );
-    CsAndGs &allFrames = *getFrames( cap );
 
-    FrameSet keyframes = getKeyframes( allFrames.grays );
-    TRACECOUNT( "Keyframes", keyframes.size() );
-
-    FrameSet SDs = getSDs( allFrames.grays, keyframes );
-    //std::for_each( SDs.begin(), SDs.end(), std::bind1st( std::ptr_fun( showNwait ), "SDs" ) );
-
-    SkinMaskSet skinMasks = generateSkinMasks( allFrames.colors );
-
-    FrameSet skinMasked; skinMasked.reserve( SDs.size() );
-    Zip( SDs.begin(), SDs.end(), skinMasks.begin(), skinMasks.end(),
-         std::back_inserter( skinMasked ), maskFrame );
-
-    FrameSet edges = getDilatedEdges( skinMasked );
-    //FrameSet edges = getEdges( skinMasked );
-    std::for_each( edges.begin(), edges.end(),
-                   std::bind1st( std::ptr_fun( showNwait ), "edges" ) );
-
-    FrameSet edgeMasked = negateAndMask( skinMasked, edges );
-
-    FrameSet smallsRemoved = removeSmallConnectedComponents( edgeMasked );
+    FrameDB db( filename );
+    db.findHands();
+    FrameSet sds = db.sds();
+    std::for_each( sds.begin(), sds.end(), std::bind1st( std::ptr_fun( showNwait ), "sds" ) );
 
     return 0;
 }

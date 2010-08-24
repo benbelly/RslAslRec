@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <functional>
 
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
@@ -11,6 +12,9 @@
 #include "keyframeselect.h"
 #include "consts.h"
 #include "logging.h"
+#include "utility.h"
+
+#include "FrameDB.h"
 
 double calculateDiff( const Frame &l, const Frame &r );
 double sizeOfLargestConnectedComponent( cv::Mat &differenceImage );
@@ -26,9 +30,23 @@ Frame AccumKeyframes::operator() ( Frame lastKey, Frame next ) {
     return lastKey;
 }
 
+unsigned char bitOr( unsigned char a, unsigned char b ) { return a | b; }
+
+cv::Mat orMasks( cv::Mat &a, cv::Mat &b ) {
+    cv::Mat dst = cv::Mat::zeros( a.size(), a.type() );
+    Zip( a.datastart, a.dataend, b.datastart, b.dataend,
+         dst.datastart, std::ptr_fun( bitOr ) );
+    return dst;
+}
+
 double calculateDiff( const Frame &l, const Frame &r ) {
-    cv::Mat diff( l.size(), l.type() );
-    cv::absdiff( l.mat, r.mat, diff );
+    // Diff only the 'valid' pixels - skin pixels
+    cv::Mat lvalid = cv::Mat::zeros( l.size(), l.type() ),
+            rvalid( r.size(), r.type() ),
+            diff( l.size(), l.type() );
+    l.mat.copyTo( lvalid, FDB->skin( l.id ).mat );
+    r.mat.copyTo( rvalid, FDB->skin( r.id ).mat );
+    cv::absdiff( lvalid, rvalid, diff );
     return sizeOfLargestConnectedComponent( diff );
 }
 

@@ -11,7 +11,7 @@ struct FrameKeyFrameDiffSum {
     { }
 
     cv::Mat like() const {
-        return cv::Mat( diffSum.size(), diffSum.type() );
+        return cv::Mat( cv::Mat::zeros( diffSum.size(), diffSum.type() ) );
     }
     Frame f;
     cv::Mat diffSum;
@@ -32,27 +32,32 @@ FrameKeyFrameDiffSum frameKeyFrameDiff( FrameKeyFrameDiffSum accum, Frame kf ) {
 }
 
 cv::Mat make16bit( const cv::Mat &src ) {
-    cv::Mat kf16u( src.size(), src.type() );
-    src.convertTo( kf16u, CV_16U );
-    return kf16u;
+    cv::Mat dst = cv::Mat::zeros( src.size(), image_types::big_gray );
+    src.convertTo( dst, image_types::big_gray, 255 );
+    /*
+     *cv::imshow( "src", src );
+     *cv::imshow( "dst", dst );
+     *cv::waitKey();
+     */
+    return dst;
 }
 
 Frame avgDist( const FrameSet &keyFrames, const Frame f ) {
-    cv::Mat Si = make16bit( f.mat ),
-                 kf16u( keyFrames[1].mat ); // already 16bit
+    cv::Mat Si( make16bit( f.mat ) ),
+            firstKey( keyFrames[0].mat ); // already 16bit
 
-    cv::Mat diff( Si.size(), Si.type() );
-    absdiff( Si, kf16u, diff );
+    cv::Mat diff = cv::Mat::zeros( Si.size(), Si.type() );
+    absdiff( Si, firstKey, diff );
 
-    FrameKeyFrameDiffSum diffsum( Frame( f.id, Si ), kf16u );
+    FrameKeyFrameDiffSum diffsum( Frame( f.id, Si ), firstKey );
     FrameKeyFrameDiffSum sum = std::accumulate( keyFrames.begin() + 1, keyFrames.end(),
                                                 diffsum, frameKeyFrameDiff );
 
     double one = 1.0, mp = keyFrames.size() - 1;
     cv::Mat avg( cv::abs( sum.diffSum * ( one / mp ) ) );
 
-    cv::Mat avg8b;
-    avg.convertTo( avg8b, CV_8UC1 );
+    cv::Mat avg8b = cv::Mat::zeros( avg.size(), image_types::gray );
+    avg.convertTo( avg8b, image_types::gray );
 
     return Frame( f.id, avg8b );
 }

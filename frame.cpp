@@ -4,8 +4,8 @@
 #include <algorithm>
 
 Frame convertTo16bit( const Frame src ) {
-    Frame dst( src.id, src.size(), CV_16U );
-    src.mat.convertTo( dst.mat, CV_16U );
+    Frame dst( src.id, src.size(), image_types::big_gray );
+    src.mat.convertTo( dst.mat, image_types::big_gray );
     return dst;
 }
 
@@ -16,22 +16,7 @@ FrameSet gray8bitTogray16bit( const FrameSet &src ) {
     return bigs;
 }
 
-static std::map<int, Frame> frames;
-static int nextFrame = 0;
-
-Frame getFrame( int id ) {
-    return frames[nextFrame];
-}
-
-int newFrame( Frame &f ) {
-    frames[++nextFrame] = f;
-    return nextFrame;
-}
-
-std::vector<int> framesToIds( FrameSet &fs ) {
-    return std::vector<int>();
-}
-
-FrameSet idsToFrames( std::vector<int> &ids ) {
-    return FrameSet();
-}
+cv::Size Frame::size() const { return mat.size(); }
+int Frame::type() const { return mat.type(); }
+int Frame::depth() const { return mat.depth(); }
+int Frame::channels() const { return mat.channels(); }
