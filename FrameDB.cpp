@@ -81,14 +81,16 @@ void FrameDB::findKeyframes() {
     std::accumulate( graySet.begin() + 1, graySet.end(),
                      firstKeyframe,
                      AccumKeyframes( keyframes ) );
+    std::cout << "Keyframe count = " << keyframes.size() << " of " << db.size() << " frames"
+              << std::endl;
 }
 
 void FrameDB::makeSDs() {
     FrameSet SDs = maskedSDs( generateInitialSDs() );
     FrameSet edges = getDilatedEdges( SDs );
     FrameSet negated = negateAndMask( SDs, edges );
-    FrameSet cleaned = removeSmallConnectedComponents( negated );
-    setItem( setSD, cleaned );
+    //FrameSet cleaned = removeSmallConnectedComponents( negated );
+    setItem( setSD, negated );
 }
 
 FrameSet FrameDB::generateInitialSDs() {

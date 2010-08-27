@@ -6,7 +6,7 @@
 
 cv::Mat doDilate( cv::Mat mat ) {
     cv::Mat dilated = cv::Mat::zeros( mat.size(), mat.type() );
-    cv::dilate( mat, dilated, cv::Mat() );
+    cv::dilate( mat, dilated, cv::Mat( 4, 2, image_types::gray, cv::Scalar( 255 ) ) );
     return dilated;
 }
 
@@ -44,6 +44,8 @@ Frame negateAndMaskFrame( Frame SD, Frame mask ) {
     mask.mat.copyTo( valid, FDB->skin( SD.id ).mat );
     Zip( SD.mat.datastart, SD.mat.dataend, valid.datastart, valid.dataend,
          result.mat.datastart, maskPixel );
+    //cv::imshow( "SD", SD.mat ); cv::imshow( "mask", valid ); cv::imshow("result", result.mat);
+    //cv::waitKey();
     return result;
 }
 

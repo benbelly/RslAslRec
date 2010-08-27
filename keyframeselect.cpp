@@ -42,7 +42,7 @@ cv::Mat orMasks( cv::Mat &a, cv::Mat &b ) {
 double calculateDiff( const Frame &l, const Frame &r ) {
     // Diff only the 'valid' pixels - skin pixels
     cv::Mat lvalid = cv::Mat::zeros( l.size(), l.type() ),
-            rvalid( r.size(), r.type() ),
+            rvalid = cv::Mat::zeros( r.size(), r.type() ),
             diff( l.size(), l.type() );
     l.mat.copyTo( lvalid, FDB->skin( l.id ).mat );
     r.mat.copyTo( rvalid, FDB->skin( r.id ).mat );
@@ -55,11 +55,12 @@ double sizeOfLargestConnectedComponent( cv::Mat &differenceImage ) {
     ContourSet contours;
     cv::findContours( differenceImage, contours,
                       CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE );
+     TRACEAREA( maxAreaOfContours( contours ) )
     /*
-     *TRACEAREA( maxAreaOfContours( contours ) )
      *#ifdef TRACE
-     *cv::drawContours( *differenceImage, contours, -1, cv::Scalar( 255 ) );
-     *cv::imshow( "contours", *differenceImage );
+     *cv::Mat out = cv::Mat::zeros( differenceImage.size(), differenceImage.type() );
+     *cv::drawContours( out, contours, -1, cv::Scalar( 255 ) );
+     *cv::imshow( "contours", out );
      *cv::waitKey( );
      *#endif
      */
