@@ -57,6 +57,10 @@ FrameSet FrameDB::sds() const {
     return getItem( getSD );
 }
 
+FrameSet FrameDB::keys() const {
+     return keyframes;
+}
+
 FrameDB::FrameData::FrameData( int i, const cv::Mat &img ) :
     id( i ),
     original( i ),

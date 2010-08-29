@@ -33,6 +33,7 @@ class FrameDB {
         FrameSet grays() const;
         FrameSet skins() const;
         FrameSet sds() const;
+        FrameSet keys() const;
 
         // Get individual frames
         Frame original( int i ) { return db[i].original; }
