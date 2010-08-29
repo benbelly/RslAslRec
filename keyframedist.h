@@ -5,4 +5,5 @@
 #include "frame.h"
 
 Frame avgDist( const FrameSet &keyFrames, const Frame f );
+Frame avgDist2( const FrameSet &keyFrames, const Frame f );
 #endif

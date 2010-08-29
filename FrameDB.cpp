@@ -14,6 +14,11 @@
 
 FrameDB *FDB;
 
+extern "C" {
+    cv::Mat original( int );
+    cv::Mat gray( int );
+}
+
 FrameDB::FrameDB( string vFile ) : videoFile( vFile ) {
     FDB = this;
 }
@@ -86,11 +91,12 @@ void FrameDB::findKeyframes() {
 }
 
 void FrameDB::makeSDs() {
-    FrameSet SDs = maskedSDs( generateInitialSDs() );
+    FrameSet init = generateInitialSDs();
+    FrameSet SDs = maskedSDs( init );
     FrameSet edges = getDilatedEdges( SDs );
     FrameSet negated = negateAndMask( SDs, edges );
-    //FrameSet cleaned = removeSmallConnectedComponents( negated );
-    setItem( setSD, negated );
+    FrameSet cleaned = removeSmallConnectedComponents( negated );
+    setItem( setSD, cleaned );
 }
 
 FrameSet FrameDB::generateInitialSDs() {
@@ -98,7 +104,7 @@ FrameSet FrameDB::generateInitialSDs() {
     FrameSet frames = grays();
     FrameSet bigKeys = gray8bitTogray16bit( keyframes );
     std::transform( frames.begin(), frames.end(), std::back_inserter( SDs ),
-                    std::bind1st( std::ptr_fun( avgDist ), bigKeys ) );
+                    std::bind1st( std::ptr_fun( avgDist2 ), keyframes ) );
     return SDs;
 }
   

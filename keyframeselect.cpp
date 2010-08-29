@@ -55,8 +55,8 @@ double sizeOfLargestConnectedComponent( cv::Mat &differenceImage ) {
     ContourSet contours;
     cv::findContours( differenceImage, contours,
                       CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE );
-     TRACEAREA( maxAreaOfContours( contours ) )
     /*
+     TRACEAREA( maxAreaOfContours( contours ) )
      *#ifdef TRACE
      *cv::Mat out = cv::Mat::zeros( differenceImage.size(), differenceImage.type() );
      *cv::drawContours( out, contours, -1, cv::Scalar( 255 ) );

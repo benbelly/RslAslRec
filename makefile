@@ -1,7 +1,10 @@
 EXECUTABLE=findhands
 OBJS = findhands.o frame.o keyframeselect.o keyframedist.o skinmask.o \
-	   FrameDB.o edgedetection.o logging.o
+	   FrameDB.o edgedetection.o logging.o cvsl.o
+SMLS = findhands.sml
 
+##
+## C++ variables
 CC=g++
 DEBUG=-g -DTRACE
 INCLUDE=-I/home/ben/opencv/include -I/home/ben/opencv/include/opencv #-I/usr/include/opencv 
@@ -9,8 +12,14 @@ LIBS=-lcxcore -lcv -lhighgui -lcvaux -lml -L/home/ben/opencv/lib
 CFLAGS=-Wall -c $(DEBUG) $(INCLUDE)
 LFLAGS=-Wall $(DEBUG) $(LIBS)
 
-#test: testdiff.cpp
-#		$(CC) $(INCLUDE) $(LFLAGS) testdiff.cpp -o testdiff
+##
+## MLTon variables
+ML = mlton
+ML_LIBS = -link-opt -L/home/ben/opencv/lib \
+		  -link-opt -lstdc++ \
+		  -link-opt -lcxcore -link-opt -lcv -link-opt -lhighgui \
+		  -link-opt -lcvaux -link-opt -lml
+ML_FFI = -default-ann 'allowFFI true'
 
 all: $(OBJS) $(EXECUTABLE)
 		@echo "\nBuild is complete."
@@ -20,9 +29,9 @@ all: $(OBJS) $(EXECUTABLE)
 		$(CC) $(CFLAGS) $<
 		@echo "      built $@."
 
-$(EXECUTABLE): $(OBJS)
+$(EXECUTABLE): $(OBJS) $(SMLS)
 		@echo "\nMaking executable:"
-		$(CC) $(OBJS) $(LFLAGS) -o $@
+		$(ML) $(ML_LIBS) $(ML_FFI) $(SMLS) $(OBJS)
 		@echo "    executable $@ built."
 
 clean:

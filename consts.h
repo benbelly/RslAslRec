@@ -5,6 +5,6 @@
 //#define T1 8200
 //#define T1 23000
 
-#define SMALLCOMPONENT 10
+#define SMALLCOMPONENT 1
 
 #endif

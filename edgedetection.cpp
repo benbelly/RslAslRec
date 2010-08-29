@@ -3,16 +3,17 @@
 #include "consts.h"
 #include "FrameDB.h"
 #include "utility.h"
+#include "logging.h"
 
 cv::Mat doDilate( cv::Mat mat ) {
     cv::Mat dilated = cv::Mat::zeros( mat.size(), mat.type() );
-    cv::dilate( mat, dilated, cv::Mat( 4, 2, image_types::gray, cv::Scalar( 255 ) ) );
+    cv::dilate( mat, dilated, cv::Mat( 3, 3, image_types::gray, cv::Scalar( 255 ) ) );
     return dilated;
 }
 
 Frame getEdge( Frame f, bool dilate ) {
     cv::Mat edges = cv::Mat::zeros( f.size(), f.type() );
-    cv::Canny( f.mat, edges, 3, 9 );
+    cv::Canny( f.mat, edges, 200, 255 );
     if( dilate )
         edges = doDilate( edges );
     return Frame( f.id, edges );
@@ -58,6 +59,7 @@ FrameSet negateAndMask( FrameSet &SDs, FrameSet &masks ) {
 }
 
 bool IsSmallComponent( Contour m ) {
+    //TRACEAREA( cv::contourArea( cv::Mat( m ) ) )
     return cv::contourArea( cv::Mat( m ) ) < SMALLCOMPONENT;
 }
 
@@ -69,10 +71,12 @@ ContourSet getSmallContours( ContourSet &c ) {
 }
 
 Frame removeComponentsFromFrame( Frame f ) {
-    Frame clean( f.id );
+    Frame clean( f.id, f.size(), f.type() );
     ContourSet contours;
-    cv::findContours( f.mat, contours,
-                      CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE );
+    cv::Mat src = cv::Mat::zeros( f.size(), f.type() );
+    f.mat.copyTo( src );
+    cv::findContours( src, contours,
+                      CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE );
     ContourSet smallContours = getSmallContours( contours );
     f.mat.copyTo( clean.mat );
     cv::drawContours( clean.mat, smallContours, -1, cv::Scalar( 0 ), -1 );

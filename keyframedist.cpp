@@ -5,6 +5,8 @@
 #include "logging.h"
 #include "consts.h"
 
+#include "FrameDB.h"
+
 struct FrameKeyFrameDiffSum {
     FrameKeyFrameDiffSum( const Frame &frame, cv::Mat &m ) : f( frame ),
                                                              diffSum( m )
@@ -48,17 +50,42 @@ Frame avgDist( const FrameSet &keyFrames, const Frame f ) {
 
     cv::Mat diff = cv::Mat::zeros( Si.size(), Si.type() );
     absdiff( Si, firstKey, diff );
-
+    cv::imshow( "diff", diff );
     FrameKeyFrameDiffSum diffsum( Frame( f.id, Si ), firstKey );
     FrameKeyFrameDiffSum sum = std::accumulate( keyFrames.begin() + 1, keyFrames.end(),
                                                 diffsum, frameKeyFrameDiff );
 
     double one = 1.0, mp = keyFrames.size() - 1;
     cv::Mat avg( cv::abs( sum.diffSum * ( one / mp ) ) );
-
+    cv::imshow( "avg", avg );
     cv::Mat avg8b = cv::Mat::zeros( avg.size(), image_types::gray );
     avg.convertTo( avg8b, image_types::gray );
+    cv::imshow( "8b", avg8b );
 
     return Frame( f.id, avg8b );
+}
+
+Frame avgDist2( const FrameSet &keyFrames, const Frame f ) {
+    const Frame src( f );
+    unsigned int size = src.mat.dataend - src.mat.datastart;
+    unsigned long *diffSum = new unsigned long[ size ];
+
+    FrameSet::const_iterator end = keyFrames.end();
+    for( FrameSet::const_iterator i = keyFrames.begin(); i != end; ++i ) {
+        unsigned char *fi = src.mat.datastart, *ki = i->mat.datastart;
+        for(unsigned long *j = diffSum; j != diffSum + size; ++j, ++fi, ++ki ) {
+            *j += ( *fi - *ki );
+        }
+    }
+
+    for( unsigned long *j = diffSum; j != diffSum + size; ++j ) {
+        *j = *j / ( keyFrames.size() - 1 );
+    }
+
+    Frame dst( src.id, src.size(), src.type() );
+    std::copy( diffSum, diffSum + size, dst.mat.datastart );
+
+    delete[] diffSum;
+    return dst;
 }
 
