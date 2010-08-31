@@ -24,6 +24,7 @@ struct Frame {
     int type() const;
     int depth() const;
     int channels() const;
+    int Id() const;
 
     int id; // frame index
 

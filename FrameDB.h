@@ -34,12 +34,16 @@ class FrameDB {
         FrameSet skins() const;
         FrameSet sds() const;
         FrameSet keys() const;
+        std::vector<int> ids() const;
 
         // Get individual frames
         Frame original( int i ) { return db[i].original; }
         Frame gray( int i )     { return db[i].gray; }
         Frame skin( int i )     { return db[i].skinMask; }
         Frame sd( int i )       { return db[i].SD; }
+        Frame key( int i )      { return keyframes[i]; }
+
+        int size() { return db.size(); }
 
         // Mask a frame with the corresponding skinmask
         Frame skinmask( Frame &f );

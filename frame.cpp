@@ -16,6 +16,7 @@ FrameSet gray8bitTogray16bit( const FrameSet &src ) {
     return bigs;
 }
 
+int Frame::Id() const { return id; }
 cv::Size Frame::size() const { return mat.size(); }
 int Frame::type() const { return mat.type(); }
 int Frame::depth() const { return mat.depth(); }

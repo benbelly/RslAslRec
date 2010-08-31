@@ -41,6 +41,13 @@ void FrameDB::setItem( FrameDB::Setter s, FrameSet vals ) {
             std::ptr_fun( s ) );
 }
 
+std::vector<int> FrameDB::ids() const {
+    std::vector<int> idvec;
+    std::transform( db.begin(), db.end(), std::back_inserter( idvec ),
+                    std::ptr_fun( getId ) );
+    return idvec;
+}
+
 FrameSet FrameDB::originals() const {
     return getItem( getOriginal );
 }
