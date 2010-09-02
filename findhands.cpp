@@ -1,38 +1,15 @@
 
+#include <string>
+#include <string.h>
+#include <iostream>
+
 #include "logging.h"
 #include "FrameDB.h"
-
-#include <string>
-
-// ML Stuff
-#include "export.h"
-#include "ml-types.h"
+#include "findhands.h"
 
 using std::string;
-
-// API for sml
-extern "C" {
-    void InitSarkur( char *cfile, int filenameLen );
-    void findHands();
-    int numFrames();
-    void getFrameIds( int *ids );
-
-    void getFrameInfo( int type, Pointer width, Pointer height,
-                                 Pointer dtype, Pointer size );
-    void getFrame( int id, int type, char *img );
-}
-
-namespace frame_types {
-    enum {
-        original = 0,
-        gray = 1,
-        skin = 2,
-        sd = 3,
-        key = 4
-    };
-}
-// API end
-
+using std::cerr;
+using std::endl;
 
 void InitSarkur( char *cfile, int filenameLen ) {
     new FrameDB( std::string( cfile, filenameLen ) );
@@ -41,25 +18,21 @@ void InitSarkur( char *cfile, int filenameLen ) {
 void findHands() {
     FDB->findHands();
     FrameSet sds = FDB->sds();
-    /*
-     *std::for_each( sds.begin(), sds.end(),
-     *               std::bind1st( std::ptr_fun( showNwait ), "sds" ) );
-     */
 }
 
 int numFrames() { return FDB->size(); }
 
-void getFrameIds( int *ids ) {
+void getFrameIds( Pointer ids ) {
     std::vector<int> dbIds( FDB->ids() );
-    std::copy( dbIds.begin(), dbIds.end(), ids );
+    std::copy( dbIds.begin(), dbIds.end(), (int*)ids );
 }
 
 int getFrameSize( const Frame &f ) {
     return f.size().height * f.size().width * f.mat.elemSize();
 }
 
-void getFrameInfo( int type, Pointer width, Pointer height,
-                             Pointer dtype, Pointer size ) {
+void getFrameInfoC( int type, Pointer width, Pointer height,
+                    Pointer dtype, Pointer size ) {
     Frame toCheck;
     switch( type ) {
         case frame_types::original:
@@ -75,6 +48,23 @@ void getFrameInfo( int type, Pointer width, Pointer height,
     *ph = toCheck.size().height;
     *pt = toCheck.type();
     *ps = getFrameSize( toCheck );
+}
+
+bool isColor( int type ) {
+    switch( type ) {
+        case frame_types::original:
+            return FDB->original( 0 ).channels() >= 3;
+            break;
+        default:
+            return false;
+            break;
+    }
+}
+
+void getVideoInfoC( int type, Pointer color, Pointer fourcc, Pointer fps ) {
+    *((Bool*)color) = isColor( type );
+    *((int*)fourcc) = FDB->getFourcc();
+    *((double*)fps) = FDB->getFps();
 }
 
 Frame getFrame( int id, int type ) {
@@ -93,9 +83,15 @@ Frame getFrame( int id, int type ) {
     return Frame();
 }
 
-void getFrame( int id, int type, char *img ) {
+void getFrame( int id, int type, Pointer img ) {
     Frame get = getFrame( id, type );
-    std::copy( get.mat.datastart, get.mat.dataend, img );
+    if( get.mat.isContinuous() )
+    {
+        memcpy( img, get.mat.datastart, get.mat.dataend - get.mat.datastart );
+        //std::copy( get.mat.datastart, get.mat.dataend, img );
+    }
+    else
+        cerr << "HELP!" << endl;
 }
 
 

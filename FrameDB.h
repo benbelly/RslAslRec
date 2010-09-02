@@ -44,6 +44,8 @@ class FrameDB {
         Frame key( int i )      { return keyframes[i]; }
 
         int size() { return db.size(); }
+        double getFps() const { return fps; }
+        int getFourcc() const { return fourcc; }
 
         // Mask a frame with the corresponding skinmask
         Frame skinmask( Frame &f );
@@ -53,6 +55,11 @@ class FrameDB {
 
     private:
         DBType db;
+
+        int fourcc;
+        double fps;
+        double numFrames;
+
         FrameSet keyframes;
         const string videoFile;
 

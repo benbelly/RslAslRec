@@ -80,6 +80,9 @@ FrameDB::FrameData::FrameData( int i, const cv::Mat &img ) :
 
 void FrameDB::loadVideo() {
     cv::VideoCapture cap( videoFile );
+    fourcc = cap.get( CV_CAP_PROP_FOURCC );
+    fps = cap.get( CV_CAP_PROP_FPS );
+    numFrames = cap.get( CV_CAP_PROP_FRAME_COUNT );
 
     int i = 0;
     cv::Mat img;
