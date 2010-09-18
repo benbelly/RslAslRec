@@ -43,4 +43,13 @@ void setSD( FrameDB::RowType &p, const Frame &v ) {
     p.second.SD = v;
 }
 
+// Boundaries
+Frame getBoundary( FrameDB::RowType p ) {
+    return p.second.boundary;
+}
+
+void setBoundary( FrameDB::RowType &p, const Frame &v ) {
+    p.second.boundary = v;
+}
+
 #endif

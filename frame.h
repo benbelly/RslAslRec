@@ -32,11 +32,6 @@ struct Frame {
 };
 typedef std::vector<Frame> FrameSet;
 
-struct CsAndGs {
-    FrameSet colors;
-    FrameSet grays;
-};
-
 typedef std::vector<cv::Point> Contour;
 typedef std::vector<Contour> ContourSet;
 

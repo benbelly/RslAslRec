@@ -1,8 +1,8 @@
 EXECUTABLE=findhands
 OBJS = cvsl.o \
 	   findhands.o frame.o keyframeselect.o keyframedist.o skinmask.o \
-	   FrameDB.o edgedetection.o logging.o
-SMLS = findhands.sml
+	   FrameDB.o edgedetection.o logging.o histograms.o
+SMLS = findhands.mlb
 
 ##
 ## C++ variables

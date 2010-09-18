@@ -64,6 +64,10 @@ FrameSet FrameDB::sds() const {
     return getItem( getSD );
 }
 
+FrameSet FrameDB::boundaries() const {
+    return getItem( getBoundary );
+}
+
 FrameSet FrameDB::keys() const {
      return keyframes;
 }
@@ -111,6 +115,12 @@ void FrameDB::makeSDs() {
     FrameSet negated = negateAndMask( SDs, edges );
     FrameSet cleaned = removeSmallConnectedComponents( negated );
     setItem( setSD, cleaned );
+    FrameHandSet boundaries = getBoundaryImages( cleaned );
+    for( FrameHandSet::iterator i = boundaries.begin(); i != boundaries.end(); ++i ) {
+        db[i->first.id].boundary = i->first;
+        db[i->first.id].hands = i->second;
+        db[i->first.id].histograms = generateHandHistograms( i->first, i->second );
+    }
 }
 
 FrameSet FrameDB::generateInitialSDs() {

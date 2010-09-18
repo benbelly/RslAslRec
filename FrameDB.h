@@ -8,6 +8,7 @@
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
+#include "histograms.h"
 #include "frame.h"
 
 using std::string;
@@ -22,7 +23,10 @@ class FrameDB {
             Frame original,
                   skinMask,
                   gray,
-                  SD;
+                  SD,
+                  boundary;
+            ContourSet hands;
+            HistogramSet histograms;
             FrameData( int i, const cv::Mat &img );
             // Don't use. Provide for std::map
             FrameData() {}
@@ -34,6 +38,7 @@ class FrameDB {
         FrameSet skins() const;
         FrameSet sds() const;
         FrameSet keys() const;
+        FrameSet boundaries() const;
         std::vector<int> ids() const;
 
         // Get individual frames
@@ -41,7 +46,8 @@ class FrameDB {
         Frame gray( int i )     { return db[i].gray; }
         Frame skin( int i )     { return db[i].skinMask; }
         Frame sd( int i )       { return db[i].SD; }
-        Frame key( int i )      { return keyframes[i]; }
+        Frame boundary( int i ) { return db[i].boundary; }
+        ContourSet hands( int i ) { return db[i].hands; }
 
         int size() { return db.size(); }
         double getFps() const { return fps; }

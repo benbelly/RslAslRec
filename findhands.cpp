@@ -42,12 +42,10 @@ void getFrameInfoC( int type, Pointer width, Pointer height,
             toCheck = FDB->gray( 0 );
             break;
     }
-    int *pw = (int*)width, *ph = (int*)height,
-        *pt = (int*)dtype, *ps = (int*)size;
-    *pw = toCheck.size().width;
-    *ph = toCheck.size().height;
-    *pt = toCheck.type();
-    *ps = getFrameSize( toCheck );
+    *((int*)width) = toCheck.size().width;
+    *((int*)height) = toCheck.size().height;
+    *((int*)dtype) = toCheck.type();
+    *((int*)size) = getFrameSize( toCheck );
 }
 
 bool isColor( int type ) {
@@ -77,8 +75,8 @@ Frame getFrame( int id, int type ) {
             return FDB->skin( id );
         case frame_types::sd:
             return FDB->sd( id );
-        case frame_types::key:
-            return FDB->key( id );
+        case frame_types::boundary:
+            return FDB->boundary( id );
     }
     return Frame();
 }
@@ -86,10 +84,7 @@ Frame getFrame( int id, int type ) {
 void getFrame( int id, int type, Pointer img ) {
     Frame get = getFrame( id, type );
     if( get.mat.isContinuous() )
-    {
         memcpy( img, get.mat.datastart, get.mat.dataend - get.mat.datastart );
-        //std::copy( get.mat.datastart, get.mat.dataend, img );
-    }
     else
         cerr << "HELP!" << endl;
 }
