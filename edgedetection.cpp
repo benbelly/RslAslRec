@@ -115,7 +115,6 @@ ContourSet getCompactAndSmallContours( const cv::Mat &img ) {
     ContourSet csc;
     Copy_if( contours.begin(), contours.end(), std::back_inserter( csc ),
              std::ptr_fun( compactAndSmall ) );
-    cerr << "Found " << csc.size() << " hands" << endl;
     return csc;
 }
 
