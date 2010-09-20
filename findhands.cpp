@@ -77,6 +77,8 @@ Frame getFrame( int id, int type ) {
             return FDB->sd( id );
         case frame_types::boundary:
             return FDB->boundary( id );
+        case frame_types::histogram:
+            return FDB->histogram( id );
     }
     return Frame();
 }

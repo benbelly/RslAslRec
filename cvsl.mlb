@@ -1,0 +1,8 @@
+
+local
+  (* import Basis Library *)
+  $(SML_LIB)/basis/basis.mlb
+  cvsl.sml
+in
+  structure Cvsl
+end

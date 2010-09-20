@@ -1,0 +1,7 @@
+local
+  (* import Basis Library *)
+  $(SML_LIB)/basis/basis.mlb
+  cvsl.mlb
+in
+  findhands.sml
+end

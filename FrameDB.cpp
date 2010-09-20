@@ -123,6 +123,11 @@ void FrameDB::makeSDs() {
     }
 }
 
+Frame FrameDB::histogram( int i ) {
+    cv::Mat img = h2i( db[i].gray, db[i].histograms );
+    return Frame( i, img );
+}
+
 FrameSet FrameDB::generateInitialSDs() {
     FrameSet SDs; SDs.reserve( db.size() );
     FrameSet frames = grays();

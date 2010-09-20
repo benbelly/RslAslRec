@@ -23,7 +23,8 @@ namespace frame_types {
         gray = 1,
         skin = 2,
         sd = 3,
-        boundary = 4
+        boundary = 4,
+        histogram = 5
     };
 }
 

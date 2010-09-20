@@ -47,7 +47,9 @@ class FrameDB {
         Frame skin( int i )     { return db[i].skinMask; }
         Frame sd( int i )       { return db[i].SD; }
         Frame boundary( int i ) { return db[i].boundary; }
+        Frame histogram( int i );
         ContourSet hands( int i ) { return db[i].hands; }
+
 
         int size() { return db.size(); }
         double getFps() const { return fps; }
