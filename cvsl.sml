@@ -13,6 +13,11 @@ local
   val videoBeginC = _import "videoSaveBeginC" : int * int * int * real * bool * char vector * int -> unit;
   val saveVideoC = _import "saveVideoC" : char vector * int * int * int -> unit;
   val videoEndC = _import "videoSaveEndC" : unit -> unit;
+
+  fun vecMax is : int = Vector.foldl Int.max 0 is;
+  fun numWidth i : int = size (Int.toString i);
+  fun maxWidth is : int = numWidth (vecMax is);
+  fun padNum n p : string = StringCvt.padLeft #"0" p (Int.toString n);
 in
   structure Cvsl =
       struct
@@ -57,11 +62,6 @@ in
       fun saveImage name t i : unit =
         let val (img, w, h, dt) = getImage t i
         in saveImageC( img, w, h, dt, name, (size name)) end;
-
-      fun vecMax is : int = Vector.foldl Int.max 0 is;
-      fun numWidth i : int = size (Int.toString i);
-      fun maxWidth is : int = numWidth (vecMax is);
-      fun padNum n p : string = StringCvt.padLeft #"0" p (Int.toString n);
 
       fun saveAllImages name ext t : unit =
         let val ids = getIds()
