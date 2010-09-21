@@ -99,7 +99,6 @@ bool compactAndSmall( Contour c ) {
      *compactness is measured by dividing the number of pixels
      *by the number of boundary pixels with a threshold T2 . The
      *size is measured by the number of pixels with threshold T3 .
-     *
      */
     double boundary = (double)c.size(), // contour acquired using CV_CHAIN_APPROX_NONE
            area = cv::contourArea( cv::Mat( c ) );

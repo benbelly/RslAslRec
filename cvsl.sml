@@ -14,6 +14,7 @@ local
   val saveVideoC = _import "saveVideoC" : char vector * int * int * int -> unit;
   val videoEndC = _import "videoSaveEndC" : unit -> unit;
 
+  (* Helper functions *)
   fun vecMax is : int = Vector.foldl Int.max 0 is;
   fun numWidth i : int = size (Int.toString i);
   fun maxWidth is : int = numWidth (vecMax is);
@@ -66,8 +67,8 @@ in
       fun saveAllImages name ext t : unit =
         let val ids = getIds()
             val w = maxWidth ids
-            val getName = fn i => padNum i w
-            val save = fn i => saveImage (name ^ (getName i) ^ "." ^ ext) t i
+            val getName = fn i => name ^ (padNum i w) ^ "." ^ ext
+            val save = fn i => saveImage (getName i) t i
         in Vector.app save ids end;
 
       fun saveVideo name t : unit =

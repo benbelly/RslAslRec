@@ -21,10 +21,8 @@ fun sarkar () =
   in
     init( filename, (size filename) );
     findHands();
-    (*Cvsl.displayVideo 0;*)
-    Cvsl.displayVideo 4;
     Cvsl.saveImage "cvsl_out/f10.png" 0 10;
-    Cvsl.saveAllImages "cvsl_out/histogram" "png" 5;
+    Cvsl.displayVideo 5;
     (*saveVideo "cvsl_out/sds.mpeg" 3;*)
 
     print "Done.\n"
