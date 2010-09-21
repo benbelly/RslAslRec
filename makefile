@@ -40,7 +40,7 @@ clean:
 		-rm -f $(EXECUTABLE) *.o *.bak
 		@echo "    finished."
 
-cframes:
+output:
 		@echo "\nRemoving frames..."
-		-rm -f output/*
+		-rm -f cvsl_out/*
 		@echo "    finished."

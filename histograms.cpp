@@ -12,8 +12,16 @@ std::vector<cv::Mat> generateHandHistograms( Frame f, ContourSet cs ) {
     return hs;
 }
 
+static const unsigned int Tvert = 7, Thorz = 7;
 bool inTh( cv::Point center, cv::Point bin, cv::Point p );
 bool inTv( cv::Point center, cv::Point bin, cv::Point p );
+
+inline bool pointLess( cv::Point l, cv::Point r ) {
+    if( l.y < r.y ) return true;
+    if( l.y > r.y ) return false;
+    if( l.x < r.x ) return true;
+    return false;
+}
 
 /*
  * for b:bins
@@ -26,11 +34,12 @@ cv::Mat generateHandHistogram( Frame f, Contour c ) {
     cv::Mat hist = cv::Mat::zeros( f.size(), CV_64FC1 );
     Contour::iterator cbegin = c.begin(), cend = c.end();
     cv::Point center( hist.cols / 2, hist.rows / 2 );
+    std::sort( c.begin(), c.end(), std::ptr_fun( pointLess ) );
     double total = 0.0;
-    for( int y = 0 ; y < hist.rows; ++y ) {
-        for( int x = 0; x < hist.cols; ++x ) {
-            cv::Point bin( x, y );
-            for( Contour::iterator p = cbegin; p != cend; ++p ) {
+    for( Contour::iterator p = cbegin; p != cend; ++p ) {
+        for( unsigned int y = p->y - (Tvert + 1) ; y < p->y + (Tvert + 1); ++y ) {
+            for( unsigned int x = p->x - (Thorz + 1); x < p->x + (Thorz + 1); ++x ) {
+                cv::Point bin( x, y );
                 if( inTv( center, bin, *p ) && inTh( center, bin, *p ) ) {
                     ++hist.at<double>( bin );
                     ++total;
@@ -47,14 +56,13 @@ cv::Mat generateHandHistogram( Frame f, Contour c ) {
 }
 
 int vd( cv::Point a, cv::Point b ) {
-    return abs( a.y - b.y );
+    return ( a.y - b.y );
 }
 
 int hd( cv::Point a, cv::Point b ) {
-    return abs( a.x - b.x );
+    return ( a.x - b.x );
 }
 
-static const unsigned int Tvert = 7, Thorz = 7;
 
 bool inTv( cv::Point center, cv::Point bin, cv::Point p ) {
     int bDist = vd( center, bin ),
@@ -75,10 +83,13 @@ bool inTh( cv::Point center, cv::Point bin, cv::Point p ) {
 cv::Mat h2i( Frame f, HistogramSet &hs ) {
     cv::Mat dst = cv::Mat::zeros( f.size(), image_types::gray );
     for( HistogramSet::iterator i = hs.begin(); i != hs.end(); ++i ) {
-        double *iBegin = i->ptr<double>(), *iEnd = iBegin + i->rows * i->cols;
+        double max = *(std::max_element( i->begin<double>(), i->end<double>() ) );
+        double scale = 255 / max;
+        double *iBegin = i->ptr<double>(),
+                        *iEnd = iBegin + i->rows * i->cols;
         unsigned char *d = dst.data;
         while( iBegin != iEnd ) {
-            *d = (unsigned char)(*iBegin * 255);
+            *d = (unsigned char)(*iBegin * scale);
             ++iBegin; ++d;
         }
     }
