@@ -34,11 +34,12 @@ cv::Mat generateHandHistogram( Frame f, Contour c ) {
     cv::Mat hist = cv::Mat::zeros( f.size(), CV_64FC1 );
     Contour::iterator cbegin = c.begin(), cend = c.end();
     cv::Point center( hist.cols / 2, hist.rows / 2 );
-    std::sort( c.begin(), c.end(), std::ptr_fun( pointLess ) );
     double total = 0.0;
     for( Contour::iterator p = cbegin; p != cend; ++p ) {
-        for( unsigned int y = p->y - (Tvert + 1) ; y < p->y + (Tvert + 1); ++y ) {
-            for( unsigned int x = p->x - (Thorz + 1); x < p->x + (Thorz + 1); ++x ) {
+        for( int y = std::max( (int)(p->y - (Tvert + 1)), 0 ) ;
+             y < std::min( (int)(p->y + (Tvert + 1)), hist.cols ); ++y ) {
+            for( int x = std::max( (int)(p->x - (Thorz + 1)), 0 );
+                 x < std::min( (int)(p->x + (Thorz + 1)), hist.rows ); ++x ) {
                 cv::Point bin( x, y );
                 if( inTv( center, bin, *p ) && inTh( center, bin, *p ) ) {
                     ++hist.at<double>( bin );
