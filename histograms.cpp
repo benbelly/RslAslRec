@@ -28,14 +28,12 @@ RowColRange bbox( cv::Point p, int hmax, int vmax ) {
 double incrementBox( cv::Mat &hist, const RowColRange &box ) {
     // There should be some way to stick this in hist?
     //cv::Mat incedBox = hist( box.first, box.second ) + cv::Scalar( 1 );
-    double total = 0.0;
     for( int y = box.first.start; y <= box.first.end; ++y ) {
         for( int x = box.second.start; x <= box.second.end; ++x ) {
             ++hist.at<double>( y, x );
-            ++total;
         }
     }
-    return total;
+    return ( box.first.end - box.first.start ) * ( box.second.end - box.second.start );
 }
 
 cv::Mat generateHandHistogram( Frame f, Contour c ) {
