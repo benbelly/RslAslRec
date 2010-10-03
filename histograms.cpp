@@ -2,68 +2,60 @@
 #include <algorithm>
 #include <functional>
 #include <stdlib.h>
+#include <fstream>
 #include "FrameDB.h"
 #include "histograms.h"
 #include "logging.h"
 
-static const unsigned int Tvert = 9, Thorz = 9;
-typedef std::pair<cv::Range, cv::Range> RowColRange;
+cv::Mat generateHandHistogram( Frame f, Contour c );
 
-
-std::vector<cv::Mat> generateHandHistograms( Frame f, ContourSet cs ) {
+HistogramSet generateHandHistograms( Frame f, ContourSet cs ) {
     std::vector<cv::Mat> hs; hs.reserve( cs.size() );
     std::transform( cs.begin(), cs.end(), std::back_inserter( hs ),
                     std::bind1st( std::ptr_fun( generateHandHistogram ), f ) );
     return hs;
 }
 
-RowColRange bbox( cv::Point p, int hmax, int vmax ) {
-    return RowColRange(
-            cv::Range( std::max( 0, (int)(p.y - Tvert ) ),
-                       std::min( vmax, (int)(p.y + Tvert ) ) ),
-            cv::Range( std::max( 0, (int)(p.x - Thorz ) ),
-                       std::min( hmax, (int)(p.x + Thorz ) ) ) );
-}
+typedef cv::Mat_<double> Histogram;
 
-double incrementBox( cv::Mat &hist, const RowColRange &box ) {
-    // There should be some way to stick this in hist?
-    //cv::Mat incedBox = hist( box.first, box.second ) + cv::Scalar( 1 );
-    for( int y = box.first.start; y <= box.first.end; ++y ) {
-        for( int x = box.second.start; x <= box.second.end; ++x ) {
-            ++hist.at<double>( y, x );
-        }
+struct CountPoint {
+    CountPoint( cv::Point c, Histogram &h, double &t ) : center( c ), hist( h ), total( t ) { }
+    cv::Point center;
+    Histogram &hist;
+    double &total;
+    void operator()( cv::Point p ) {
+        ++hist( vD( p ), hD( p ) );
+        ++total;
     }
-    return ( box.first.end - box.first.start ) * ( box.second.end - box.second.start );
-}
+    int D( int l, int r ) { return abs( l - r ); }
+    int vD( cv::Point p ) { return D( center.y, p.y ); }
+    int hD( cv::Point p ) { return D( center.x, p.x ); }
+};
 
-cv::Mat generateHandHistogram( Frame f, Contour c ) {
-    cv::Mat hist = cv::Mat::zeros( f.size(), CV_64FC1 );
-    cv::Point center( hist.cols / 2, hist.rows / 2 );
+inline cv::Mat generateHandHistogram( Frame f, Contour c ) {
+    cv::Point center( f.size().width / 2, f.size().height / 2 );
+    Histogram hist = Histogram::zeros( center.y + 1, center.x + 1 );
     double total = 0.0;
-    Contour::iterator cbegin = c.begin(), cend = c.end();
-    for( Contour::iterator p = cbegin; p != cend; ++p ) {
-        total += incrementBox( hist, bbox( *p, hist.rows, hist.cols ) );
+    std::for_each( c.begin(), c.end(), CountPoint( center, hist, total ) );
+    // Normalize
+    Histogram::iterator hbegin = hist.begin(), hend = hist.end();
+    while( hbegin != hend ) {
+        *hbegin = *hbegin / total;
+        ++hbegin;
     }
-    // Normalize to sum to 1
-    double *histBegin = hist.ptr<double>(),
-           *histEnd = histBegin + ( hist.rows * hist.cols );
-    for( double *i = histBegin; i != histEnd; ++i ) *i = *i / total;
     return hist;
 }
 
+void addImages( Histogram &dst, Histogram src ) {
+    Histogram::iterator db = dst.begin(), de = dst.end(),
+                        sb = src.begin(), se = src.end();
+    while( db != de ) *db++ += *sb++;
+}
+
 cv::Mat h2i( Frame f, HistogramSet &hs ) {
-    cv::Mat dst = cv::Mat::zeros( f.size(), image_types::gray );
-    for( HistogramSet::iterator i = hs.begin(); i != hs.end(); ++i ) {
-        double max = *(std::max_element( i->begin<double>(), i->end<double>() ) );
-        double scale = 255. / max;
-        double *iBegin = i->ptr<double>(),
-               *iEnd = iBegin + i->rows * i->cols;
-        unsigned char *d = dst.data;
-        while( iBegin != iEnd ) {
-            if( *iBegin > 0.0 )
-                *d = (unsigned char)(*iBegin * scale);
-            ++iBegin; ++d;
-        }
-    }
-    return dst;
+    unsigned int width = hs[0].cols, height = hs[0].rows;
+    Histogram histImg = Histogram::zeros( height, width );
+    std::for_each( hs.begin(), hs.end(),
+                   std::bind1st( std::ptr_fun( addImages ), histImg ) );
+    return histImg;
 }

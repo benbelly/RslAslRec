@@ -13,6 +13,8 @@ extern "C" {
                          Pointer fname, int fnameLen );
     void saveVideoC( Pointer img, int width, int height, int type );
     void videoSaveEndC();
+
+    void showNormalHistogram( Pointer histImg, int width, int height );
 }
 
 #endif

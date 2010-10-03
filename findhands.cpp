@@ -38,6 +38,9 @@ void getFrameInfoC( int type, Pointer width, Pointer height,
         case frame_types::original:
             toCheck = FDB->original( 0 );
             break;
+        case frame_types::histogram:
+            toCheck = FDB->histogram( 0 );
+            break;
         default:
             toCheck = FDB->gray( 0 );
             break;

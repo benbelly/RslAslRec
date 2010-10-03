@@ -13,6 +13,7 @@ local
   val videoBeginC = _import "videoSaveBeginC" : int * int * int * real * bool * char vector * int -> unit;
   val saveVideoC = _import "saveVideoC" : char vector * int * int * int -> unit;
   val videoEndC = _import "videoSaveEndC" : unit -> unit;
+  val showNormalHistogram = _import "showNormalHistogram" : char vector * int * int -> unit;
 
   (* Helper functions *)
   fun vecMax is : int = Vector.foldl Int.max 0 is;
@@ -70,6 +71,15 @@ in
             val getName = fn i => name ^ (padNum i w) ^ "." ^ ext
             val save = fn i => saveImage (getName i) t i
         in Vector.app save ids end;
+
+      fun showHistogram i : unit =
+        let val (img, w, h, dt) = getImage 5 i (* need to pass 5 *)
+        in showNormalHistogram( img, w, h ) end;
+
+      fun showAllHistograms () =
+        let val ids = getIds()
+            val show = fn i => showHistogram i
+        in Vector.app show ids end;
 
       fun saveVideo name t : unit =
         let val (color, fourcc, fps) = getVideoInfo t
