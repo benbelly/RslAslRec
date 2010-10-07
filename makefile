@@ -2,7 +2,8 @@ EXECUTABLE=findhands
 OBJS = cvsl.o \
 	   findhands.o frame.o keyframeselect.o keyframedist.o skinmask.o \
 	   FrameDB.o edgedetection.o logging.o histograms.o plotter.o
-SMLS = findhands.mlb
+MLB = findhands.mlb
+SMLS = findhands.mlb cvsl.sml cvsl.mlb
 
 OPENCV_PATH=/home/ben/opencv
 PLPLOT_PATH=/home/ben/plplot
@@ -39,9 +40,9 @@ all: $(OBJS) $(EXECUTABLE)
 		$(CC) $(CFLAGS) $<
 		@echo "      built $@."
 
-$(EXECUTABLE): $(OBJS) $(SMLS)
+$(EXECUTABLE): $(OBJS) $(SMLS) $(MLB)
 		@echo "\nMaking executable:"
-		$(ML) $(ML_LIBS) $(ML_FFI) $(SMLS) $(OBJS)
+		$(ML) $(ML_LIBS) $(ML_FFI) $(MLB) $(OBJS)
 		@echo "    executable $@ built."
 
 clean:
