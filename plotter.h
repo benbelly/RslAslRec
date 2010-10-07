@@ -14,7 +14,6 @@ class plotter {
         void plot();
 
     private:
-
         cv::Mat_<double> hist;
         // env values
         PLFLT xm2d, xM2d, ym2d, yM2d;

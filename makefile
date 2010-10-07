@@ -5,19 +5,22 @@ OBJS = cvsl.o \
 SMLS = findhands.mlb
 
 OPENCV_PATH=/home/ben/opencv
+PLPLOT_PATH=/home/ben/plplot
 
 ##
 ## C++ variables
 CC=g++
 DEBUG=-g -DTRACE
-INCLUDE=-I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv -I/usr/lib/mlton/include #-I/usr/include/opencv 
+INCLUDE=-I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
+		-I$(PLPLOT_PATH)/include \
+		-I/usr/lib/mlton/include #-I/usr/include/opencv 
 CFLAGS=-Wall -c $(DEBUG) $(INCLUDE)
-LFLAGS=-Wall $(DEBUG) $(LIBS)
 
 ##
 ## MLTon variables
 ML = mlton
 ML_LIBS = -link-opt -L$(OPENCV_PATH)/lib \
+		  -link-opt -L$(PLPLOT_PATH)/lib \
 		  -link-opt -lstdc++ \
 		  -link-opt -lcxcore -link-opt -lcv -link-opt -lhighgui \
 		  -link-opt -lcvaux -link-opt -lml \

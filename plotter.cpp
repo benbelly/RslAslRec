@@ -1,9 +1,9 @@
 #include "plotter.h"
 
-const std::string plotter::XWIN( "xwin" );
+const std::string plotter::XWIN( "xcairo" );
 
-plotter::plotter() : just( 2 ), style( -2 ), zm( 0.0 ), zM( 1.0 ),
-                     alt( 30.0 ), az( 30.0 ) {
+plotter::plotter() : just( 2 ), style( -2 ), zm( 0.0 ), zM( 0.1 ),
+                     alt( 10.0 ), az( 30.0 ) {
 }
 
 void plotter::toPlot( cv::Mat_<double> h ) {
@@ -18,7 +18,7 @@ void plotter::toPlot( cv::Mat_<double> h ) {
     PL().w3d( basex, basey, height, xm, xM, ym, yM, zm, zM, alt, az );
     PL().box3( "bnt", "X", 0, 0,
                "bnt", "Y", 0, 0,
-               "bnt", "Z", 0, 0 );
+               "bnst", "Z", 0.01, 2.0 );
 }
 
 void plotter::plot() {
