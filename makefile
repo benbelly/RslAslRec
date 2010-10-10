@@ -14,7 +14,7 @@ CC=g++
 DEBUG=-g -DTRACE
 INCLUDE=-I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
 		-I$(PLPLOT_PATH)/include \
-		-I/usr/lib/mlton/include #-I/usr/include/opencv 
+		-I/usr/lib/mlton/include
 CFLAGS=-Wall -c $(DEBUG) $(INCLUDE)
 
 ##

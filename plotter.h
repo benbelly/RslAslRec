@@ -2,6 +2,7 @@
 #ifndef PLOTTER_H__
 #define PLOTTER_H__
 
+#include <string>
 #include <plplot/plplot.h>
 #include <plplot/plstream.h>
 #include <opencv/cv.h>

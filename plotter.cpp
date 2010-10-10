@@ -1,3 +1,4 @@
+#include <vector>
 #include "plotter.h"
 
 const std::string plotter::XWIN( "xcairo" );
@@ -34,6 +35,7 @@ void plotter::plot() {
     PL().col0( 15 ); // white
     PL().poin3( ys.size(), &xs[0], &ys[0], &zs[0], 1 );
 }
+
 plstream &plotter::PL() {
     static plstream *pl = 0;
     if( !pl ) {
