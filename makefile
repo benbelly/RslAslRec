@@ -5,7 +5,8 @@ OBJS = cvsl.o \
 MLB = findhands.mlb
 SMLS = findhands.mlb cvsl.sml cvsl.mlb
 
-OPENCV_PATH=/home/ben/opencv
+#OPENCV_PATH=/home/ben/opencv
+OPENCV_PATH=/usr/include/opencv
 PLPLOT_PATH=/home/ben/plplot
 
 ##
@@ -20,11 +21,12 @@ CFLAGS=-Wall -c $(DEBUG) $(INCLUDE)
 ##
 ## MLTon variables
 ML = mlton
-ML_LIBS = -link-opt -L$(OPENCV_PATH)/lib \
-		  -link-opt -L$(PLPLOT_PATH)/lib \
-		  -link-opt -lstdc++ \
+#ML_LIBS = -link-opt -L$(OPENCV_PATH)/lib \
+		  #-link-opt -L$(PLPLOT_PATH)/lib 
+ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt -lcxcore -link-opt -lcv -link-opt -lhighgui \
 		  -link-opt -lcvaux -link-opt -lml \
+		  -link-opt -lavutil \
 		  -link-opt -lplplotcxxd -link-opt -lplplotd \
 		  -link-opt -lltdl -link-opt -ldl \
 		  -link-opt -lm -link-opt -lcsirocsa \
