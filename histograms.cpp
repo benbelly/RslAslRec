@@ -2,12 +2,15 @@
 #include <algorithm>
 #include <functional>
 #include <stdlib.h>
-#include <fstream>
 #include "FrameDB.h"
 #include "histograms.h"
 #include "logging.h"
 
+
 cv::Mat generateHandHistogram( Frame f, Contour c );
+inline void NormalizeHistogram( Histogram &hist, double total );
+
+static const int histSize = 32;
 
 HistogramSet generateHandHistograms( Frame f, ContourSet cs ) {
     std::vector<cv::Mat> hs; hs.reserve( cs.size() );
@@ -16,34 +19,66 @@ HistogramSet generateHandHistograms( Frame f, ContourSet cs ) {
     return hs;
 }
 
-typedef cv::Mat_<double> Histogram;
-
+/*
+ * Histograms in the paper are a bit of a mystery.
+ *  The hand is a 200x200 pixel image.
+ *  The histogram is a 32x32 pixel image
+ *  The algorithm goes:
+ *      hist[rows, cols] <= 0
+ *      total = 0
+ *      foreach( Point p in IMG )
+ *          foreach( Point q in IMG from p )
+ *              xD = |( p.x - q.x )| * 32 * 2 / 200   ?? Why "* 2"
+ *              yD = |( p.y - q.y )| * 32 / 200
+ *              xD = min( xD, 32 - 1 )
+ *              yD = min( yD, 32 - 1 )
+ *              ++hist[yD, xD]
+ *              ++total
+ *      foreach( float i in hist )
+ *          hist[i] = sqrt( hist[i] / total )       ?? Why "sqrt"
+ *
+ * This file does not currently reflect that algorithm
+ */
 struct CountPoint {
-    CountPoint( cv::Point c, Histogram &h, double &t ) : center( c ), hist( h ), total( t ) { }
-    cv::Point center;
+    CountPoint( cv::Point pnt, Histogram &h, double &t,
+                int width, int height ) :
+        p( pnt ), hist( h ), total( t ), w( width ), h( height ) { }
+    cv::Point p;
     Histogram &hist;
     double &total;
-    void operator()( cv::Point p ) {
-        ++hist( vD( p ), hD( p ) );
-        ++total;
+    int w, h;
+    void operator()( cv::Point q ) {
+        int hSize = hist.size().width; // assume a square
+        int xD = abs( ( p.x - q.x ) ) * hSize * 2 / w,
+            yD = abs( ( p.y - q.y ) ) * hSize / h;
+        xD = std::min( xD, hSize - 1 );
+        yD = std::min( yD, hSize - 1 );
+        ++hist( yD, xD ); ++total;
     }
-    int D( int l, int r ) { return abs( l - r ); }
-    int vD( cv::Point p ) { return D( center.y, p.y ); }
-    int hD( cv::Point p ) { return D( center.x, p.x ); }
 };
 
+void CountPoints( Contour::iterator end, Histogram &hist, double &total,
+                  int xSize, int ySize, Contour::iterator point ) {
+    std::for_each( point, end, CountPoint( *point, hist, total, xSize, ySize ) );
+}
+
 inline cv::Mat generateHandHistogram( Frame f, Contour c ) {
-    cv::Point center( f.size().width / 2, f.size().height / 2 );
-    Histogram hist = Histogram::zeros( center.y + 1, center.x + 1 );
+    Histogram hist = Histogram::zeros( histSize, histSize );
+    int w = f.size().width, h = f.size().height;
     double total = 0.0;
-    std::for_each( c.begin(), c.end(), CountPoint( center, hist, total ) );
-    // Normalize
+    Contour::iterator cbegin = c.begin(), cend = c.end();
+    while( cbegin != cend )
+        CountPoints( cend, hist, total, w, h, cbegin++ );
+    NormalizeHistogram( hist, total );
+    return hist;
+}
+
+inline void NormalizeHistogram( Histogram &hist, double total ) {
     Histogram::iterator hbegin = hist.begin(), hend = hist.end();
     while( hbegin != hend ) {
-        *hbegin = *hbegin / total;
+        *hbegin = sqrt( *hbegin / total );
         ++hbegin;
     }
-    return hist;
 }
 
 void addImages( Histogram &dst, Histogram src ) {

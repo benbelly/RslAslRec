@@ -4,7 +4,7 @@
 const std::string plotter::XWIN( "xcairo" );
 
 plotter::plotter() : just( 2 ), style( -2 ), zm( 0.0 ), zM( 0.1 ),
-                     alt( 10.0 ), az( 30.0 ) {
+                     alt( 35.0 ), az( 30.0 ) {
 }
 
 void plotter::toPlot( cv::Mat_<double> h ) {
@@ -13,13 +13,13 @@ void plotter::toPlot( cv::Mat_<double> h ) {
     ym2d = -(hist.rows / 2); yM2d = hist.rows / 2;
     xm = 0; xM = hist.cols;
     ym = 0; yM = hist.rows;
-    basex = 100; basey = 100; height = 50;
+    basex = 15; basey = 15; height = 25;
     PL().col0( 1 );
     PL().env( xm2d, xM2d, ym2d, yM2d, just, style );
     PL().w3d( basex, basey, height, xm, xM, ym, yM, zm, zM, alt, az );
     PL().box3( "bnt", "X", 0, 0,
                "bnt", "Y", 0, 0,
-               "bnst", "Z", 0.01, 2.0 );
+               "bnst", "Z", 1.0, 2.0 );
 }
 
 void plotter::plot() {

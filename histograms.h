@@ -7,6 +7,7 @@
 #include "frame.h"
 
 typedef std::vector<cv::Mat> HistogramSet;
+typedef cv::Mat_<double> Histogram;
 
 HistogramSet generateHandHistograms( Frame f, ContourSet cs );
 
