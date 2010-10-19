@@ -14,11 +14,6 @@
 
 FrameDB *FDB;
 
-extern "C" {
-    cv::Mat original( int );
-    cv::Mat gray( int );
-}
-
 FrameDB::FrameDB( FrameSet &os ) {
     for( unsigned int i = 0; i < os.size(); ++i )
         db[i] = FrameData( i, os[i].mat );
