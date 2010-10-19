@@ -12,7 +12,8 @@ using std::cerr;
 using std::endl;
 
 void InitSarkur( char *cfile, int filenameLen ) {
-    new FrameDB( std::string( cfile, filenameLen ) );
+    FrameSet vidFrames = loadFromVideo( std::string( cfile, filenameLen ) );
+    new FrameDB( vidFrames );
 }
 
 void findHands() {

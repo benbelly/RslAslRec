@@ -15,7 +15,7 @@ using std::string;
 
 class FrameDB {
     public:
-        FrameDB( string videoFile );
+        FrameDB( FrameSet &frames );
         void findHands();
 
         struct FrameData {
@@ -71,7 +71,6 @@ class FrameDB {
         FrameSet keyframes;
         const string videoFile;
 
-        void loadVideo();
         void findKeyframes();
         void makeSDs();
 

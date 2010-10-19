@@ -19,12 +19,13 @@ extern "C" {
     cv::Mat gray( int );
 }
 
-FrameDB::FrameDB( string vFile ) : videoFile( vFile ) {
+FrameDB::FrameDB( FrameSet &os ) {
+    for( unsigned int i = 0; i < os.size(); ++i )
+        db[i] = FrameData( i, os[i].mat );
     FDB = this;
 }
 
 void FrameDB::findHands() {
-    loadVideo();
     findKeyframes();
     makeSDs();
 }
@@ -80,21 +81,6 @@ FrameDB::FrameData::FrameData( int i, const cv::Mat &img ) :
     img.copyTo( original.mat );
     skinMask = generateSkinMask( original );
     cv::cvtColor( img, gray.mat, CV_BGR2GRAY );
-}
-
-void FrameDB::loadVideo() {
-    cv::VideoCapture cap( videoFile );
-    fourcc = cap.get( CV_CAP_PROP_FOURCC );
-    fps = cap.get( CV_CAP_PROP_FPS );
-    numFrames = cap.get( CV_CAP_PROP_FRAME_COUNT );
-
-    int i = 0;
-    cv::Mat img;
-    while( cap.grab() ) {
-        cap.retrieve( img );
-        db[i] = FrameData( i, img );
-        ++i;
-    }
 }
 
 void FrameDB::findKeyframes() {

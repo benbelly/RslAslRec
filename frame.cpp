@@ -3,6 +3,26 @@
 #include <map>
 #include <algorithm>
 
+FrameSet loadFromVideo( std::string videoFile ) {
+    cv::VideoCapture cap( videoFile );
+    /*
+     *fourcc = cap.get( CV_CAP_PROP_FOURCC );
+     *fps = cap.get( CV_CAP_PROP_FPS );
+     */
+    int numFrames = cap.get( CV_CAP_PROP_FRAME_COUNT );
+    FrameSet frames; frames.reserve( numFrames );
+
+    int i = 0;
+    cv::Mat img;
+    while( cap.grab() ) {
+        cap.retrieve( img );
+        cv::Mat copy( img.size(), img.type() );
+        img.copyTo( copy );
+        frames.push_back( Frame( i++, copy ) );
+    }
+    return frames;
+}
+
 Frame convertTo16bit( const Frame src ) {
     Frame dst( src.id, src.size(), image_types::big_gray );
     src.mat.convertTo( dst.mat, image_types::big_gray );
