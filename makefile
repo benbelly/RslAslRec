@@ -2,7 +2,7 @@ EXECUTABLE=findhands
 OBJS = cvsl.o \
 	   findhands.o frame.o keyframeselect.o keyframedist.o skinmask.o \
 	   FrameDB.o edgedetection.o logging.o histograms.o plotter.o \
-	   eigenthingummies.o SignDB.o
+	   eigenthingummies.o SignDB.o LevelBuilding.o
 MLB = findhands.mlb
 SMLS = findhands.mlb cvsl.sml cvsl.mlb
 
