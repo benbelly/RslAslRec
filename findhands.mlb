@@ -2,6 +2,7 @@ local
   (* import Basis Library *)
   $(SML_LIB)/basis/basis.mlb
   cvsl.mlb
+  aslio.sml
 in
   findhands.sml
 end
