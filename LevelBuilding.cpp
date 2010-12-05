@@ -1,82 +1,79 @@
 
-#include <vector>
-#include <list>
-#include <utility>
-#include <limits>
-#include <algorithm>
-#include <functional>
-#include "frame.h"
+#include<vector>
+#include<list>
+#include<utility>
+#include<limits>
+#include<algorithm>
+#include<functional>
+#include<string>
+#include<iostream>
+#include"LevelBuilding.h"
 
-// TODO: Grammar checking - sign combinations that are not allowed in the grammer have a
-// constant cost. The distance to those 'illegal' signs should not be calculated
+inline void ASSERT( bool valid, std::string msg ) {
+    if( valid ) return;
+    std::cerr << msg << std::endl;
+    exit( 1 );
+}
 
-typedef cv::PCA SignFeatureVec;
+// Client has selected distances and a predecessor - insert them
+void LevelArrays::setDistance( int level, int frame, int sign,
+                               LevelArrays::D &ds, const Index &pred ) {
+    ASSERT( frame + ds.size() < (unsigned int)numFrames,
+            "Too many distances passed to setDistance" );
+    double predDist = a[pred.level][pred.frame][pred.sign];
+    for( unsigned int f = 0; f < ds.size(); ++f ) {
+        a[level][frame + f][sign] = ds[f] + predDist;
+        v[level][frame + f][sign] = pred;
+    }
+}
 
-struct ModelSign {
-    std::string gloss;
-    SignFeatureVec features;
-};
-
-typedef std::vector<ModelSign> ModelBase;
-
-double distance( ModelSign sign, int startFrame, int endFrame ) {
-    // Calculate the distance of frame sequence start->end
-    // from the sign
-    // TODO: Memoize the sign/Framepair pair for performance
-    // TODO: Memoize the startFrame/endFrame pair for performance
-    // TODO: Oh, and implement distance.  :)
-    // TODO: ME, of course!!
+double LevelBuilder::distance( ModelSign sign, int start, int end ) {
+    // For each FrameScore, find the minimal distance to all possible
+    // subsequences of the model sign.
     return 0.0;
 }
 
-struct Label {
-    Label( ModelSign s ) : sign( s ), endFrame( -1 ),
-                           distance( std::numeric_limits<double>::max() ) { };
-    ModelSign sign;
-    int endFrame;
-    double distance;
-};
 
-// Cheap use of pair to allow std algorithms
-Label MforSign( ModelSign sign, std::pair<int, int> startAndEnd ) {
-    int startFrame = startAndEnd.first, end = startAndEnd.second;
-    Label signScore( sign );
-    for( int m = startFrame + 1; m < end; ++m ) {
-        double dist = distance( sign, startFrame, m );
-        if( dist < signScore.distance ) {
-            signScore.distance = dist;
-            signScore.endFrame = m;
+LevelArrays::D LevelBuilder::DistancesForSign( ModelSign sign, int start ) {
+    unsigned int numFrames = video.size() - start;
+    LevelArrays::D fds( numFrames, maxScore );
+    for( unsigned int m = start; m < video.size(); ++m ) {
+        unsigned int loc = m - start;
+        fds[loc] = distance( sign, start, m );
+    }
+    return fds;
+}
+
+std::vector<LevelArrays::D> LevelBuilder::DistancesForAllSigns( int startFrame ) {
+    std::vector<LevelArrays::D> sds; sds.reserve( signDB.size() );
+    ModelBase::iterator begin = signDB.begin(), end = signDB.end();
+    while( begin != end )
+        sds.push_back( DistancesForSign( *begin++, startFrame ) );
+    return sds;
+}
+
+LevelArrays::Index LevelBuilder::findBestPrevious( int level, int frame ) {
+    LevelArrays::Distance best = std::numeric_limits<double>::max();
+    int bestSign = -1, pl = level - 1, pf = frame - 1;
+    for( unsigned int sign = 0; sign < signDB.size(); ++sign ) {
+        if( levels.distanceFor( pl, pf, sign ) < best ) {
+            best = levels.distanceFor( pl, pf, sign );
+            bestSign = sign;
         }
     }
-    return signScore;
+    return LevelArrays::Index( pl, pf, bestSign );
 }
 
-//
-// Returns a collection of best-end-frames for every sign in the ModelBase
-//
-std::vector<Label> ScoresForSigns( ModelBase signDB,
-                                   int startFrame, int size ) {
-    std::vector<Label> scores; scores.reserve( size );
-    std::transform( signDB.begin(), signDB.end(),
-                    std::back_inserter( scores ),
-                    std::bind2nd( std::ptr_fun( MforSign ),
-                                  std::pair<int, int>( startFrame, size ) ) );
-    return scores;
+void LevelBuilder::DistancesForAllSigns( int level, int start ) {
+    std::vector<LevelArrays::D> dists = DistancesForAllSigns( start );
+    LevelArrays::Index pred = findBestPrevious( level, start );
+    for( unsigned int i = 0; i < dists.size(); ++i )
+        levels.setDistance( level, start, i, dists[i], pred );
 }
 
-
-// TODO: These all assume some sort of global current video
-const static int videoSize = 141;
-const static unsigned int maxLevels = 20;
-
-typedef std::vector<Label> Sentence;
-
-// TODO: Limit the number of sentences pursued?
-std::vector<Sentence> SignsForLevels( ModelBase signDB ) {
-    std::vector<Sentence> bestSentences; bestSentences.reserve( signDB.size() );
-    // Level 0!
-    std::vector<Label> firstLabels = ScoresForSigns( signDB, 0, videoSize );
-    for( unsigned int lvl = 1; lvl < maxLevels; ++lvl ) {
-    }
-    return bestSentences;
+void LevelBuilder::BuildLevels() {
+    int start = 0;
+    // Prepopulate the first level (0) with startSign
+    for( int l = 1; i < numLevels; ++i )
+        DistancesForAllSigns( l, start++ );
 }

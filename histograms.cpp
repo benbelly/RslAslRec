@@ -87,7 +87,7 @@ void addImages( Histogram &dst, Histogram src ) {
     while( db != de ) *db++ += *sb++;
 }
 
-cv::Mat h2i( Frame f, HistogramSet &hs ) {
+cv::Mat h2i( Frame, HistogramSet &hs ) {
     unsigned int width = hs[0].cols, height = hs[0].rows;
     Histogram histImg = Histogram::zeros( height, width );
     std::for_each( hs.begin(), hs.end(),

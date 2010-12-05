@@ -1,4 +1,13 @@
 local
+    fun inDir dir (action : unit -> 'a) : 'a = 
+	let val oldDir = OS.FileSys.getDir()
+	    val _ = OS.FileSys.chDir dir
+	    val result = action()
+	    val _ = OS.FileSys.chDir oldDir
+	in
+	    result
+	end;
+
     fun getItemFromStream soFar str test : string list =
 	let val name = OS.FileSys.readDir str
 	    val toList = fn n => if (test n) then n::[] else [];
@@ -8,22 +17,25 @@ local
 	    else soFar
 	end;
 
-    fun getSubDirsOfStream  str : string list = getItemFromStream [] str OS.FileSys.isDir;
+    fun getSubDirsOfStream str : string list = getItemFromStream [] str OS.FileSys.isDir;
     fun getFilesOfStream str : string list =
 	getItemFromStream [] str (fn f => not(OS.FileSys.isDir f));
-    fun getDatFilesOfStream str : string list =
-	List.filter (fn f => String.isSuffix ".dat" f) (getFilesOfStream str);
 
     fun intFromString s : int = Option.valOf (Int.fromString s);
     fun intListFromStringList ss : int list = map intFromString ss;
     fun splitLine line : string list = String.tokens Char.isSpace line;
+
 in
+
 structure AslIO =
 struct
 
-fun getFiles dirName : string list = getFilesOfStream (OS.FileSys.openDir dirName);
-fun getDatFiles dirName : string list = getDatFilesOfStream (OS.FileSys.openDir dirName);
-fun getSubDirs dirName : string list = getSubDirsOfStream (OS.FileSys.openDir dirName);
+fun getFiles dirName : string list = inDir dirName (fn () => getFilesOfStream (OS.FileSys.openDir dirName));
+fun getSubDirs dirName : string list = inDir dirName (fn () => getSubDirsOfStream (OS.FileSys.openDir dirName));
+
+fun getDatFiles dirName : string list = List.filter (fn f => String.isSuffix ".dat" f) (getFiles dirName);
+fun getSignSubDirs dirName : string list = List.filter (fn d => String.isPrefix "sign" d) (getSubDirs dirName);
+fun getSentenceSubDirs dirName : string list = List.filter (fn d=> String.isPrefix "Sentence" d) (getSubDirs dirName);
 
 datatype feature = Face of int * int * int * int
 		 | Dominant of int list
@@ -52,9 +64,7 @@ datatype root = Root of string * sentence list;
 exception BadData of string;
 
 (*
- *
  * Functions to create features
- *
  *)
 fun lineToFace numlist : feature =
     let val breakList = fn (tx::ty::bx::by::[]) => Face(tx, ty, bx, by)
@@ -66,11 +76,19 @@ fun lineToDominant numlist : feature = Dominant(intListFromStringList numlist);
 fun lineToWeak numlist : feature = Weak(intListFromStringList numlist);
 
 (*
- *
  * Functions to create Frames
  * frame files look like S01_1_0282.dat
- *
  *)
+
+fun prFrame (Frame(num, f1, f2, f3)) =
+    let
+    in
+	print ("Frame number " ^ (Int.toString num) ^ "\n");
+	prFeature f1;
+	prFeature f2;
+	prFeature f3
+    end;
+
 fun getFrameNum filename : int =
     let val tokens = String.tokens (fn c => c = #"_") filename
     in
@@ -98,22 +116,45 @@ fun linesToFrames frm strm =
 fun frameFromFile file : frame =
     let val num = getFrameNum file
 	val instream = TextIO.openIn file
+	val frames = linesToFrames (Frame(num, Missing, Missing, Missing)) instream
+	val _ = TextIO.closeIn instream
     in
-	linesToFrames (Frame(num, Missing, Missing, Missing)) instream
+	frames
     end;
 
+fun validFrame (Frame(_, Face(_,_,_,_), Dominant(ds), Weak(ws))) : bool =
+    length ds mod 2 = 0 andalso length ws mod 2 = 0
+  | validFrame _ = false;
+
 (*
- *
  * Functions to create glosses
  * gloss dirs look like sign_lipread_0001
  * datatype gloss = Gloss of string * string * frame list;
- *
  *)
 fun signGloss dirName : string = List.nth(String.tokens (fn c => c = #"_") dirName, 1);
 
 fun glossForDir dirName : gloss =
-    Gloss(dirName, signGloss dirName, map frameFromFile (getDatFiles dirName));
+    inDir dirName (fn () => Gloss(dirName, signGloss dirName, map frameFromFile (getDatFiles ".")));
 
-end;
+(*
+ * Functions to create sentences
+ * Sentence directories look like Sentence 1.1 lipread can i
+ * datatype sentence = Sentence of string * string * gloss list;
+ *)
+fun sentenceGlosses dirName : string = 
+    (* List.drop *)
+    String.concatWith " " (tl (tl (String.tokens Char.isSpace dirName)));
+
+fun sentenceForDir dirName : sentence =
+    inDir dirName (fn () => Sentence( dirName, sentenceGlosses dirName, map glossForDir (getSignSubDirs ".")));
+
+(*
+ * Functions to create the Root directory
+ * datatype root = Root of string * sentence list;
+ *)
+fun rootForDir dirName : root =
+    inDir dirName (fn () => Root( dirName, map sentenceForDir (getSentenceSubDirs ".")));
+
+end; (* struct end *)
 
 end

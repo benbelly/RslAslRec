@@ -47,7 +47,7 @@ void saveImageC( Pointer img, int width, int height, int type, char *fname, int 
 
 
 static cv::VideoWriter *out = 0;
-void videoSaveBeginC( int width, int height, int fourcc, double fps, Bool color,
+void videoSaveBeginC( int width, int height, int /*fourcc*/, double fps, Bool color,
                       Pointer fname, int fnameLen ) {
     if( out ) {
         cerr << "Output writer not properly cleaned up" << endl;
