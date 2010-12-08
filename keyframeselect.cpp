@@ -11,7 +11,7 @@
 
 #include "keyframeselect.h"
 #include "consts.h"
-#include "logging.h"
+//#include "logging.h"
 #include "utility.h"
 
 #include "FrameDB.h"

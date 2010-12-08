@@ -42,16 +42,6 @@ datatype feature = Face of int * int * int * int
 		 | Weak of int list
 		 | Missing;
 
-fun prFeature (Face(tx, ty, bx, by)) = print ("Face: tx = " ^ (Int.toString tx) ^
-					      ", ty = " ^ (Int.toString ty) ^
-					      ", bx = " ^ (Int.toString bx) ^
-					      ", by = " ^ (Int.toString by) ^ "\n")
-  | prFeature (Dominant(xs)) = print ("Dominant hand of " ^ (Int.toString ((length xs) div 2)) ^
-				      " points\n")
-  | prFeature (Weak(xs)) = print ("Weak hand of " ^ (Int.toString ((length xs) div 2)) ^
-				  " points\n")
-  | prFeature Missing = print "Missing\n";
-
 (* Frame number and features (Face, Dominant, Weak) *)
 datatype frame = Frame of int * feature * feature * feature;
 (* Directory, gloss, frames *)
@@ -79,15 +69,6 @@ fun lineToWeak numlist : feature = Weak(intListFromStringList numlist);
  * Functions to create Frames
  * frame files look like S01_1_0282.dat
  *)
-
-fun prFrame (Frame(num, f1, f2, f3)) =
-    let
-    in
-	print ("Frame number " ^ (Int.toString num) ^ "\n");
-	prFeature f1;
-	prFeature f2;
-	prFeature f3
-    end;
 
 fun getFrameNum filename : int =
     let val tokens = String.tokens (fn c => c = #"_") filename
@@ -134,26 +115,39 @@ fun validFrame (Frame(_, Face(_,_,_,_), Dominant(ds), Weak(ws))) : bool =
 fun signGloss dirName : string = List.nth(String.tokens (fn c => c = #"_") dirName, 1);
 
 fun glossForDir dirName : gloss =
-    inDir dirName (fn () => Gloss(dirName, signGloss dirName, map frameFromFile (getDatFiles ".")));
+    inDir dirName (fn () => Gloss(dirName, signGloss dirName,
+                                  map frameFromFile (getDatFiles ".")));
 
 (*
  * Functions to create sentences
  * Sentence directories look like Sentence 1.1 lipread can i
- * datatype sentence = Sentence of string * string * gloss list;
  *)
 fun sentenceGlosses dirName : string = 
-    (* List.drop *)
-    String.concatWith " " (tl (tl (String.tokens Char.isSpace dirName)));
+    String.concatWith " " (List.drop(String.tokens Char.isSpace dirName, 2));
 
 fun sentenceForDir dirName : sentence =
-    inDir dirName (fn () => Sentence( dirName, sentenceGlosses dirName, map glossForDir (getSignSubDirs ".")));
+    inDir dirName (fn () => Sentence( dirName, sentenceGlosses dirName,
+                                      map glossForDir (getSignSubDirs ".")));
 
 (*
  * Functions to create the Root directory
- * datatype root = Root of string * sentence list;
  *)
 fun rootForDir dirName : root =
     inDir dirName (fn () => Root( dirName, map sentenceForDir (getSentenceSubDirs ".")));
+
+fun imagesForFrame (Frame(_,_,dom,weak)) : int list * int list =
+    let val d2l = fn (Dominant(ps)) => ps
+        |            (Weak(ps)) => ps
+        |            _ => []
+    in
+      (d2l dom, d2l weak)
+    end;
+
+fun imagesForGloss (Gloss(_,_,fs)) : (int list * int list) list = map imagesForFrame fs;
+fun imagesForSentence (Sentence(_, _, gs)) : (int list * int list) list =
+    foldr op@ [] (map imagesForGloss gs);
+fun imagesForRoot (Root(_, ss)) : (int list * int list) list =
+    foldr op@ [] (map imagesForSentence ss);
 
 end; (* struct end *)
 

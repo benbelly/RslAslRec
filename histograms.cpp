@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "FrameDB.h"
 #include "histograms.h"
-#include "logging.h"
+//#include "logging.h"
 
 
 cv::Mat generateHandHistogram( Frame f, Contour c );

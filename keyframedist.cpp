@@ -2,7 +2,7 @@
 #include <numeric>
 #include "frame.h"
 #include "keyframedist.h"
-#include "logging.h"
+//#include "logging.h"
 #include "consts.h"
 
 #include "FrameDB.h"

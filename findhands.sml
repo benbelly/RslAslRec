@@ -15,9 +15,12 @@
 val init = _import "InitSarkur" : char vector * int -> unit;
 val findHands = _import "findHands" : unit -> unit;
 
+
 fun sarkar () =
   let (* Sarkur C functions *)
     val filename="mov/S003.MOV"
+    val dataDir = "/home/ben/Documents/school/USF-ASL-Data-Set-v2"
+    val dataRoot = AslIO.rootForDir dataDir;
   in
     init( filename, (size filename) );
     findHands();

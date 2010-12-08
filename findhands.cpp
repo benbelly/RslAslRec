@@ -2,14 +2,16 @@
 #include <string>
 #include <string.h>
 #include <iostream>
+#include <map>
 
-#include "logging.h"
 #include "FrameDB.h"
 #include "findhands.h"
 
 using std::string;
 using std::cerr;
 using std::endl;
+
+std::map<int, cv::Mat> specialImages;
 
 void InitSarkur( char *cfile, int filenameLen ) {
     FrameSet vidFrames = loadFromVideo( std::string( cfile, filenameLen ) );
@@ -41,6 +43,9 @@ void getFrameInfoC( int type, Pointer width, Pointer height,
             break;
         case frame_types::histogram:
             toCheck = FDB->histogram( 0 );
+            break;
+        case frame_types::special: // Meaningless
+            toCheck = Frame( 0, specialImages[0] );
             break;
         default:
             toCheck = FDB->gray( 0 );
@@ -83,6 +88,8 @@ Frame getFrame( int id, int type ) {
             return FDB->boundary( id );
         case frame_types::histogram:
             return FDB->histogram( id );
+        case frame_types::special:
+            return Frame( id, specialImages[id] );
     }
     return Frame();
 }
@@ -95,18 +102,21 @@ void getFrame( int id, int type, Pointer img ) {
         cerr << "HELP!" << endl;
 }
 
+void makeImageFromData( cv::Mat &img, int numPts, Pointer pts ) {
+    int i = 0;
+    while( i < numPts ) {
+        int x = pts[i++], y = pts[i++];
+        img.at<unsigned char>( y, x ) = 255;
+    }
+}
 
-/*
- *
- *int main( int, char **argv ) {
- *    string filename = argv[1];
- *
- *    FrameDB db( filename );
- *    db.findHands();
- *    FrameSet sds = db.sds();
- *    std::for_each( sds.begin(), sds.end(), std::bind1st( std::ptr_fun( showNwait ), "sds" ) );
- *
- *    return 0;
- *}
- *
- */
+void addHandImage( int width, int height,
+                   int h1NumPts, Pointer h1Pts,
+                   int h2NumPts, Pointer h2Pts ) {
+    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
+    makeImageFromData( hand, h1NumPts, h1Pts );
+    if( h2Pts ) makeImageFromData( hand, h2NumPts, h2Pts );
+    static int lastIndex = 0;
+    specialImages[lastIndex++] = hand;
+}
+

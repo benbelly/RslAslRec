@@ -6,7 +6,7 @@
 #include "opencv/highgui.h"
 #include "opencv/cvaux.h"
 
-#include "logging.h"
+//#include "logging.h"
 #include "skinmask.h"
 
 Frame generateSkinMask( Frame frame ) {

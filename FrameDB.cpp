@@ -1,7 +1,8 @@
 
-#include <numeric>
+#include<iostream>
+#include<numeric>
 
-#include "logging.h"
+//#include "logging.h"
 
 #include "keyframeselect.h"
 #include "keyframedist.h"
@@ -11,6 +12,9 @@
 #include "utility.h"
 
 #include "FrameDBHelpers.h"
+
+using std::cout;
+using std::endl;
 
 FrameDB *FDB;
 
