@@ -1,6 +1,5 @@
 local
   $(SML_LIB)/basis/basis.mlb
-  iohelpers.mlb
 in
-  aslio.sml
+  iohelpers.sml
 end

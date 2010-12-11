@@ -78,8 +78,7 @@ in
 
       fun showAllHistograms () =
         let val ids = getIds()
-            val show = fn i => showHistogram i
-        in Vector.app show ids end;
+        in Vector.app showHistogram ids end;
 
       fun saveVideo name t : unit =
         let val (color, fourcc, fps) = getVideoInfo t

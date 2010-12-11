@@ -1,41 +1,18 @@
 local
-    fun inDir dir (action : unit -> 'a) : 'a = 
-	let val oldDir = OS.FileSys.getDir()
-	    val _ = OS.FileSys.chDir dir
-	    val result = action()
-	    val _ = OS.FileSys.chDir oldDir
-	in
-	    result
-	end;
-
-    fun getItemFromStream soFar str test : string list =
-	let val name = OS.FileSys.readDir str
-	    val toList = fn n => if (test n) then n::[] else [];
-	in
-	    if (Option.isSome name) then
-		getItemFromStream (soFar @ (toList (Option.valOf name))) str test
-	    else soFar
-	end;
-
-    fun getSubDirsOfStream str : string list = getItemFromStream [] str OS.FileSys.isDir;
-    fun getFilesOfStream str : string list =
-	getItemFromStream [] str (fn f => not(OS.FileSys.isDir f));
-
     fun intFromString s : int = Option.valOf (Int.fromString s);
     fun intListFromStringList ss : int list = map intFromString ss;
     fun splitLine line : string list = String.tokens Char.isSpace line;
-
+	
+    fun getDatFiles dirName : string list =
+	List.filter (fn f => String.isSuffix ".dat" f) (getFiles dirName);
+    fun getSignSubDirs dirName : string list =
+	List.filter (fn d => String.isPrefix "sign" d) (getSubDirs dirName);
+    fun getSentenceSubDirs dirName : string list =
+	List.filter (fn d=> String.isPrefix "Sentence" d) (getSubDirs dirName);
 in
 
 structure AslIO =
 struct
-
-fun getFiles dirName : string list = inDir dirName (fn () => getFilesOfStream (OS.FileSys.openDir dirName));
-fun getSubDirs dirName : string list = inDir dirName (fn () => getSubDirsOfStream (OS.FileSys.openDir dirName));
-
-fun getDatFiles dirName : string list = List.filter (fn f => String.isSuffix ".dat" f) (getFiles dirName);
-fun getSignSubDirs dirName : string list = List.filter (fn d => String.isPrefix "sign" d) (getSubDirs dirName);
-fun getSentenceSubDirs dirName : string list = List.filter (fn d=> String.isPrefix "Sentence" d) (getSubDirs dirName);
 
 datatype feature = Face of int * int * int * int
 		 | Dominant of int list
@@ -148,6 +125,10 @@ fun imagesForSentence (Sentence(_, _, gs)) : (int list * int list) list =
     foldr op@ [] (map imagesForGloss gs);
 fun imagesForRoot (Root(_, ss)) : (int list * int list) list =
     foldr op@ [] (map imagesForSentence ss);
+
+
+fun sentenceNumber dirName : real =
+    Option.valOf (Real.fromString (hd (tl (String.tokens Char.isSpace dirName))));
 
 end; (* struct end *)
 

@@ -16,10 +16,6 @@ extern "C" {
     void getVideoInfoC( int type, Pointer color, Pointer fourcc, Pointer fps );
     void getFrame( int id, int type, Pointer img );
 
-    /* This is probably 460 x 290 */
-    void addHandImage( int width, int height,
-                       int h1NumPts, Pointer h1Pts,
-                       int h2NumPts, Pointer h2Pts );
 }
 
 namespace frame_types {
@@ -37,6 +33,10 @@ namespace frame_types {
 extern "C" {
     void InitSarkur( char *cfile, int filenameLen );
     void findHands();
+    /* This is probably 460 x 290 */
+    void addHandImage( int width, int height,
+                       int h1NumPts, Pointer h1Pts,
+                       int h2NumPts, Pointer h2Pts );
 }
 
 #endif

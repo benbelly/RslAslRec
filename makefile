@@ -4,7 +4,8 @@ OBJS = cvsl.o \
 	   FrameDB.o edgedetection.o histograms.o plotter.o \
 	   eigenthingummies.o SignDB.o # LevelBuilding.o
 MLB = findhands.mlb
-SMLS = findhands.mlb cvsl.sml cvsl.mlb
+SMLS = findhands.sml findhands.mlb cvsl.sml cvsl.mlb aslio.sml aslio.mlb \
+	iohelpers.sml iohelpers.mlb
 
 #OPENCV_PATH=/home/ben/opencv
 OPENCV_PATH=/usr/include/opencv
