@@ -13,26 +13,51 @@
  *)
 
 
-val init = _import "InitSarkur" : char vector * int -> unit;
+val init = _import "InitAslAlg" : char vector * int -> unit;
 val findHands = _import "findHands" : unit -> unit;
 (* addHandImage takes width, height, hand 1 size (number of points), hand 1 points,
    hand 2 size, hand 2 points *)
-val addHandsImage = _import "addHandImage" : int * int * int * int vector * int * int vector -> unit;
+val addHandsImage = _import "addHandImage" : int * int * int * int vector * int * int vector -> int;
 
+fun saveAllHands root : int list =
+    map (fn (i1, i2) => addHandsImage(640, 480, length i1, Vector.fromList i1,
+				      length i2, Vector.fromList i2))
+	(AslIO.imagesForRoot root);
+    
+fun cleanedRoot (AslIO.Root(d,ss)) skips : AslIO.root =
+    let
+	val skipSentence = fn snum => List.exists (fn skip => snum = skip) skips
+	val sentenceAndNumbers = List.filter (fn (s,n) => not(skipSentence n))
+					     (ListPair.zip(ss, (map AslIO.sentenceNum ss)))
+	val (sentences, _) = ListPair.unzip sentenceAndNumbers
+    in
+	AslIO.Root(d,sentences)
+    end;
 
-fun sarkar () =
+(* Create a Root for the traning set and a Root for the candidate set *)
+fun splitSentences (AslIO.Root(d,ss)) candidateInstance : AslIO.root * AslIO.root =
+    let
+	val candidate = fn sentence => (AslIO.sentenceNum sentence) = candidateInstance
+	val train = fn s => not(candidate s)
+    in
+	(AslIO.Root(d,List.filter train ss),
+	 AslIO.Root(d, List.filter candidate ss))
+    end;
+
+fun aslalg () =
   let
-    val filename="mov/S003.MOV"
-    val dataDir = "/home/ben/Documents/school/USF-ASL-Data-Set-v2"
-    val dataRoot = AslIO.rootForDir dataDir;
+    val filename = "mov/S003.MOV";
+    val dataDir = "/home/ben/Documents/school/USF-ASL-Data-Set-v2";
+    val root = AslIO.rootForDir dataDir;
+    val skipSentences = [1, 18, 19, 25] (* incomplete sets *)
+    val candidate = 5 (* Test sentence instance 5 *)
+    val cleaned = cleanedRoot root skipSentences
+    val (trainingS, candS) = splitSentences cleaned candidate
   in
     init( filename, (size filename) );
     (* findHands(); *)
-    map (fn (i1, i2) => addHandsImage(460, 290, length i1, Vector.fromList i1,
-				      length i2, Vector.fromList i2))
-	(AslIO.imagesForRoot dataRoot);
-
-    print "Done.\n"
+    Cvsl.displayAllImages 6
   end;
 
-sarkar();
+val _ = aslalg();
+print "Done.\n";

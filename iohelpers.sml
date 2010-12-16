@@ -30,4 +30,7 @@ fun getFiles dirName : string list = inDir dirName (fn () => getFilesOfStream (O
 (* Get the subdirectories of a directory *)
 fun getSubDirs dirName : string list = inDir dirName (fn () => getSubDirsOfStream (OS.FileSys.openDir dirName));
 
+(* print-line *)
+fun pl s = print (s ^ "\n");
+
 end

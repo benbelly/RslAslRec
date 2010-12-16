@@ -13,7 +13,7 @@ using std::endl;
 
 std::map<int, cv::Mat> specialImages;
 
-void InitSarkur( char *cfile, int filenameLen ) {
+void InitAslAlg( char *cfile, int filenameLen ) {
     FrameSet vidFrames = loadFromVideo( std::string( cfile, filenameLen ) );
     new FrameDB( vidFrames );
 }
@@ -102,7 +102,7 @@ void getFrame( int id, int type, Pointer img ) {
         cerr << "HELP!" << endl;
 }
 
-void makeImageFromData( cv::Mat &img, int numPts, Pointer pts ) {
+void makeImageFromData( cv::Mat &img, int numPts, int *pts ) {
     int i = 0;
     while( i < numPts ) {
         int x = pts[i++], y = pts[i++];
@@ -110,13 +110,14 @@ void makeImageFromData( cv::Mat &img, int numPts, Pointer pts ) {
     }
 }
 
-void addHandImage( int width, int height,
-                   int h1NumPts, Pointer h1Pts,
-                   int h2NumPts, Pointer h2Pts ) {
+int addHandImage( int width, int height,
+		  int h1NumPts, Pointer h1Pts,
+		  int h2NumPts, Pointer h2Pts ) {
     cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
-    makeImageFromData( hand, h1NumPts, h1Pts );
-    if( h2Pts ) makeImageFromData( hand, h2NumPts, h2Pts );
+    makeImageFromData( hand, h1NumPts, (int *)h1Pts );
+    if( h2NumPts ) makeImageFromData( hand, h2NumPts, (int *)h2Pts );
     static int lastIndex = 0;
-    specialImages[lastIndex++] = hand;
+    specialImages[lastIndex] = hand;
+    return lastIndex++;
 }
 

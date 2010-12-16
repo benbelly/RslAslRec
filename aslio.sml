@@ -23,8 +23,8 @@ datatype feature = Face of int * int * int * int
 datatype frame = Frame of int * feature * feature * feature;
 (* Directory, gloss, frames *)
 datatype gloss = Gloss of string * string * frame list;
-(* Directory, sentence, glosses *)
-datatype sentence = Sentence of string * string * gloss list;
+(* Directory, sentence, sentence number, instance number, glosses *)
+datatype sentence = Sentence of string * string * int * int * gloss list;
 (* Root dir and list of sentences *)
 datatype root = Root of string * sentence list;
 
@@ -99,11 +99,38 @@ fun glossForDir dirName : gloss =
  * Functions to create sentences
  * Sentence directories look like Sentence 1.1 lipread can i
  *)
+(* Get the sentence number for a directory. Directory number 2.3 would have
+   a sentence number of 2 *)
+fun sentenceNumberForDir dirName : int =
+    let
+	val nums = List.nth((String.tokens Char.isSpace dirName), 2)
+	val firstNum = hd (String.tokens (fn c => c = #".") nums)
+    in		     
+	Option.valOf (Int.fromString firstNum)
+    end;
+
+fun sentenceNum (Sentence(_,_,num,_,_)) : int = num;
+
+(* Get the instance number for a sentence directory. Directory number 2.3 would
+   have a instance number of 3 *)
+fun sentenceInstanceForDir dirName : int =
+    let
+	val nums = List.nth((String.tokens Char.isSpace dirName), 2)
+	val secondNum = List.nth(String.tokens (fn c => c = #".") nums, 2)
+    in
+	Option.valOf (Int.fromString secondNum)
+    end;
+
+fun sentenceInstance (Sentence(_,_,_,ins,_)) : int = ins;
+
+
 fun sentenceGlosses dirName : string = 
     String.concatWith " " (List.drop(String.tokens Char.isSpace dirName, 2));
 
 fun sentenceForDir dirName : sentence =
     inDir dirName (fn () => Sentence( dirName, sentenceGlosses dirName,
+				      sentenceNumberForDir dirName,
+				      sentenceInstanceForDir dirName,
                                       map glossForDir (getSignSubDirs ".")));
 
 (*
@@ -121,14 +148,29 @@ fun imagesForFrame (Frame(_,_,dom,weak)) : int list * int list =
     end;
 
 fun imagesForGloss (Gloss(_,_,fs)) : (int list * int list) list = map imagesForFrame fs;
-fun imagesForSentence (Sentence(_, _, gs)) : (int list * int list) list =
+fun imagesForSentence (Sentence(_, _, _, _, gs)) : (int list * int list) list =
     foldr op@ [] (map imagesForGloss gs);
 fun imagesForRoot (Root(_, ss)) : (int list * int list) list =
     foldr op@ [] (map imagesForSentence ss);
 
 
-fun sentenceNumber dirName : real =
-    Option.valOf (Real.fromString (hd (tl (String.tokens Char.isSpace dirName))));
+(* Old code - may need again someday *)
+(* sentence, gloss, frame_num, image *)
+(*
+fun firstImage (AslIO.Root(_, ss)) : string * string * int * (int list * int list) =
+  let
+    val s = hd ss
+    val sentence = fn (AslIO.Sentence(s, _, _, _, _)) => s
+    val gloss = fn (AslIO.Sentence(_, _, _, _, (AslIO.Gloss(_,g,_))::gs)) => g
+		 | _ => "gloss error"
+    val fnum = fn (AslIO.Sentence(_, _, _, _, (AslIO.Gloss(_,_,(AslIO.Frame(n,_,_,_)::fs)))::gs)) => n
+		| _ => ~1
+    val fimg = fn (AslIO.Sentence(_, _, _, _, (AslIO.Gloss(_,_,f::fs))::gs)) => f
+		| _ => AslIO.Frame(~1,AslIO.Missing, AslIO.Missing, AslIO.Missing)
+  in
+    (sentence s, gloss s, fnum s, AslIO.imagesForFrame (fimg s))
+  end;
+*)
 
 end; (* struct end *)
 
