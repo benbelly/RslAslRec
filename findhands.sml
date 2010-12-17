@@ -49,13 +49,16 @@ fun aslalg () =
     val filename = "mov/S003.MOV";
     val dataDir = "/home/ben/Documents/school/USF-ASL-Data-Set-v2";
     val root = AslIO.rootForDir dataDir;
-    val skipSentences = [1, 18, 19, 25] (* incomplete sets *)
+    val imgs = AslIO.imagesForRoot root
+    val ids = map (fn (d,w) => addHandsImage(460, 580, length d, Vector.fromList d, length w, Vector.fromList w )) imgs
+    (* val skipSentences = [1, 18, 19, 25]
     val candidate = 5 (* Test sentence instance 5 *)
     val cleaned = cleanedRoot root skipSentences
-    val (trainingS, candS) = splitSentences cleaned candidate
+    val (trainingS, candS) = splitSentences cleaned candidate *)
   in
     init( filename, (size filename) );
     (* findHands(); *)
+    print ("Number of images stored: " ^ (Int.toString( length ids )) ^ "\n");
     Cvsl.displayAllImages 6
   end;
 
