@@ -62,11 +62,11 @@ fun inFrame ("FACE:"::ns) (Frame(num, Missing, dominant, weak)) : frame =
   | inFrame [] frm = frm (* possible blank lines *)
   | inFrame _ _ = raise BadData "No match for feature line";
 
-fun linesToFrames frm strm =
+fun linesToFrame frm strm =
     let val line = TextIO.inputLine strm
     in
 	if (Option.isSome line) then
-	    linesToFrames (inFrame (splitLine (Option.valOf line)) frm) strm
+	    linesToFrame (inFrame (splitLine (Option.valOf line)) frm) strm
 	else
 	    frm
     end;
@@ -74,7 +74,7 @@ fun linesToFrames frm strm =
 fun frameFromFile file : frame =
     let val num = getFrameNum file
 	val instream = TextIO.openIn file
-	val frames = linesToFrames (Frame(num, Missing, Missing, Missing)) instream
+	val frames = linesToFrame (Frame(num, Missing, Missing, Missing)) instream
 	val _ = TextIO.closeIn instream
     in
 	frames
