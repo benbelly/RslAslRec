@@ -35,6 +35,7 @@ ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt -lcsironn -link-opt -lqhull \
 		  -link-opt -lqsastime -link-opt -lfreetype
 ML_FFI = -default-ann 'allowFFI true'
+ML_DEBUG = -const 'Exn.keepHistory true'
 
 all: $(OBJS) $(EXECUTABLE)
 		@echo "\nBuild is complete."
@@ -46,15 +47,15 @@ all: $(OBJS) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJS) $(SMLS) $(MLB)
 		@echo "\nMaking executable:"
-		$(ML) $(ML_LIBS) $(ML_FFI) $(MLB) $(OBJS)
+		$(ML) $(ML_LIBS) $(ML_FFI) $(ML_DEBUG) $(MLB) $(OBJS)
 		@echo "    executable $@ built."
 
-clean:
+clean: out
 		@echo "\nCleaning up..."
 		-rm -f $(EXECUTABLE) *.o *.bak
 		@echo "    finished."
 
-output:
+out:
 		@echo "\nRemoving frames..."
 		-rm -f cvsl_out/*
 		@echo "    finished."

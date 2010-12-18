@@ -8,8 +8,8 @@
 
 // API for sml
 extern "C" {
-    int numFrames();
-    void getFrameIds( Pointer ids );
+    int numFrames( int type );
+    void getFrameIds( int type, Pointer ids );
 
     void getFrameInfoC( int type, Pointer width, Pointer height,
                                  Pointer dtype, Pointer size );

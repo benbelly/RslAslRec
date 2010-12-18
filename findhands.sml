@@ -59,7 +59,7 @@ fun aslalg () =
     init( filename, (size filename) );
     (* findHands(); *)
     print ("Number of images stored: " ^ (Int.toString( length ids )) ^ "\n");
-    Cvsl.displayAllImages 6
+    Cvsl.saveAllImages "cvsl_out/train" "png" 6
   end;
 
 val _ = aslalg();

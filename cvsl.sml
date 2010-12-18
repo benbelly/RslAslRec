@@ -1,8 +1,8 @@
 
 local
   (* cvsl support api *)
-  val numFrames = _import "numFrames" : unit -> int;
-  val getFrameIds = _import "getFrameIds" : int array -> unit;
+  val numFrames = _import "numFrames" : int -> int;
+  val getFrameIds = _import "getFrameIds" : int * int array -> unit;
   val getFrameInfoC = _import "getFrameInfoC" : int * int ref * int ref * int ref * int ref -> unit;
   val getVideoInfoC = _import "getVideoInfoC" : int * bool ref * int ref * real ref -> unit;
   val getFrame = _import "getFrame" : int * int * char array -> unit;
@@ -50,14 +50,14 @@ in
         let val (img, w, h, dt) = getImage t i
         in showImageC( img, w, h, dt, wait ) end;
 
-      fun getIds () : int vector =
-        let val num = numFrames()
+      fun getIds t : int vector =
+        let val num = numFrames(t)
             val ids : int array = Array.array( num, 0 )
-            val _ = getFrameIds( ids )
+            val _ = getFrameIds( t, ids )
         in Array.vector( ids ) end;
 
       fun displayAll t wait =
-        let val ids = getIds()
+        let val ids = getIds t
             val show = fn i => getAndShow t i wait
         in Vector.app show ids end;
 
@@ -66,7 +66,7 @@ in
         in saveImageC( img, w, h, dt, name, (size name)) end;
 
       fun saveAllImages name ext t : unit =
-        let val ids = getIds()
+        let val ids = getIds t
             val w = maxWidth ids
             val getName = fn i => name ^ (padNum i w) ^ "." ^ ext
             val save = fn i => saveImage (getName i) t i
@@ -77,13 +77,13 @@ in
         in showNormalHistogram( img, w, h ) end;
 
       fun showAllHistograms () =
-        let val ids = getIds()
+        let val ids = getIds 5
         in Vector.app showHistogram ids end;
 
       fun saveVideo name t : unit =
         let val (color, fourcc, fps) = getVideoInfo t
             val (width, height, dt, _) = getFrameInfo t
-            val ids = getIds()
+            val ids = getIds t
             val save = fn i => let val (img, _, _, _) = getImage t i
                                in saveVideoC( img, width, height, dt ) end;
         in

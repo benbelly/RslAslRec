@@ -103,7 +103,7 @@ fun glossForDir dirName : gloss =
    a sentence number of 2 *)
 fun sentenceNumberForDir dirName : int =
     let
-	val nums = List.nth((String.tokens Char.isSpace dirName), 2)
+	val nums = List.nth((String.tokens Char.isSpace dirName), 1)
 	val firstNum = hd (String.tokens (fn c => c = #".") nums)
     in		     
 	Option.valOf (Int.fromString firstNum)
@@ -115,8 +115,8 @@ fun sentenceNum (Sentence(_,_,num,_,_)) : int = num;
    have a instance number of 3 *)
 fun sentenceInstanceForDir dirName : int =
     let
-	val nums = List.nth((String.tokens Char.isSpace dirName), 2)
-	val secondNum = List.nth(String.tokens (fn c => c = #".") nums, 2)
+	val nums = List.nth((String.tokens Char.isSpace dirName), 1)
+	val secondNum = List.nth(String.tokens (fn c => c = #".") nums, 1)
     in
 	Option.valOf (Int.fromString secondNum)
     end;

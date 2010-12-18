@@ -11,7 +11,8 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-std::map<int, cv::Mat> specialImages;
+typedef std::map<int, cv::Mat> SpecialImageMap;
+SpecialImageMap specialImages;
 
 void InitAslAlg( char *cfile, int filenameLen ) {
     FrameSet vidFrames = loadFromVideo( std::string( cfile, filenameLen ) );
@@ -23,11 +24,33 @@ void findHands() {
     FrameSet sds = FDB->sds();
 }
 
-int numFrames() { return FDB->size(); }
+int numFrames( int type ) {
+    switch( type ) {
+        case frame_types::special:
+            return specialImages.size();
+        default:
+            return FDB->size();
+    }
+}
 
-void getFrameIds( Pointer ids ) {
-    std::vector<int> dbIds( FDB->ids() );
-    std::copy( dbIds.begin(), dbIds.end(), (int*)ids );
+int toKey( SpecialImageMap::value_type p ) {
+    return p.first;
+}
+void getFrameIds( int type, Pointer ids ) {
+    switch( type ) {
+        case frame_types::special:
+        {
+            std::vector<int> dbIds; dbIds.reserve( specialImages.size() );
+            std::transform( specialImages.begin(), specialImages.end(),
+                            std::back_inserter( dbIds ), std::ptr_fun( toKey ) );
+            std::copy( dbIds.begin(), dbIds.end(), (int*)ids );
+        }
+        default:
+        {
+            std::vector<int> dbIds( FDB->ids() );
+            std::copy( dbIds.begin(), dbIds.end(), (int*)ids );
+        }
+    }
 }
 
 int getFrameSize( const Frame &f ) {
@@ -102,11 +125,24 @@ void getFrame( int id, int type, Pointer img ) {
         cerr << "HELP!" << endl;
 }
 
+/*
+ * The input data skips scan lines and does weird things
+ * This tries to correct for _most_ of it.
+ */
 void makeImageFromData( cv::Mat &img, int numPts, int *pts ) {
-    int i = 0;
+    int i = 0, x = pts[i++], y = pts[i++];
+    // Since y jumps around, track the jump and increment actualY
+    // Sometimes Y changes (incorrectly) in the middle of scanlines,
+    // so track X position as well, and only increment y when both change
+    int actualY = y, lastX, lastY = y;
     while( i < numPts ) {
-        int x = pts[i++], y = pts[i++];
-        img.at<unsigned char>( y, x ) = 255;
+        img.at<unsigned char>( actualY, x ) = 255;
+        lastX = x;
+        x = pts[i++]; y = pts[i++];
+        if( y != lastY &&
+            x != (lastX + 1) ) {
+            lastY = y; ++actualY;
+        }
     }
 }
 
