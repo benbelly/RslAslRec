@@ -1,11 +1,15 @@
-EXECUTABLE=findhands
+EXECUTABLE=aslalg
 OBJS = cvsl.o \
-	   findhands.o frame.o keyframeselect.o keyframedist.o skinmask.o \
+	   aslalg.o frame.o keyframeselect.o keyframedist.o skinmask.o \
 	   FrameDB.o edgedetection.o histograms.o plotter.o \
 	   eigenthingummies.o SignDB.o # LevelBuilding.o
-MLB = findhands.mlb
-SMLS = findhands.sml findhands.mlb cvsl.sml cvsl.mlb aslio.sml aslio.mlb \
-	iohelpers.sml iohelpers.mlb
+
+SMLS = aslalg.sml aslalg.mlb \
+	   cvsl.sig cvsl.sml cvsl.mlb \
+	   aslio.sig aslio.sml aslio.mlb \
+	   iohelpers.sml iohelpers.mlb
+
+MLB = aslalg.mlb
 
 #OPENCV_PATH=/home/ben/opencv
 OPENCV_PATH=/usr/include/opencv
@@ -18,17 +22,17 @@ DEBUG=-g -DTRACE
 INCLUDE=-I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
 		-I$(PLPLOT_PATH)/include \
 		-I/usr/lib/mlton/include
-CFLAGS=-Wall -Wextra -std=c++0x -c $(DEBUG) $(INCLUDE)
+#CFLAGS=-Wall -Wextra -std=c++0x -c $(DEBUG) $(INCLUDE)
+CFLAGS=-Wall -Wextra -c $(DEBUG) $(INCLUDE)
 
 ##
 ## MLTon variables
 ML = mlton
-#ML_LIBS = -link-opt -L$(OPENCV_PATH)/lib \
-		  #-link-opt -L$(PLPLOT_PATH)/lib 
 ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt -lcxcore -link-opt -lcv -link-opt -lhighgui \
 		  -link-opt -lcvaux -link-opt -lml \
 		  -link-opt -lavutil \
+		  -link-opt -L$(PLPLOT_PATH)/lib \
 		  -link-opt -lplplotcxxd -link-opt -lplplotd \
 		  -link-opt -lltdl -link-opt -ldl \
 		  -link-opt -lm -link-opt -lcsirocsa \

@@ -1,27 +1,26 @@
 
 local
   (* cvsl support api *)
-  val numFrames = _import "numFrames" : int -> int;
-  val getFrameIds = _import "getFrameIds" : int * int array -> unit;
+  val numFramesC    = _import "numFramesC" : int -> int;
+  val getFrameIdsC  = _import "getFrameIdsC" : int * int array -> unit;
   val getFrameInfoC = _import "getFrameInfoC" : int * int ref * int ref * int ref * int ref -> unit;
   val getVideoInfoC = _import "getVideoInfoC" : int * bool ref * int ref * real ref -> unit;
-  val getFrame = _import "getFrame" : int * int * char array -> unit;
+  val getFrameC     = _import "getFrameC" : int * int * char array -> unit;
 
   (* cvsl api *)
-  val showImageC = _import "showImageC" : char vector * int * int * int * bool -> unit;
-  val saveImageC = _import "saveImageC" : char vector * int * int * int * char vector * int -> unit;
-  val videoBeginC = _import "videoSaveBeginC" : int * int * int * real * bool * char vector * int -> unit;
-  val saveVideoC = _import "saveVideoC" : char vector * int * int * int -> unit;
-  val videoEndC = _import "videoSaveEndC" : unit -> unit;
-  val showNormalHistogram = _import "showNormalHistogram" : char vector * int * int -> unit;
+  val showImageC      = _import "showImageC" : char vector * int * int * int * bool -> unit;
+  val saveImageC      = _import "saveImageC" : char vector * int * int * int * char vector * int -> unit;
+  val videoBeginC     = _import "videoSaveBeginC" : int * int * int * real * bool * char vector * int -> unit;
+  val saveVideoC      = _import "saveVideoC" : char vector * int * int * int -> unit;
+  val videoEndC       = _import "videoSaveEndC" : unit -> unit;
+  val showNormalHistC = _import "showNormalHistogramC" : char vector * int * int -> unit;
 
   (* Helper functions *)
   fun vecMax is : int = Vector.foldl Int.max 0 is;
   fun numWidth i : int = size (Int.toString i);
   fun maxWidth is : int = numWidth (vecMax is);
   fun padNum n p : string = StringCvt.padLeft #"0" p (Int.toString n);
-in
-  structure Cvsl =
+  structure OpenCV_cvsl =
       struct
 
       (* Get the image data, width, height, data-type *)
@@ -43,7 +42,7 @@ in
       fun getImage t i : char vector * int * int * int =
         let val (width, height, dt, size) = getFrameInfo t
             val img : char array = Array.array( size, Char.chr( 0 ) )
-            val _ = getFrame( i, t, img )
+            val _ = getFrameC( i, t, img )
         in (Array.vector( img ), width, height, dt) end;
 
       fun getAndShow t i wait : unit =
@@ -51,9 +50,9 @@ in
         in showImageC( img, w, h, dt, wait ) end;
 
       fun getIds t : int vector =
-        let val num = numFrames(t)
+        let val num = numFramesC(t)
             val ids : int array = Array.array( num, 0 )
-            val _ = getFrameIds( t, ids )
+            val _ = getFrameIdsC( t, ids )
         in Array.vector( ids ) end;
 
       fun displayAll t wait =
@@ -74,7 +73,7 @@ in
 
       fun showHistogram i : unit =
         let val (img, w, h, dt) = getImage 5 i (* need to pass 5 *)
-        in showNormalHistogram( img, w, h ) end;
+        in showNormalHistC( img, w, h ) end;
 
       fun showAllHistograms () =
         let val ids = getIds 5
@@ -97,4 +96,6 @@ in
       fun displayVideo t = displayAll t false;
 
       end;
+in
+  structure Cvsl :> CVSL = OpenCV_cvsl;
 end

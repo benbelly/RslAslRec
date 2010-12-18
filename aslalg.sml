@@ -13,11 +13,11 @@
  *)
 
 
-val init = _import "InitAslAlg" : char vector * int -> unit;
-val findHands = _import "findHands" : unit -> unit;
+val init = _import "InitAslAlgC" : char vector * int -> unit;
+val findHands = _import "findHandsC" : unit -> unit;
 (* addHandImage takes width, height, hand 1 size (number of points), hand 1 points,
    hand 2 size, hand 2 points *)
-val addHandsImage = _import "addHandImage" : int * int * int * int vector * int * int vector -> int;
+val addHandsImage = _import "addHandImageC" : int * int * int * int vector * int * int vector -> int;
 
 fun saveAllHands root : int list =
     map (fn (i1, i2) => addHandsImage(640, 480, length i1, Vector.fromList i1,
@@ -50,7 +50,9 @@ fun aslalg () =
     val dataDir = "/home/ben/Documents/school/USF-ASL-Data-Set-v2";
     val root = AslIO.rootForDir dataDir;
     val imgs = AslIO.imagesForRoot root
-    val ids = map (fn (d,w) => addHandsImage(460, 580, length d, Vector.fromList d, length w, Vector.fromList w )) imgs
+    val ids = map (fn (d,w) => addHandsImage(460, 300,
+                                             length d, Vector.fromList d,
+                                             length w, Vector.fromList w )) imgs
     (* val skipSentences = [1, 18, 19, 25]
     val candidate = 5 (* Test sentence instance 5 *)
     val cleaned = cleanedRoot root skipSentences
