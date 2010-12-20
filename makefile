@@ -13,7 +13,7 @@ MLB = aslalg.mlb
 
 #OPENCV_PATH=/home/ben/opencv
 OPENCV_PATH=/usr/include/opencv
-PLPLOT_PATH=/home/ben/plplot
+PLPLOT_PATH=/usr
 
 ##
 ## C++ variables
