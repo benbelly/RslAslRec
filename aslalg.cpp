@@ -115,16 +115,6 @@ bool isColor( int type ) {
 }
 
 /*
- * Get information about the input video
- * InitAslAlg() must be called first
- */
-void getVideoInfoC( int type, Pointer color, Pointer fourcc, Pointer fps ) {
-    *((Bool*)color) = isColor( type );
-    *((int*)fourcc) = FDB->getFourcc();
-    *((double*)fps) = FDB->getFps();
-}
-
-/*
  * Helper function for getFrameC that accesses/creates the requested frame
  */
 Frame getFrame( int id, int type ) {

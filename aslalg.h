@@ -6,6 +6,8 @@
 #include "export.h"
 #include "ml-types.h"
 
+#include "cvsl.h"
+
 namespace frame_types {
     enum {
         original = 0,
@@ -31,42 +33,14 @@ extern "C" {
      * InitAslAlg() must be called before this
      */
     void findHandsC();
-    /*
-     * Get the number of frames of a particular type
-     * InitAslAlg() must be called first
-     */
-    int numFramesC( int type );
-    /*
-     * Get the ids associated with frames of a particular type
-     * InitAslAlg() must be called first
-     */
-    void getFrameIdsC( int type, Pointer ids );
-
-    /*
-     * Return the width, height, cv image type, and size of a type of images
-     * InitAslAlg() must be called first
-     */
-    void getFrameInfoC( int type, Pointer width, Pointer height,
-                                 Pointer dtype, Pointer size );
-    /*
-     * Get information about the input video
-     * InitAslAlg() must be called first
-     */
-    void getVideoInfoC( int type, Pointer color, Pointer fourcc, Pointer fps );
-    /*
-     * Return the image with id and type
-     * InitAslAlg() must be called first
-     */
-    void getFrameC( int id, int type, Pointer img );
 
     /*
      * Add a training image - assumes a data format
      * InitAslAlg() must be called first
      */
     int addHandImageC( int width, int height,
-                      int h1NumPts, Pointer h1Pts,
-                      int h2NumPts, Pointer h2Pts );
-
+                       int h1NumPts, Pointer h1Pts,
+                       int h2NumPts, Pointer h2Pts );
 }
 
 #endif

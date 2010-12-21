@@ -4,15 +4,11 @@ local
   val numFramesC    = _import "numFramesC" : int -> int;
   val getFrameIdsC  = _import "getFrameIdsC" : int * int array -> unit;
   val getFrameInfoC = _import "getFrameInfoC" : int * int ref * int ref * int ref * int ref -> unit;
-  val getVideoInfoC = _import "getVideoInfoC" : int * bool ref * int ref * real ref -> unit;
   val getFrameC     = _import "getFrameC" : int * int * char array -> unit;
 
   (* cvsl api *)
   val showImageC      = _import "showImageC" : char vector * int * int * int * bool -> unit;
   val saveImageC      = _import "saveImageC" : char vector * int * int * int * char vector * int -> unit;
-  val videoBeginC     = _import "videoSaveBeginC" : int * int * int * real * bool * char vector * int -> unit;
-  val saveVideoC      = _import "saveVideoC" : char vector * int * int * int -> unit;
-  val videoEndC       = _import "videoSaveEndC" : unit -> unit;
   val showNormalHistC = _import "showNormalHistogramC" : char vector * int * int -> unit;
 
   (* Helper functions *)
@@ -31,13 +27,6 @@ local
             val size = ref 0
             val _ = getFrameInfoC( t, width, height, dt, size )
         in (!width, !height, !dt, !size) end;
-
-      fun getVideoInfo t : bool * int * real =
-        let val color = ref false
-            val fourcc = ref 0
-            val fps = ref 0.0
-            val _ = getVideoInfoC( t, color, fourcc, fps )
-        in ( !color, !fourcc, !fps ) end;
 
       fun getImage t i : char vector * int * int * int =
         let val (width, height, dt, size) = getFrameInfo t
@@ -78,18 +67,6 @@ local
       fun showAllHistograms () =
         let val ids = getIds 5
         in Vector.app showHistogram ids end;
-
-      fun saveVideo name t : unit =
-        let val (color, fourcc, fps) = getVideoInfo t
-            val (width, height, dt, _) = getFrameInfo t
-            val ids = getIds t
-            val save = fn i => let val (img, _, _, _) = getImage t i
-                               in saveVideoC( img, width, height, dt ) end;
-        in
-          videoBeginC( width, height, fourcc, fps, color, name, (size name) );
-          Vector.app save ids;
-          videoEndC()
-        end;
 
       fun displayImage t i = getAndShow t i true;
       fun displayAllImages t = displayAll t true;

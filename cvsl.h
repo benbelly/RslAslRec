@@ -5,6 +5,41 @@
 #include "export.h" // mlton types
 #include "ml-types.h" // mlton types, for real
 
+/*****************************************************************************
+ *
+ * These functions are specific to the problem domain an must be implemented
+ * by the CVSL user
+ *
+ ****************************************************************************/
+extern "C" {
+    /*
+     * Get the number of frames of a particular type
+     * InitAslAlg() must be called first
+     */
+    int numFramesC( int type );
+    /*
+     * Get the ids associated with frames of a particular type
+     * InitAslAlg() must be called first
+     */
+    void getFrameIdsC( int type, Pointer ids );
+    /*
+     * Return the width, height, cv image type, and size of a type of images
+     * InitAslAlg() must be called first
+     */
+    void getFrameInfoC( int type, Pointer width, Pointer height,
+                                  Pointer dtype, Pointer size );
+    /*
+     * Return the image with id and type
+     * InitAslAlg() must be called first
+     */
+    void getFrameC( int id, int type, Pointer img );
+}
+
+/*****************************************************************************
+ *
+ * These functions are provided using OpenCV and PLPlot
+ *
+ ****************************************************************************/
 extern "C" {
     /*
      * Display an image with cv image type of 'type'. If wait is true, wait
@@ -15,20 +50,6 @@ extern "C" {
      * Save an image with cv image type of 'type' to file fname
      */
     void saveImageC( Pointer img, int width, int height, int type, char *fname, int fnameLen);
-    /*
-     * Start a video-save session to file fname
-     */
-    void videoSaveBeginC( int width, int height, int fourcc, double fps, Bool color,
-                         Pointer fname, int fnameLen );
-    /*
-     * Save a frame of video. videoSaveBeginC() must be called first
-     */
-    void saveVideoC( Pointer img, int width, int height, int type );
-    /*
-     * Finalize saving a video. videoSaveBeginC() must be called first, followed
-     * by saveVideoC() calls for any frames
-     */
-    void videoSaveEndC();
     /*
      * Display a histogram. histImage is a normalized-histogram array
      */
