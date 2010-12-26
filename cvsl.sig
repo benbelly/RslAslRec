@@ -1,27 +1,27 @@
 signature CVSL =
 sig
-    (* take type and wait boolean
+    (* args: frame type and wait boolean
      * return unit *)
     val displayAll : int -> bool -> unit
-    (* take filename, type, and id
+    (* args: filename, frame type and id
      * returns unit *)
     val saveImage : string -> int -> int -> unit
-    (* take name, extension, type
+    (* args: name, extension, type
      * return unit *)
     val saveAllImages : string -> string -> int -> unit
-    (* take id
+    (* args: histogram id
      * return unit *)
     val showHistogram : int -> unit
-    (* take unit
+    (* args: unit
      * return unit *)
     val showAllHistograms : unit -> unit
-    (* take type and id
+    (* args: frame type and id
      * return unit *)
     val displayImage : int -> int -> unit
-    (* take type
+    (* args: frame type
      * return unit *)
     val displayAllImages : int -> unit
-    (* take type
+    (* args: frame type
      * return unit *)
     val displayVideo : int -> unit
 end;
