@@ -184,14 +184,17 @@ Pointer seqForGlossC( int glossLen, Pointer glossPtr ) {
 
 int addHandsToSeqC( Pointer seqPtr,
                     int width, int height,
-		    int h1NumPts, Pointer h1Pts,
-		    int h2NumPts, Pointer h2Pts ) {
+                    Pointer faceCorners,
+                    int h1NumPts, Pointer h1Pts,
+                    int h2NumPts, Pointer h2Pts ) {
     cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray ),
             weak = cv::Mat::zeros( height, width, image_types::gray );
     makeImageFromData( hand, h1NumPts, (int *)h1Pts );
     if( h2NumPts ) makeImageFromData( weak, h2NumPts, (int *)h2Pts );
+    int *facePts = (int *)faceCorners;
+    cv::Point topLeft( facePts[0], facePts[1] ), bottomRight( facePts[2], facePts[3] );
     SignSeq *seq = (SignSeq *)seqPtr;
-    seq->AddHands( hand, weak );
+    seq->AddHands( topLeft, bottomRight, hand, weak );
     return 0;
 }
 

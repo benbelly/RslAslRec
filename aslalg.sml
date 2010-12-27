@@ -12,23 +12,11 @@
  *}
  *)
 
-
 val init = _import "InitAslAlgC" : char vector * int -> unit;
 val findHands = _import "findHandsC" : unit -> unit;
 val seqForGloss = _import "seqForGlossC" : int * char vector -> int ref;
-val addHandsToSeq = _import "addHandsToSeqC" : int ref * int * int * int * int vector * int * int vector -> int;
+val addHandsToSeq = _import "addHandsToSeqC" : int ref * int * int * int vector * int * int vector * int * int vector -> int;
 
-(* addHandImage takes width, height, hand 1 size (number of points), hand 1 points,
-   hand 2 size, hand 2 points *)
-(*val addHandsImage = _import "addHandImageC" : int * int * int * int vector * int * int vector -> int;*)
-
-(*
- *fun saveAllHands root : int list =
- *    map (fn (i1, i2) => addHandsImage(640, 480, length i1, Vector.fromList i1,
- *                      length i2, Vector.fromList i2))
- *    (AslIO.imagesForRoot root);
- *)
-    
 fun cleanedRoot (AslIO.Root(d,ss)) skips : AslIO.root =
     let
 	val skipSentence = fn snum => List.exists (fn skip => snum = skip) skips
@@ -49,16 +37,19 @@ fun splitSentences (AslIO.Root(d,ss)) candidateInstance : AslIO.root * AslIO.roo
 	 AslIO.Root(d, List.filter candidate ss))
     end;
 
-fun trainForFrame SeqRef (AslIO.Frame(_, _, dom, weak)) : int =
+fun trainForFrame SeqRef (AslIO.Frame(_, face, dom, weak)) : int =
     let
 	val toList = fn (AslIO.Dominant(ds)) => ds
 		      | (AslIO.Weak(ws)) => ws
-		      | (_) => []
-	val doms = toList dom
-	val weaks = toList weak
+		      | (AslIO.Face(tx,ty,bx,by)) => [tx,ty,bx,by]
+		      | _ => []
+	val faces = Vector.fromList (toList face)
+	val doms = Vector.fromList (toList dom)
+	val weaks = Vector.fromList (toList weak)
     in
-	addHandsToSeq(SeqRef, 640, 480, length doms, Vector.fromList doms,
-		      length weaks, Vector.fromList weaks)
+	addHandsToSeq(SeqRef, 640, 480, faces,
+		      Vector.length doms, doms,
+		      Vector.length weaks, weaks)
     end;
 
 fun trainForGloss (AslIO.Gloss(_, word, fs)) : int list =
@@ -80,12 +71,13 @@ fun aslalg () =
     val dataDir = "/home/ben/Documents/school/USF-ASL-Data-Set-v2";
     val root = AslIO.rootForDir dataDir;
     val imgs = AslIO.imagesForRoot root
-    (* val skipSentences = [1, 18, 19, 25]
+    val skipSentences = [1, 18, 19, 25]
     val candidate = 5 (* Test sentence instance 5 *)
     val cleaned = cleanedRoot root skipSentences
-    val (trainingS, candS) = splitSentences cleaned candidate *)
+    val (trainingS, candS) = splitSentences cleaned candidate
   in
     init( filename, (size filename) );
+    trainForRoot trainingS;
     (* findHands(); *)
     Cvsl.saveAllImages "cvsl_out/train" "png" 6
   end;

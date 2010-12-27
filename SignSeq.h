@@ -15,12 +15,16 @@ class SignSeq {
         virtual ~SignSeq();
 
         typedef cv::Mat Hand;
-        typedef std::pair<Hand, Hand> HandPair;
+        struct FeatureFrame {
+            cv::Point faceTopLeft, faceBottomRight;
+            Hand dom, weak;
+        };
 
-        void AddHands( const cv::Mat &dom, const cv::Mat &weak );
+        void AddHands( cv::Point tl, cv::Point br,
+                       const cv::Mat &dom, const cv::Mat &weak );
 
     private:
-        std::vector<HandPair> hands;
+        std::vector<FeatureFrame> hands;
         
 };
 

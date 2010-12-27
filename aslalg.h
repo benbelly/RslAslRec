@@ -40,9 +40,16 @@ extern "C" {
      */
     Pointer seqForGlossC( int glossLen, Pointer glossPtr );
 
-    int addHandsToSeqC( int width, int height,
-			int h1NumPts, Pointer h1Pts,
-			int h2NumPts, Pointer h2Pts );
+    /*
+     * Add hands and face to the provided sign sequence
+     * InitAslAlg() must be called first, and seqPtr should
+     * be provided by seqForGlossC()
+     */
+    int addHandsToSeqC( Pointer seqPtr,
+                        int width, int height,
+                        Pointer faceCorners,
+                        int h1NumPts, Pointer h1Pts,
+                        int h2NumPts, Pointer h2Pts );
 
     /*
      *int addHandImageC( int glossLen, Pointer glossPtr,

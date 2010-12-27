@@ -7,6 +7,7 @@ SignSeq::SignSeq() {
 SignSeq::~SignSeq() {
 }
 
-void SignSeq::AddHands( const cv::Mat &dom, const cv::Mat &weak ) {
-    hands.push_back( HandPair( dom, weak ) );
+void SignSeq::AddHands( cv::Point tl, cv::Point br,
+                        const cv::Mat &dom, const cv::Mat &weak ) {
+    hands.push_back( FeatureFrame { tl, br, dom, weak } );
 }
