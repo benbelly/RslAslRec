@@ -1,48 +1,18 @@
 
-#include <iostream>
 
 #include "FrameDB.h"
 
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
-
+#include "cvhelpers.h"
 
 #include "plotter.h"
 #include "cvsl.h"
 
+#include <iostream>
+
 using std::cerr;
 using std::endl;
-
-/*
- * Helper function to copy from an image point to a destination matrix.
- * Templated to allow different destination types
- */
-template<typename MatType>
-void CopyMat( Pointer img, MatType dst ) {
-    if( dst.isContinuous() )
-        memcpy( dst.datastart, img, dst.dataend - dst.datastart );
-    else
-        cerr << "Cannot copy image - destination is not continuous" << endl;
-}
-
-/*
- * Helper function to create a cv::Mat from the provided image data
- */
-cv::Mat makeMat( Pointer img, int width, int height, int type ) {
-    cv::Mat dst = cv::Mat::zeros( height, width, type );
-    CopyMat( img, dst );
-    return dst;
-}
-
-/*
- * Helper function to create a cv::Mat_<T> from the provided image data
- */
-template<typename T>
-cv::Mat_<T> makeMat( Pointer img, int width, int height ) {
-    cv::Mat_<T> dst = cv::Mat_<T>::zeros( height, width );
-    CopyMat( img, dst );
-    return dst;
-}
 
 /*
  * Display an image with cv image type of 'type'. If wait is true, wait

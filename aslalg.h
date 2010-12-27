@@ -35,12 +35,21 @@ extern "C" {
     void findHandsC();
 
     /*
-     * Add a training image - assumes a data format
+     * Get a pointer to the next sequence for this gloss
      * InitAslAlg() must be called first
      */
-    int addHandImageC( int width, int height,
-                       int h1NumPts, Pointer h1Pts,
-                       int h2NumPts, Pointer h2Pts );
+    Pointer seqForGlossC( int glossLen, Pointer glossPtr );
+
+    int addHandsToSeqC( int width, int height,
+			int h1NumPts, Pointer h1Pts,
+			int h2NumPts, Pointer h2Pts );
+
+    /*
+     *int addHandImageC( int glossLen, Pointer glossPtr,
+     *                   int width, int height,
+     *                   int h1NumPts, Pointer h1Pts,
+     *                   int h2NumPts, Pointer h2Pts );
+     */
 }
 
 #endif

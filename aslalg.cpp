@@ -1,11 +1,12 @@
 
+#include "FrameDB.h"
+#include "TrainDB.h"
+#include "aslalg.h"
+
 #include <string>
 #include <string.h>
 #include <iostream>
 #include <map>
-
-#include "FrameDB.h"
-#include "aslalg.h"
 
 using std::string;
 using std::cerr;
@@ -22,6 +23,7 @@ static TrainingImageMap trainingImages;
 void InitAslAlgC( char *cfile, int filenameLen ) {
     FrameSet vidFrames = loadFromVideo( std::string( cfile, filenameLen ) );
     new FrameDB( vidFrames );
+    new TrainDB();
 }
 
 /*
@@ -172,17 +174,39 @@ void makeImageFromData( cv::Mat &img, int numPts, int *pts ) {
 }
 
 /*
- * Add a training image - assumes a data format
+ * Get a pointer to the next sequence for this gloss
  * InitAslAlg() must be called first
  */
-int addHandImageC( int width, int height,
-                   int h1NumPts, Pointer h1Pts,
-                   int h2NumPts, Pointer h2Pts ) {
-    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
-    makeImageFromData( hand, h1NumPts, (int *)h1Pts );
-    if( h2NumPts ) makeImageFromData( hand, h2NumPts, (int *)h2Pts );
-    static int lastIndex = 0;
-    trainingImages[lastIndex] = hand;
-    return lastIndex++;
+Pointer seqForGlossC( int glossLen, Pointer glossPtr ) {
+    std::string gloss( (char *)glossPtr, glossLen );
+    return (Pointer) TDB->NextSequenceForGloss( gloss );
 }
+
+int addHandsToSeqC( Pointer seqPtr,
+                    int width, int height,
+		    int h1NumPts, Pointer h1Pts,
+		    int h2NumPts, Pointer h2Pts ) {
+    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray ),
+            weak = cv::Mat::zeros( height, width, image_types::gray );
+    makeImageFromData( hand, h1NumPts, (int *)h1Pts );
+    if( h2NumPts ) makeImageFromData( weak, h2NumPts, (int *)h2Pts );
+    SignSeq *seq = (SignSeq *)seqPtr;
+    seq->AddHands( hand, weak );
+    return 0;
+}
+
+/*
+ *int addHandImageC( int glossLen, Pointer glossPtr,
+ *                   int width, int height,
+ *                   int h1NumPts, Pointer h1Pts,
+ *                   int h2NumPts, Pointer h2Pts ) {
+ *    std::string gloss( glossPtr, glossLen );
+ *    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
+ *    makeImageFromData( hand, h1NumPts, (int *)h1Pts );
+ *    if( h2NumPts ) makeImageFromData( hand, h2NumPts, (int *)h2Pts );
+ *    static int lastIndex = 0;
+ *    trainingImages[lastIndex] = hand;
+ *    return lastIndex++;
+ *}
+ */
 

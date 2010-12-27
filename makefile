@@ -2,7 +2,10 @@ EXECUTABLE=aslalg
 OBJS = cvsl.o \
 	   aslalg.o frame.o keyframeselect.o keyframedist.o skinmask.o \
 	   FrameDB.o edgedetection.o histograms.o plotter.o \
-	   eigenthingummies.o SignDB.o # LevelBuilding.o
+	   eigenthingummies.o SignDB.o \
+	   TrainDB.o SignSeq.o Gloss.o
+
+# LevelBuilding.o
 
 SMLS = aslalg.sml aslalg.mlb \
 	   cvsl.sig cvsl.sml cvsl.mlb \
@@ -17,13 +20,12 @@ PLPLOT_PATH=/usr
 
 ##
 ## C++ variables
-CC=g++
-DEBUG=-g -DTRACE
+CC=g++-4.5
+DEBUG=-g
 INCLUDE=-I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
 		-I$(PLPLOT_PATH)/include \
 		-I/usr/lib/mlton/include
-#CFLAGS=-Wall -Wextra -std=c++0x -c $(DEBUG) $(INCLUDE)
-CFLAGS=-Wall -Wextra -c $(DEBUG) $(INCLUDE)
+CFLAGS=-Wall -Wextra -std=c++0x -c $(INCLUDE) $(DEBUG)
 
 ##
 ## MLTon variables

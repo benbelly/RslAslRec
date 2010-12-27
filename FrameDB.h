@@ -11,8 +11,6 @@
 #include "histograms.h"
 #include "frame.h"
 
-using std::string;
-
 class FrameDB {
     public:
         FrameDB( FrameSet &frames );
@@ -69,7 +67,7 @@ class FrameDB {
         double numFrames;
 
         FrameSet keyframes;
-        const string videoFile;
+        const std::string videoFile;
 
         void findKeyframes();
         void makeSDs();
