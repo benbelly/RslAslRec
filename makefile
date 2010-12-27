@@ -20,7 +20,8 @@ PLPLOT_PATH=/usr
 
 ##
 ## C++ variables
-CC=g++-4.5
+#CC=g++-4.5
+CC=g++
 DEBUG=-g
 INCLUDE=-I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
 		-I$(PLPLOT_PATH)/include \

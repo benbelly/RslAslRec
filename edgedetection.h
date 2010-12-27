@@ -12,4 +12,6 @@ FrameSet removeSmallConnectedComponents( FrameSet &fs );
 
 typedef std::vector< std::pair<Frame, ContourSet> > FrameHandSet;
 FrameHandSet getBoundaryImages( FrameSet &fs );
+
+Contour getBoundary( const cv::Mat &img );
 #endif

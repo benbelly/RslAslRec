@@ -60,7 +60,7 @@ fun trainForGloss (AslIO.Gloss(_, word, fs)) : int list =
     end;
 
 fun trainForSentence (AslIO.Sentence(_, _, _, _, gs)) : unit =
-  List.app (fn g => ignore(trainForGloss g)) gs;
+  List.app (fn g => ignore(trainForGloss g)) gs
 
 fun trainForRoot (AslIO.Root(_, ss)) : unit =
   List.app trainForSentence ss;
@@ -68,7 +68,7 @@ fun trainForRoot (AslIO.Root(_, ss)) : unit =
 fun aslalg () =
   let
     val filename = "mov/S003.MOV";
-    val dataDir = "/home/ben/Documents/school/USF-ASL-Data-Set-v2";
+    val dataDir = "/home/bholm/USF-ASL-Data-Set-v2";
     val root = AslIO.rootForDir dataDir;
     val imgs = AslIO.imagesForRoot root
     val skipSentences = [1, 18, 19, 25]
@@ -77,7 +77,10 @@ fun aslalg () =
     val (trainingS, candS) = splitSentences cleaned candidate
   in
     init( filename, (size filename) );
+    print "Initialized.\n";
+    print ("Training " ^ (Int.toString(length (AslIO.imagesForRoot trainingS))) ^ " hand pairs\n");
     trainForRoot trainingS;
+    print "Trained.\n";
     (* findHands(); *)
     Cvsl.saveAllImages "cvsl_out/train" "png" 6
   end;

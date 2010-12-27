@@ -4,18 +4,15 @@
 #include <stdlib.h>
 #include "FrameDB.h"
 #include "histograms.h"
-//#include "logging.h"
 
-
-cv::Mat generateHandHistogram( Frame f, Contour c );
 inline void NormalizeHistogram( Histogram &hist, double total );
 
 static const int histSize = 32;
 
-HistogramSet generateHandHistograms( Frame f, ContourSet cs ) {
+HistogramSet generateHandHistograms( cv::Size size, ContourSet cs ) {
     std::vector<cv::Mat> hs; hs.reserve( cs.size() );
     std::transform( cs.begin(), cs.end(), std::back_inserter( hs ),
-                    std::bind1st( std::ptr_fun( generateHandHistogram ), f ) );
+                    std::bind1st( std::ptr_fun( generateHandHistogram ), size ) );
     return hs;
 }
 
@@ -35,9 +32,8 @@ HistogramSet generateHandHistograms( Frame f, ContourSet cs ) {
  *              ++hist[yD, xD]
  *              ++total
  *      foreach( float i in hist )
- *          hist[i] = sqrt( hist[i] / total )       ?? Why "sqrt"
+ *          hist[i] = sqrt( hist[i] / total )
  *
- * This file does not currently reflect that algorithm
  */
 struct CountPoint {
     CountPoint( cv::Point pnt, Histogram &h, double &t,
@@ -62,9 +58,9 @@ void CountPoints( Contour::iterator end, Histogram &hist, double &total,
     std::for_each( point, end, CountPoint( *point, hist, total, xSize, ySize ) );
 }
 
-inline cv::Mat generateHandHistogram( Frame f, Contour c ) {
+Histogram generateHandHistogram( cv::Size size, Contour c ) {
     Histogram hist = Histogram::zeros( histSize, histSize );
-    int w = f.size().width, h = f.size().height;
+    int w = size.width, h = size.height;
     double total = 0.0;
     Contour::iterator cbegin = c.begin(), cend = c.end();
     while( cbegin != cend )

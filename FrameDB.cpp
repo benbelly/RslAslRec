@@ -104,7 +104,7 @@ void FrameDB::makeSDs() {
     for( FrameHandSet::iterator i = boundaries.begin(); i != boundaries.end(); ++i ) {
         db[i->first.id].boundary = i->first;
         db[i->first.id].hands = i->second;
-        db[i->first.id].histograms = generateHandHistograms( i->first, i->second );
+        db[i->first.id].histograms = generateHandHistograms( (i->first).size(), i->second );
     }
 }
 

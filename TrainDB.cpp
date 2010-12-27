@@ -1,6 +1,10 @@
 
 #include "TrainDB.h"
 
+#include<iostream>
+using std::cerr;
+using std::endl;
+
 TrainDB *TDB;
 
 TrainDB::TrainDB() {
@@ -11,6 +15,7 @@ TrainDB::~TrainDB() {
 }
 
 SignSeq *TrainDB::NextSequenceForGloss( std::string g ) {
+    //cerr << "Getting next sequence for " << g << endl;
     SignMap::iterator glossI = GlossIter( g );
     return (glossI->second)->NextSeq();
 }

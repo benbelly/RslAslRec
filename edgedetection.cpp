@@ -125,6 +125,15 @@ std::pair<Frame, ContourSet> getBoundaryImage( Frame f ) {
     return std::pair<Frame, ContourSet>( clean, contours );
 }
 
+Contour getBoundary( const cv::Mat &src ) {
+    cv::Mat img = cv::Mat::zeros( src.size(), src.type() );
+    src.copyTo( img );
+    ContourSet contours;
+    cv::findContours( img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE );
+    Contour result = contours.empty() ? Contour() : *(contours.begin());
+    return result;
+}
+
 FrameHandSet getBoundaryImages( FrameSet &fs ) {
     std::vector< std::pair<Frame, ContourSet> > result; result.reserve( fs.size() );
     std::transform( fs.begin(), fs.end(), std::back_inserter( result ),

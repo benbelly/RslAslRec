@@ -3,6 +3,8 @@
 #define SIGNSEQ_H__
 
 #include "frame.h"
+#include "edgedetection.h"
+#include "histograms.h"
 #include<utility>
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
@@ -18,6 +20,7 @@ class SignSeq {
         struct FeatureFrame {
             cv::Point faceTopLeft, faceBottomRight;
             Hand dom, weak;
+            Histogram domHist, weakHist;
         };
 
         void AddHands( cv::Point tl, cv::Point br,
