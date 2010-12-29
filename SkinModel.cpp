@@ -7,7 +7,7 @@
 
 std::pair<int, double *> loadSkinModel() {
     FILE *in = fopen( "skinmodel.model", "rb" );
-    int step = 0;
+    double step = 0;
     fread( &step, sizeof(double), 1, in );
 
     int l = 256 / step;
