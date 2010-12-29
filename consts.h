@@ -14,4 +14,6 @@ const static unsigned int SMALLCOMPONENT = 75;
 
 const static int maxComponents = 7;
 
+const static double skinColorThresh = 0.4;
+
 #endif

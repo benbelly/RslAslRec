@@ -3,14 +3,16 @@ OBJS = cvsl.o \
 	   aslalg.o frame.o keyframeselect.o keyframedist.o skinmask.o \
 	   FrameDB.o edgedetection.o histograms.o plotter.o \
 	   eigenthingummies.o SignDB.o \
-	   TrainDB.o SignSeq.o Gloss.o
+	   TrainDB.o SignSeq.o Gloss.o \
+	   SkinModel.o
 
 # LevelBuilding.o
 
 SMLS = aslalg.sml aslalg.mlb \
 	   cvsl.sig cvsl.sml cvsl.mlb \
 	   aslio.sig aslio.sml aslio.mlb \
-	   iohelpers.sml iohelpers.mlb
+	   iohelpers.sml iohelpers.mlb \
+	   sorting.sml
 
 MLB = aslalg.mlb
 
