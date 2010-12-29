@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <utility>
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
@@ -39,6 +40,7 @@ typedef std::vector<Contour> ContourSet;
 //
 // Frame loading functions
 //
+FrameSet loadFromFiles( std::vector<std::pair<std::string, int>> &files);
 FrameSet loadFromVideo( std::string filename );
 
 ///

@@ -27,7 +27,7 @@ extern "C" {
      * Initialize the database of frames using the specified video file
      * This is not used since the data is already broken into frames
      */
-    void InitAslAlgC( char *cfile, int filenameLen );
+    void InitAslAlgC( char **files, int *filelens, int *frameIds, int numFiles );
     /*
      * Run the findhands algorithm on the FrameDB already initialized
      * InitAslAlg() must be called before this
@@ -51,12 +51,6 @@ extern "C" {
                         int h1NumPts, Pointer h1Pts,
                         int h2NumPts, Pointer h2Pts );
 
-    /*
-     *int addHandImageC( int glossLen, Pointer glossPtr,
-     *                   int width, int height,
-     *                   int h1NumPts, Pointer h1Pts,
-     *                   int h2NumPts, Pointer h2Pts );
-     */
 }
 
 #endif

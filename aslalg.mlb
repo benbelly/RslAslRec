@@ -4,6 +4,7 @@ local
   cvsl.mlb
   aslio.mlb
   iohelpers.mlb
+  sorting.sml
 in
   aslalg.sml
 end

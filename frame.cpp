@@ -2,6 +2,19 @@
 #include "frame.h"
 #include <map>
 #include <algorithm>
+#include <functional>
+
+FrameSet loadFromFiles( std::vector<std::pair<std::string, int>> &filesAndFrames ) {
+    FrameSet frames; frames.reserve( filesAndFrames.size() );
+    std::vector<std::pair<std::string, int>>::iterator begin = filesAndFrames.begin(),
+        end = filesAndFrames.end();
+    while( begin != end ) {
+        cv::Mat mat = cv::imread( begin->first );
+        frames.push_back( Frame( begin->second, mat ) );
+        ++begin;
+    }
+    return frames;
+}
 
 FrameSet loadFromVideo( std::string videoFile ) {
     cv::VideoCapture cap( videoFile );

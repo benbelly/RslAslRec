@@ -20,8 +20,12 @@ static TrainingImageMap trainingImages;
  * Initialize the database of frames using the specified video file
  * This is not used since the data is already broken into frames
  */
-void InitAslAlgC( char *cfile, int filenameLen ) {
-    FrameSet vidFrames = loadFromVideo( std::string( cfile, filenameLen ) );
+void InitAslAlgC( char **files, int *filelens, int *frameIds, int numFiles ) {
+    std::vector<std::pair<std::string, int>> frameFiles; frameFiles.reserve( numFiles );
+    for( int i = 0; i < numFiles; ++i )
+        frameFiles.push_back(
+                std::make_pair( std::string( files[i], filelens[i] ), frameIds[i] ) );
+    FrameSet vidFrames = loadFromFiles( frameFiles );
     new FrameDB( vidFrames );
     new TrainDB();
 }
@@ -85,18 +89,19 @@ int getFrameSize( const Frame &f ) {
 void getFrameInfoC( int type, Pointer width, Pointer height,
                     Pointer dtype, Pointer size ) {
     Frame toCheck;
+    int id = FDB->ids()[0];
     switch( type ) {
         case frame_types::original:
-            toCheck = FDB->original( 0 );
+            toCheck = FDB->original( id );
             break;
         case frame_types::histogram:
-            toCheck = FDB->histogram( 0 );
+            toCheck = FDB->histogram( id );
             break;
         case frame_types::special: // Meaningless
             toCheck = Frame( 0, trainingImages[0] );
             break;
         default:
-            toCheck = FDB->gray( 0 );
+            toCheck = FDB->gray( id );
             break;
     }
     *((int*)width) = toCheck.size().width;
@@ -144,11 +149,19 @@ Frame getFrame( int id, int type ) {
  * InitAslAlg() must be called first
  */
 void getFrameC( int id, int type, Pointer img ) {
-    Frame get = getFrame( id, type );
-    if( get.mat.isContinuous() )
-        memcpy( img, get.mat.datastart, get.mat.dataend - get.mat.datastart );
-    else
-        cerr << "HELP! - Non-continuous image requested" << endl;
+    cv::Mat get = getFrame( id, type ).mat;
+    if( get.isContinuous() )
+        memcpy( img, get.datastart, get.dataend - get.datastart );
+    else {
+        //cv::imwrite("cvsl_out/foo.png", get, std::vector<int>());
+        // Can't copy the entire image, copy row-by-row
+        int step = get.elemSize() * get.cols,
+            last = 0;
+        for( int y = 0; y < get.rows; ++y ) {
+            char *rowPtr = get.ptr<char>( y );
+            memcpy( img + last, rowPtr, step );
+        }
+    }
 }
 
 /*
@@ -197,19 +210,4 @@ int addHandsToSeqC( Pointer seqPtr,
     seq->AddHands( topLeft, bottomRight, hand, weak );
     return 0;
 }
-
-/*
- *int addHandImageC( int glossLen, Pointer glossPtr,
- *                   int width, int height,
- *                   int h1NumPts, Pointer h1Pts,
- *                   int h2NumPts, Pointer h2Pts ) {
- *    std::string gloss( glossPtr, glossLen );
- *    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
- *    makeImageFromData( hand, h1NumPts, (int *)h1Pts );
- *    if( h2NumPts ) makeImageFromData( hand, h2NumPts, (int *)h2Pts );
- *    static int lastIndex = 0;
- *    trainingImages[lastIndex] = hand;
- *    return lastIndex++;
- *}
- */
 

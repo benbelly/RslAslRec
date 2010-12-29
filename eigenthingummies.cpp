@@ -1,9 +1,8 @@
 
 #include "eigenthingummies.h"
+#include "consts.h"
 
 typedef cv::Mat_<double> PCAVec;
-
-static const int maxComponents = 4;
 
 PCAVec makeBigVector( SampleSet &ss ) {
     unsigned int vsize = ss[0].rows * ss[0].cols;

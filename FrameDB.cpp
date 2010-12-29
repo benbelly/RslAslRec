@@ -20,7 +20,7 @@ FrameDB *FDB;
 
 FrameDB::FrameDB( FrameSet &os ) {
     for( unsigned int i = 0; i < os.size(); ++i )
-        db[i] = FrameData( i, os[i].mat );
+        db[os[i].Id()] = FrameData( os[i].Id(), os[i].mat );
     FDB = this;
 }
 
