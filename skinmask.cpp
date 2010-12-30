@@ -30,7 +30,7 @@ FrameSet generateSkinMasks( FrameSet &frames ) {
 }
 
 Frame maskFrame( Frame &f, Frame &sk ) {
-    cv::Mat masked = cv::Mat::zeros( masked.size(), masked.type() );
+    cv::Mat masked = cv::Mat::zeros( f.size(), f.type() );
     f.mat.copyTo( masked, sk.mat );
     /*
      *cv::imshow( "gray", f.mat );

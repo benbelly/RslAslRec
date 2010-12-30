@@ -101,10 +101,13 @@ fun aslalg () =
            " hand pairs\n");
     trainForRoot trainingS;
     print "Trained.\n";
-    (* findHands(); *)
-    Cvsl.saveAllImages "cvsl_out/sd" "png" 3;
-    Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
-    Cvsl.saveAllImages "cvsl_out/orig" "png" 0
+    (*
+     *Cvsl.saveAllImages "cvsl_out/sd" "png" 3;
+     *Cvsl.saveAllImages "cvsl_out/orig" "png" 0;
+     * Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
+     * Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;
+     *)
+     Cvsl.displayAllImages 4
   end;
 
 val _ = aslalg();

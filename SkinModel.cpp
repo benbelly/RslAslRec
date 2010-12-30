@@ -1,6 +1,7 @@
 
 #include "SkinModel.h"
 #include "consts.h"
+#include "edgedetection.h"
 #include <stdlib.h>
 #include <memory>
 #include <utility>
@@ -25,6 +26,11 @@ SkinModel::~SkinModel() {
 }
 
 Frame SkinModel::GetSkinMask( Frame &frame ) {
+    Frame skinMask = GenerateRawMask( frame );
+    return removeComponentsFromFrame( skinMask );
+}
+
+Frame SkinModel::GenerateRawMask( Frame &frame ) {
     std::pair<int, double *> stepAndModel = GetModel();
     int step = stepAndModel.first;
     int l = 256 / step;

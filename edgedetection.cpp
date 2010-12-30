@@ -61,7 +61,6 @@ FrameSet negateAndMask( FrameSet &SDs, FrameSet &masks ) {
 }
 
 bool IsSmallComponent( Contour m ) {
-    //TRACEAREA( cv::contourArea( cv::Mat( m ) ) )
     return cv::contourArea( cv::Mat( m ) ) < SMALLCOMPONENT;
 }
 
@@ -102,7 +101,7 @@ bool compactAndSmall( Contour c ) {
      */
     double boundary = (double)c.size(), // contour acquired using CV_CHAIN_APPROX_NONE
            area = cv::contourArea( cv::Mat( c ) );
-    return ( area <= T3 ) && ( ( area / boundary ) < T2 );
+    return ( area < T3 ) && ( ( area / boundary ) > T2 );
 }
 
 ContourSet getCompactAndSmallContours( const cv::Mat &img ) {
@@ -121,7 +120,7 @@ std::pair<Frame, ContourSet> getBoundaryImage( Frame f ) {
     Frame clean( f.id, f.size(), f.type() );
     ContourSet contours( getCompactAndSmallContours( f.mat ) );
     cv::drawContours( clean.mat, contours, allContours, cv::Scalar( 255 ) );
-    clean.mat.row( clean.mat.rows / 2 ).col( clean.mat.cols / 2 ) = cv::Scalar( 255 );
+    //clean.mat.row( clean.mat.rows / 2 ).col( clean.mat.cols / 2 ) = cv::Scalar( 255 );
     return std::pair<Frame, ContourSet>( clean, contours );
 }
 

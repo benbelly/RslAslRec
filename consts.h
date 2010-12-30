@@ -7,10 +7,7 @@ const static unsigned int T1 = 300;
 const static unsigned int T2 = 2;
 const static unsigned int T3 = 4000;
 
-//#define T1 8200
-//#define T1 23000
-
-const static unsigned int SMALLCOMPONENT = 75;
+const static int SMALLCOMPONENT = 100;
 
 const static int maxComponents = 7;
 

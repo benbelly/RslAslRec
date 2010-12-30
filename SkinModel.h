@@ -14,6 +14,9 @@ class SkinModel {
         Frame GetSkinMask( Frame &frame );
 
     private:
+
+        Frame GenerateRawMask( Frame &frame );
+
         std::pair<int, double *> GetModel() const;
 };
 

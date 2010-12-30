@@ -9,6 +9,7 @@ FrameSet getDilatedEdges( FrameSet &frames );
 FrameSet negateAndMask( FrameSet &SDs, FrameSet &masks );
 
 FrameSet removeSmallConnectedComponents( FrameSet &fs );
+Frame removeComponentsFromFrame( Frame f );
 
 typedef std::vector< std::pair<Frame, ContourSet> > FrameHandSet;
 FrameHandSet getBoundaryImages( FrameSet &fs );
