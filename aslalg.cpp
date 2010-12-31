@@ -45,8 +45,8 @@ void findHandsC() {
  */
 int numFramesC( int type ) {
     switch( type ) {
-        case frame_types::special:
-            return trainingImages.size();
+        case frame_types::training:
+            return TDB->ids().size();
         default:
             return FDB->size();
     }
@@ -61,11 +61,9 @@ int toKey( TrainingImageMap::value_type p ) { return p.first; }
  */
 void getFrameIdsC( int type, Pointer ids ) {
     switch( type ) {
-        case frame_types::special:
+        case frame_types::training:
         {
-            std::vector<int> dbIds; dbIds.reserve( trainingImages.size() );
-            std::transform( trainingImages.begin(), trainingImages.end(),
-                            std::back_inserter( dbIds ), std::ptr_fun( toKey ) );
+            std::vector<int> dbIds( TDB->ids() );
             std::copy( dbIds.begin(), dbIds.end(), (int*)ids );
         }
         default:
@@ -79,8 +77,8 @@ void getFrameIdsC( int type, Pointer ids ) {
 /*
  * Return the size (in bytes) of a frame
  */
-int getFrameSize( const Frame &f ) {
-    return f.size().height * f.size().width * f.mat.elemSize();
+int getFrameSize( const cv::Mat &f ) {
+    return f.size().height * f.size().width * f.elemSize();
 }
 
 /*
@@ -88,20 +86,23 @@ int getFrameSize( const Frame &f ) {
  */
 void getFrameInfoC( int type, Pointer width, Pointer height,
                     Pointer dtype, Pointer size ) {
-    Frame toCheck;
+    cv::Mat toCheck;
     int id = FDB->ids()[0];
     switch( type ) {
         case frame_types::original:
-            toCheck = FDB->original( id );
+            toCheck = FDB->original( id ).mat;
             break;
         case frame_types::histogram:
-            toCheck = FDB->histogram( id );
+            toCheck = FDB->histogram( id ).mat;
             break;
-        case frame_types::special: // Meaningless
-            toCheck = Frame( 0, trainingImages[0] );
-            break;
+        case frame_types::training:
+            {
+                id = TDB->ids()[0];
+                toCheck = TDB->GetFeatureFrame( id )->dom;
+                break;
+            }
         default:
-            toCheck = FDB->gray( id );
+            toCheck = FDB->gray( id ).mat;
             break;
     }
     *((int*)width) = toCheck.size().width;
@@ -138,8 +139,8 @@ Frame getFrame( int id, int type ) {
             return FDB->boundary( id );
         case frame_types::histogram:
             return FDB->histogram( id );
-        case frame_types::special:
-            return Frame( id, trainingImages[id] );
+        case frame_types::training:
+            return Frame( id, TDB->GetFeatureFrame( id )->dom );
     }
     return Frame();
 }
@@ -195,6 +196,11 @@ Pointer seqForGlossC( int glossLen, Pointer glossPtr ) {
     return (Pointer) TDB->NextSequenceForGloss( gloss );
 }
 
+/*
+ * Add hands and face to the provided sign sequence
+ * InitAslAlg() must be called first, and seqPtr should
+ * be provided by seqForGlossC()
+ */
 int addHandsToSeqC( Pointer seqPtr,
                     int width, int height,
                     Pointer faceCorners,

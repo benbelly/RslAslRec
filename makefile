@@ -4,7 +4,7 @@ OBJS = cvsl.o \
 	   FrameDB.o edgedetection.o histograms.o plotter.o \
 	   eigenthingummies.o SignDB.o \
 	   TrainDB.o SignSeq.o Gloss.o \
-	   SkinModel.o
+	   SkinModel.o FeatureFrame.o \
 
 # LevelBuilding.o
 

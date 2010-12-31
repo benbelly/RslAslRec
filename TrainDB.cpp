@@ -28,3 +28,17 @@ TrainDB::SignMap::iterator TrainDB::GlossIter( std::string g ) {
                                         std::make_pair( g, SignPtr( new Gloss( g ) ) ) );
     return forGloss;
 }
+
+int TrainDB::AddHandToList( std::shared_ptr<FeatureFrame> ff ) {
+    static int index = 0;
+    features[index] = ff;
+    return index++;
+}
+
+int getId( std::pair<int, std::shared_ptr<FeatureFrame> > p ) { return p.first; }
+std::vector<int> TrainDB::ids() {
+    std::vector<int> is; is.reserve( features.size() );
+    std::transform( features.begin(), features.end(), std::back_inserter( is ),
+                    std::ptr_fun( getId ) );
+    return is;
+}
