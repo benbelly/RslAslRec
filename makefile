@@ -5,6 +5,7 @@ OBJS = cvsl.o \
 	   eigenthingummies.o SignDB.o \
 	   TrainDB.o SignSeq.o Gloss.o \
 	   SkinModel.o FeatureFrame.o \
+	   Databases.o
 
 # LevelBuilding.o
 

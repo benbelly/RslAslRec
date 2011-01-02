@@ -1,9 +1,8 @@
 
 #include "edgedetection.h"
 #include "consts.h"
-#include "FrameDB.h"
 #include "utility.h"
-//#include "logging.h"
+#include "Databases.h"
 
 static const int allContours = -1;
 

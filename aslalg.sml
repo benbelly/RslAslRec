@@ -7,7 +7,7 @@
  *        sd = 3,
  *        boundary = 4,
  *        histogram = 5,
- *        special = 6
+ *        training = 6
  *    };
  *}
  *)
@@ -107,6 +107,7 @@ fun aslalg () =
      * Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
      * Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;
      *)
+     Cvsl.saveAllImages "cvsl_out/training" "png" 6;
      Cvsl.displayAllImages 4
   end;
 

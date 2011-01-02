@@ -12,11 +12,10 @@
 #include "utility.h"
 
 #include "FrameDBHelpers.h"
+#include "Databases.h"
 
 using std::cout;
 using std::endl;
-
-FrameDB *FDB;
 
 FrameDB::FrameDB( FrameSet &os ) {
     for( unsigned int i = 0; i < os.size(); ++i )

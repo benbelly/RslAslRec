@@ -1,11 +1,10 @@
 
 #include "TrainDB.h"
+#include "Databases.h"
 
 #include<iostream>
 using std::cerr;
 using std::endl;
-
-TrainDB *TDB;
 
 TrainDB::TrainDB() {
     TDB = this;

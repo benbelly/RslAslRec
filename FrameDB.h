@@ -82,6 +82,4 @@ class FrameDB {
         void setItem( Setter, FrameSet vals );
 };
 
-extern FrameDB *FDB;
-
 #endif

@@ -33,6 +33,4 @@ class TrainDB {
         SignMap::iterator GlossIter( std::string );
 };
 
-extern TrainDB *TDB;
-
 #endif

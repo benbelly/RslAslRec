@@ -14,7 +14,7 @@
 //#include "logging.h"
 #include "utility.h"
 
-#include "FrameDB.h"
+#include "Databases.h"
 
 double calculateDiff( const Frame &l, const Frame &r );
 double sizeOfLargestConnectedComponent( cv::Mat &differenceImage );
