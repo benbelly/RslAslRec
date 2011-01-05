@@ -40,6 +40,11 @@ void FrameDB::setItem( FrameDB::Setter s, FrameSet vals ) {
             std::ptr_fun( s ) );
 }
 
+int FrameDB::firstId() const {
+    if( db.empty() ) throw "Empty Database!";  //shrug
+    return db.begin()->first;
+}
+
 std::vector<int> FrameDB::ids() const {
     std::vector<int> idvec;
     std::transform( db.begin(), db.end(), std::back_inserter( idvec ),

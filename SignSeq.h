@@ -20,6 +20,8 @@ class SignSeq {
         int AddHands( cv::Point tl, cv::Point br,
                       const cv::Mat &dom, const cv::Mat &weak );
 
+        double Distance( std::pair<int, int> interval );
+
     private:
         std::vector<std::shared_ptr<FeatureFrame> > hands;
         

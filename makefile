@@ -5,11 +5,13 @@ OBJS = cvsl.o \
 	   eigenthingummies.o SignDB.o \
 	   TrainDB.o SignSeq.o Gloss.o \
 	   SkinModel.o FeatureFrame.o \
-	   Databases.o
+	   Databases.o aslalgLevel.o \
+	   LevelArrays.o \
 
 # LevelBuilding.o
 
 SMLS = aslalg.sml aslalg.mlb \
+	   aslalgLevel.sml \
 	   cvsl.sig cvsl.sml cvsl.mlb \
 	   aslio.sig aslio.sml aslio.mlb \
 	   iohelpers.sml iohelpers.mlb \

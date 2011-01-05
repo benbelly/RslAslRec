@@ -5,6 +5,7 @@ local
   aslio.mlb
   iohelpers.mlb
   sorting.sml
+  aslalgLevel.sml
 in
   aslalg.sml
 end

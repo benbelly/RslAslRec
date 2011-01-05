@@ -37,6 +37,7 @@ class FrameDB {
         FrameSet sds() const;
         FrameSet keys() const;
         FrameSet boundaries() const;
+        int firstId() const;
         std::vector<int> ids() const;
 
         // Get individual frames

@@ -15,16 +15,16 @@ TrainDB::~TrainDB() {
 
 SignSeq *TrainDB::NextSequenceForGloss( std::string g ) {
     //cerr << "Getting next sequence for " << g << endl;
-    SignMap::iterator glossI = GlossIter( g );
+    GlossMap::iterator glossI = GlossIter( g );
     return (glossI->second)->NextSeq();
 }
 
-TrainDB::SignMap::iterator TrainDB::GlossIter( std::string g ) {
-    SignMap::iterator forGloss = trainedSigns.find( g ),
-                      end = trainedSigns.end();
+TrainDB::GlossMap::iterator TrainDB::GlossIter( std::string g ) {
+    GlossMap::iterator forGloss = trainedSigns.find( g ),
+                       end = trainedSigns.end();
     if( forGloss == end )
         forGloss = trainedSigns.insert( trainedSigns.begin(),
-                                        std::make_pair( g, SignPtr( new Gloss( g ) ) ) );
+                                        std::make_pair( g, GlossPtr( new Gloss( g ) ) ) );
     return forGloss;
 }
 
