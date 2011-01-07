@@ -12,6 +12,8 @@
 #include<utility>
 #include<memory>
 
+class SignSeqScores;
+
 class SignSeq {
     public:
         SignSeq();
@@ -24,7 +26,18 @@ class SignSeq {
 
     private:
         std::vector<std::shared_ptr<FeatureFrame> > hands;
-        
+
+
+        void GenerateScoresForModelFrames( SignSeqScores &scores,
+                                           std::pair<int, int> interval );
+        void GeneratorScoresForModel( SignSeqScores &scores,
+                                      std::pair<int, int> interval,
+                                      int modelIndex );
+        void GenerateScoresForTestFrame( SignSeqScores &scores,
+                                         int modelIndex, int testIndex );
+        double GetBestScoreForEnd( SignSeqScores &scores, int end );
+
+        std::vector<std::pair<int, int> > makePairs( HistogramSet &hands );
 };
 
 #endif

@@ -108,13 +108,25 @@ void FrameDB::makeSDs() {
     for( FrameHandSet::iterator i = boundaries.begin(); i != boundaries.end(); ++i ) {
         db[i->first.id].boundary = i->first;
         db[i->first.id].hands = i->second;
+        db[i->first.id].handCenters = centers( i->second );
         db[i->first.id].histograms = generateHandHistograms( (i->first).size(), i->second );
     }
 }
 
-Frame FrameDB::histogram( int i ) {
+Frame FrameDB::histogramImg( int i ) {
     cv::Mat img = h2i( db[i].gray, db[i].histograms );
     return Frame( i, img );
+}
+
+bool handSizeCompare( std::pair<int, FrameDB::FrameData> l,
+                      std::pair<int, FrameDB::FrameData> r ) {
+    return l.second.hands.size() < r.second.hands.size();
+}
+
+int FrameDB::maxHands() {
+    DBType::iterator max = std::max_element( db.begin(), db.end(),
+                                             std::ptr_fun( handSizeCompare ) );
+    return max->second.hands.size();
 }
 
 FrameSet FrameDB::generateInitialSDs() {

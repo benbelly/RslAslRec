@@ -138,3 +138,19 @@ FrameHandSet getBoundaryImages( FrameSet &fs ) {
                     std::ptr_fun( getBoundaryImage ) );
     return result;
 }
+
+CenterPoint center( Contour contour ) {
+    cv::Mat dst( contour );
+    CenterPoint center;
+    float radius;
+    cv::minEnclosingCircle( dst, center, radius );
+    return center;
+}
+
+CenterSet centers( ContourSet &contours ) {
+    std::vector<cv::Point2f> cs; cs.reserve( contours.size() );
+    std::transform( contours.begin(), contours.end(),
+                    std::back_inserter( cs ),
+                    std::ptr_fun( center ) );
+    return cs;
+}

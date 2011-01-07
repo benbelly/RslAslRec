@@ -24,6 +24,7 @@ class FrameDB {
                   SD,
                   boundary;
             ContourSet hands;
+            CenterSet handCenters;
             HistogramSet histograms;
             FrameData( int i, const cv::Mat &img );
             // Don't use. Provide for std::map
@@ -41,21 +42,20 @@ class FrameDB {
         std::vector<int> ids() const;
 
         // Get individual frames
-        Frame original( int i ) { return db[i].original; }
-        Frame gray( int i )     { return db[i].gray; }
-        Frame skin( int i )     { return db[i].skinMask; }
-        Frame sd( int i )       { return db[i].SD; }
-        Frame boundary( int i ) { return db[i].boundary; }
-        Frame histogram( int i );
-        ContourSet hands( int i ) { return db[i].hands; }
+        Frame original( int i )          { return db[i].original; }
+        Frame gray( int i )              { return db[i].gray; }
+        Frame skin( int i )              { return db[i].skinMask; }
+        Frame sd( int i )                { return db[i].SD; }
+        Frame boundary( int i )          { return db[i].boundary; }
+        HistogramSet histograms( int i ) { return db[i].histograms; }
+        Frame histogramImg( int i );
+        ContourSet hands( int i )        { return db[i].hands; }
+        CenterSet handCenters( int i )       { return db[i].handCenters; }
 
 
         int size() { return db.size(); }
-        double getFps() const { return fps; }
-        int getFourcc() const { return fourcc; }
-
-        // Mask a frame with the corresponding skinmask
-        Frame skinmask( Frame &f );
+        // maximum number of hand candidates in all frames
+        int maxHands();
 
         typedef std::map<int, FrameDB::FrameData> DBType;
         typedef DBType::value_type RowType;

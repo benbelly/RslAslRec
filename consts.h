@@ -3,6 +3,7 @@
 
 
 const static unsigned int T0 = 100;
+const static unsigned int T0_SQR = T0 * T0;
 const static unsigned int T1 = 300;
 const static unsigned int T2 = 2;
 const static unsigned int T3 = 4000;

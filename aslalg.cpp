@@ -92,7 +92,7 @@ void getFrameInfoC( int type, Pointer width, Pointer height,
             toCheck = FDB->original( id ).mat;
             break;
         case frame_types::histogram:
-            toCheck = FDB->histogram( id ).mat;
+            toCheck = FDB->histogramImg( id ).mat;
             break;
         case frame_types::training:
             {
@@ -137,7 +137,7 @@ Frame getFrame( int id, int type ) {
         case frame_types::boundary:
             return FDB->boundary( id );
         case frame_types::histogram:
-            return FDB->histogram( id );
+            return FDB->histogramImg( id );
         case frame_types::training:
             return Frame( id, TDB->GetFeatureFrame( id )->dom );
     }

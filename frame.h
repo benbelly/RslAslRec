@@ -37,6 +37,9 @@ typedef std::vector<Frame> FrameSet;
 typedef std::vector<cv::Point> Contour;
 typedef std::vector<Contour> ContourSet;
 
+typedef cv::Point2f CenterPoint;
+typedef std::vector<CenterPoint> CenterSet;
+
 //
 // Frame loading functions
 //

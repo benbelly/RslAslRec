@@ -6,7 +6,7 @@ OBJS = cvsl.o \
 	   TrainDB.o SignSeq.o Gloss.o \
 	   SkinModel.o FeatureFrame.o \
 	   Databases.o aslalgLevel.o \
-	   LevelArrays.o \
+	   LevelArrays.o SignSeqScores.o \
 
 # LevelBuilding.o
 
