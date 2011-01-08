@@ -2,11 +2,11 @@
 #ifndef ASLALG_H__
 #define ASLALG_H__
 
+
+#include "cvsl.h"
 // ML Stuff
 #include "export.h"
 #include "ml-types.h"
-
-#include "cvsl.h"
 
 namespace frame_types {
     enum {

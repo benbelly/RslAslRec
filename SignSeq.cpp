@@ -4,6 +4,7 @@
 #include "Databases.h"
 #include "consts.h"
 #include "boost/bind.hpp"
+#include "boost/mem_fn.hpp"
 #include <limits>
 
 SignSeq::SignSeq() {
@@ -14,28 +15,35 @@ SignSeq::~SignSeq() {
 
 int SignSeq::AddHands( cv::Point tl, cv::Point br,
                         const cv::Mat &dom, const cv::Mat &weak ) {
-    std::shared_ptr<FeatureFrame> framePtr( new FeatureFrame( tl, br, dom, weak ) );
-    hands.push_back( std::shared_ptr<FeatureFrame>( framePtr ) );
+    boost::shared_ptr<FeatureFrame> framePtr( new FeatureFrame( tl, br, dom, weak ) );
+    hands.push_back( boost::shared_ptr<FeatureFrame>( framePtr ) );
     return TDB->AddHandToList( framePtr );
 }
 
-double SignSeq::Distance( std::pair<int, int> interval ) {
+void SignSeq::CollectEigenValues( std::vector<cv::Mat> &samples ) {
+    std::transform( hands.begin(), hands.end(),
+                    std::back_inserter( samples ),
+                    boost::mem_fn( &FeatureFrame::GetDominantPcaEigenValues ) );
+}
+
+double SignSeq::Distance( std::pair<int, int> interval, const cv::Mat &icovar ) {
     SignSeqScores scores( hands.size(), interval.second - interval.first, FDB->maxHands() );
-    GenerateScoresForModelFrames( scores, interval );
+    GenerateScoresForModelFrames( scores, interval, icovar );
     return GetBestScoreForEnd( scores, interval.second );
 }
 
 void SignSeq::GenerateScoresForModelFrames( SignSeqScores &scores,
-                                            std::pair<int, int> interval ) {
+                                            std::pair<int, int> interval,
+                                            const cv::Mat &icovar ) {
     for( unsigned int i = 0; i < hands.size(); ++i )
-        GeneratorScoresForModel( scores, interval, i );
+        GeneratorScoresForModel( scores, interval, i, icovar );
 }
 
 void SignSeq::GeneratorScoresForModel( SignSeqScores &scores,
                                        std::pair<int, int> interval,
-                                       int modelIndex ) {
+                                       int modelIndex, const cv::Mat &icovar ) {
     for( int j = interval.first; j <= interval.second; ++j )
-        GenerateScoresForTestFrame( scores, modelIndex, j );
+        GenerateScoresForTestFrame( scores, modelIndex, j, icovar );
 }
 
 /* Helpers for GenerateScoresForTestFrame */
@@ -44,13 +52,15 @@ bool bestPredecessor( SignSeqScores &scores,
                       SignSeqScores::Index l, SignSeqScores::Index r );
 
 void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
-                                          int modelIndex, int testIndex ) {
+                                          int modelIndex, int testIndex,
+                                          const cv::Mat &icovar ) {
     HistogramSet handCands = FDB->histograms( testIndex );
     std::vector<std::pair<int, int> > pairs = makePairs( handCands );
     for( unsigned int k = 0; k < handCands.size(); ++k ) {
         std::pair<int, int> handPair = pairs[k];
         double distance = hands[modelIndex]->distance( handCands[handPair.first],
-                                                       handCands[handPair.second] );
+                                                       handCands[handPair.second],
+                                                       icovar );
         std::vector<SignSeqScores::Index> predecessors = scores.legalPredecessors(
                 modelIndex, testIndex, k, std::ptr_fun( validPredecessor ) );
         SignSeqScores::Index bestPred = *( std::min_element( predecessors.begin(),

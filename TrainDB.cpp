@@ -28,13 +28,13 @@ TrainDB::GlossMap::iterator TrainDB::GlossIter( std::string g ) {
     return forGloss;
 }
 
-int TrainDB::AddHandToList( std::shared_ptr<FeatureFrame> ff ) {
+int TrainDB::AddHandToList( boost::shared_ptr<FeatureFrame> ff ) {
     static int index = 0;
     features[index] = ff;
     return index++;
 }
 
-int getId( std::pair<int, std::shared_ptr<FeatureFrame> > p ) { return p.first; }
+int getId( std::pair<int, boost::shared_ptr<FeatureFrame> > p ) { return p.first; }
 std::vector<int> TrainDB::ids() {
     std::vector<int> is; is.reserve( features.size() );
     std::transform( features.begin(), features.end(), std::back_inserter( is ),

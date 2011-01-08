@@ -30,7 +30,6 @@ Frame avgDist2( const FrameSet &keyFrames, const Frame f ) {
     }
 
     Frame dst( src.id, src.size(), src.type() );
-    //std::copy( diffSum, diffSum + size, dst.mat.datastart );
     std::transform( diffSum, diffSum + size, dst.mat.datastart,
                     std::ptr_fun( zeroOrMax ) );
 

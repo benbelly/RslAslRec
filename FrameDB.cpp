@@ -18,8 +18,10 @@ using std::cout;
 using std::endl;
 
 FrameDB::FrameDB( FrameSet &os ) {
+    // Convert the FrameSet to a map indexed by Frame.Id()
     for( unsigned int i = 0; i < os.size(); ++i )
         db[os[i].Id()] = FrameData( os[i].Id(), os[i].mat );
+    // Set myself as the global FrameDatabase
     FDB = this;
 }
 
@@ -109,7 +111,9 @@ void FrameDB::makeSDs() {
         db[i->first.id].boundary = i->first;
         db[i->first.id].hands = i->second;
         db[i->first.id].handCenters = centers( i->second );
-        db[i->first.id].histograms = generateHandHistograms( (i->first).size(), i->second );
+        HistogramSet histograms = generateHandHistograms( (i->first).size(), i->second );
+        db[i->first.id].histograms = histograms;
+        db[i->first.id].pcas = pcaForHists( histograms );
     }
 }
 

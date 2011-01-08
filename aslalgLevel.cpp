@@ -1,5 +1,7 @@
 
 #include "Databases.h"
+#include "boost/shared_ptr.hpp"
+#include "boost/mem_fn.hpp"
 #include<utility>
 #include<string>
 #include<limits>
@@ -7,21 +9,23 @@
 
 int numberOfSequencesC( Pointer glossPtr, int glossLen ) {
     std::string gloss( (char *)glossPtr, glossLen );
-    std::vector<std::shared_ptr<SignSeq> > seqShared = TDB->Sequences( gloss );
+    std::vector<boost::shared_ptr<SignSeq> > seqShared = TDB->Sequences( gloss );
     return seqShared.size();
 }
 
 void getSequencesC( Pointer glossPtr, int glossLen, Pointer sequencePtrs ) {
     std::string gloss( (char *)glossPtr, glossLen );
-    std::vector<std::shared_ptr<SignSeq> > seqShared = TDB->Sequences( gloss );
+    std::vector<boost::shared_ptr<SignSeq> > seqShared = TDB->Sequences( gloss );
     std::transform( seqShared.begin(), seqShared.end(),
                     (SignSeq **)sequencePtrs,
-                    std::mem_fun_ref( &std::shared_ptr<SignSeq>::get ) );
+                    boost::mem_fn( &boost::shared_ptr<SignSeq>::get ) );
 }
 
-double distanceC( Pointer seqPtr, int start, int end ) {
-    SignSeq *sequence = (SignSeq *)seqPtr;
-    return sequence->Distance( std::make_pair( start, end ) );
-}
+/*
+ *double distanceC( Pointer seqPtr, int start, int end ) {
+ *    SignSeq *sequence = (SignSeq *)seqPtr;
+ *    return sequence->Distance( std::make_pair( start, end ) );
+ *}
+ */
 
 double getMaxScoreC() { return std::numeric_limits<double>::max(); }

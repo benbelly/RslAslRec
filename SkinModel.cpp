@@ -2,7 +2,7 @@
 #include "SkinModel.h"
 #include "consts.h"
 #include "edgedetection.h"
-#include <stdlib.h>
+#include <stdio.h>
 #include <memory>
 #include <utility>
 

@@ -10,8 +10,11 @@ struct FeatureFrame {
     cv::Point faceTopLeft, faceBottomRight;
     cv::Mat dom, weak;
     Histogram domHist, weakHist;
+    cv::PCA domPCA, weakPCA;
 
-    double distance( Histogram testDom, Histogram testWeak );
+    double distance( Histogram testDom, Histogram testWeak, const cv::Mat &icovar );
+    Histogram GetDominantHistogram() { return domHist; }
+    cv::Mat GetDominantPcaEigenValues() { return domPCA.eigenvalues; }
 };
 
 #endif

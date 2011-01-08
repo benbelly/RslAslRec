@@ -16,11 +16,12 @@ typedef std::map<int, cv::Mat> TrainingImageMap;
 static TrainingImageMap trainingImages;
 
 /*
- * Initialize the database of frames using the specified video file
- * This is not used since the data is already broken into frames
+ * Initialize the FrameDatabase and the TrainingDatabase. The FrameDatabase will need 
+ * an array of filenames (frame images), an array of lengths, an array of frame ids
+ * (usually the index) and a length that indicates the length of all arrays
  */
 void InitAslAlgC( char **files, int *filelens, int *frameIds, int numFiles ) {
-    std::vector<std::pair<std::string, int>> frameFiles; frameFiles.reserve( numFiles );
+    std::vector<std::pair<std::string, int> > frameFiles; frameFiles.reserve( numFiles );
     for( int i = 0; i < numFiles; ++i )
         frameFiles.push_back(
                 std::make_pair( std::string( files[i], filelens[i] ), frameIds[i] ) );

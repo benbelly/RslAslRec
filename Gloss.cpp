@@ -4,6 +4,9 @@
 #include<functional>
 #include<limits>
 #include "Gloss.h"
+#include "eigens.h"
+#include "boost/bind.hpp"
+#include "boost/mem_fn.hpp"
 
 Gloss::Gloss( std::string g ) : gloss( g ) {
 }
@@ -11,23 +14,16 @@ Gloss::Gloss( std::string g ) : gloss( g ) {
 Gloss::~Gloss() {}
 
 SignSeq *Gloss::NextSeq() {
-    std::shared_ptr<SignSeq> ssp( new SignSeq() );
+    boost::shared_ptr<SignSeq> ssp( new SignSeq() );
     trainedSeqs.push_back( ssp );
     return ssp.get();
 }
 
 std::vector<double> Gloss::GetScores( std::pair<int, int> interval ) {
-    // Silly C++ - turn the shared_ptr into regular pointers for use 
-    // with the std algorithms
-    // TODO: I'm using C++0x, so maybe std::bind will work
-    std::vector<SignSeq *> seqPtrs; seqPtrs.reserve( trainedSeqs.size() );
+    std::vector<double> distances; distances.reserve( trainedSeqs.size() );
     std::transform( trainedSeqs.begin(), trainedSeqs.end(),
-                    std::back_inserter( seqPtrs ),
-                    std::mem_fun_ref( &std::shared_ptr<SignSeq>::get ) );
-    std::vector<double> distances; distances.reserve( seqPtrs.size() );
-    std::transform( seqPtrs.begin(), seqPtrs.end(),
                     std::back_inserter( distances ),
-                    std::bind2nd( std::mem_fun( &SignSeq::Distance ), interval ) );
+                    boost::bind( &SignSeq::Distance, _1, interval, GetICovarMatrix() ) );
     return distances;
 }
 
@@ -38,3 +34,20 @@ double Gloss::Distance( int start, int end ) {
         return std::numeric_limits<double>::max();
     return *min;
 }
+
+const cv::Mat &Gloss::GetICovarMatrix() {
+    if( icovarianceMatrix.empty() ) CalcICovarianceMatrix();
+    return icovarianceMatrix;
+}
+
+void Gloss::CalcICovarianceMatrix() {
+    // Get histograms from all frames of all videos of this gloss
+    std::vector<cv::Mat> eigenValues;
+    std::for_each( trainedSeqs.begin(), trainedSeqs.end(),
+                   boost::bind( &SignSeq::CollectEigenValues, _1, eigenValues ) );
+    cv::Mat covariance, mean;
+    cv::calcCovarMatrix( &eigenValues[0], eigenValues.size(), covariance, mean,
+                         CV_COVAR_NORMAL );
+    cv::invert( covariance, icovarianceMatrix );
+}
+

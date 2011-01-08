@@ -9,6 +9,7 @@
 #include "opencv/highgui.h"
 
 #include "histograms.h"
+#include "eigens.h"
 #include "frame.h"
 
 class FrameDB {
@@ -26,6 +27,7 @@ class FrameDB {
             ContourSet hands;
             CenterSet handCenters;
             HistogramSet histograms;
+            PcaSet pcas;
             FrameData( int i, const cv::Mat &img );
             // Don't use. Provide for std::map
             FrameData() {}
@@ -50,7 +52,8 @@ class FrameDB {
         HistogramSet histograms( int i ) { return db[i].histograms; }
         Frame histogramImg( int i );
         ContourSet hands( int i )        { return db[i].hands; }
-        CenterSet handCenters( int i )       { return db[i].handCenters; }
+        CenterSet handCenters( int i )   { return db[i].handCenters; }
+        PcaSet Pcas( int i )             { return db[i].pcas; }
 
 
         int size() { return db.size(); }

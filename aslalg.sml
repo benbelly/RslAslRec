@@ -81,7 +81,6 @@ end;
 
 fun aslalg () =
   let
-    val filename = "mov/S003.MOV";
     val dataDir = "/home/bholm/USF-ASL-Data-Set-v2"
     val candidateDir = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
     val (candidateFrames, nums) = getSortedCandidates candidateDir
@@ -102,13 +101,15 @@ fun aslalg () =
     trainForRoot trainingS;
     print "Trained.\n";
     (*
-     *Cvsl.saveAllImages "cvsl_out/sd" "png" 3;
-     *Cvsl.saveAllImages "cvsl_out/orig" "png" 0;
-     * Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
-     * Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;
-     *)
      Cvsl.saveAllImages "cvsl_out/training" "png" 6;
-     Cvsl.displayAllImages 4
+     *)
+     Cvsl.saveAllImages "cvsl_out/orig" "png" 0;
+     Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
+     Cvsl.saveAllImages "cvsl_out/sd" "png" 3;
+     Cvsl.saveAllImages "cvsl_out/boundary" "png" 4
+     (*
+      Cvsl.displayAllImages 4
+      *)
   end;
 
 val _ = aslalg();

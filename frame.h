@@ -43,7 +43,7 @@ typedef std::vector<CenterPoint> CenterSet;
 //
 // Frame loading functions
 //
-FrameSet loadFromFiles( std::vector<std::pair<std::string, int>> &files);
+FrameSet loadFromFiles( std::vector<std::pair<std::string, int> > &files);
 FrameSet loadFromVideo( std::string filename );
 
 ///
