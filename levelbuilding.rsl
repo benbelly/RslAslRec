@@ -1,0 +1,11 @@
+inc "rsl.sml"
+
+interp:
+    testDir: string
+    trainDir: string
+    testFrames: int set
+
+fn main ( inFile ) {
+    %update : trainAndLoadCandidate
+    accept
+}
