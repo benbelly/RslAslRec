@@ -24,14 +24,23 @@ ASLREC_OBJS = $(addprefix $(ASLREC_DIR)/, frame.o keyframeselect.o keyframedist.
 										  aslalgLevel.o )
 ASLREC_SMLS = $(addprefix $(ASLREC_DIR)/, aslalgLevel.sml )
 
+
+###############################
+#
+# ASL Data reading files
+#
+###############################
+DATAREAD_DIR = dataread
+DATAREAD_SMLS = $(addprefix $(DATAREAD_DIR)/, aslio.sig aslio.sml aslio.mlb \
+											  iohelpers.sml iohelpers.mlb \
+											  sorting.sml training.sml )
+
 OBJS = $(CVSL_OBJS) $(ASLREC_OBJS)
 
 SMLS = $(ASLREC_SMLS) \
 	   $(CVSL_SMLS) \
-	   aslalg.sml aslalg.mlb \
-	   aslio.sig aslio.sml aslio.mlb \
-	   iohelpers.sml iohelpers.mlb \
-	   sorting.sml training.sml
+	   $(DATAREAD_SMLS) \
+	   aslalg.sml aslalg.mlb 
 
 MLB = aslalg.mlb
 
@@ -51,7 +60,8 @@ CFLAGS=-Wall -Wextra -c $(INCLUDE) $(DEBUG)
 ##
 ML = mlton
 ML_PATHS = -mlb-path-var "CVSL_DIR $(CVSL_DIR)" \
-		   -mlb-path-var "ASLREC_DIR $(ASLREC_DIR)"
+		   -mlb-path-var "ASLREC_DIR $(ASLREC_DIR)" \
+		   -mlb-path-var "DATAREAD_DIR $(DATAREAD_DIR)"
 ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt '-lcxcore -lcv -lhighgui -lcvaux -lml -lavutil' \
 		  -link-opt '-lplplotcxxd -lplplotd' \

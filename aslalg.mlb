@@ -3,10 +3,10 @@ in
   (* import Basis Library *)
   $(SML_LIB)/basis/basis.mlb
   $(CVSL_DIR)/cvsl.mlb
-  aslio.mlb
-  iohelpers.mlb
-  sorting.sml
-  training.sml
+  $(DATAREAD_DIR)/aslio.mlb
+  $(DATAREAD_DIR)/iohelpers.mlb
+  $(DATAREAD_DIR)/sorting.sml
+  $(DATAREAD_DIR)/training.sml
   $(ASLREC_DIR)/aslalgLevel.sml
   aslalg.sml
 end
