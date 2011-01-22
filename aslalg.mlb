@@ -7,6 +7,6 @@ in
   iohelpers.mlb
   sorting.sml
   training.sml
-  aslalgLevel.sml
+  $(ASLREC_DIR)/aslalgLevel.sml
   aslalg.sml
 end
