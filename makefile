@@ -1,7 +1,12 @@
 EXECUTABLE=aslalg
-OBJS = cvsl.o \
+
+CVSL_DIR=cvsl
+CVSL_OBJS = $(CVSL_DIR)/cvsl.o $(CVSL_DIR)/plotter.o
+CVSL_SMLS = $(CVSL_DIR)/cvsl.mlb $(CVSL_DIR)/cvsl.sig $(CVSL_DIR)/cvsl.sml
+
+OBJS = $(CVSL_OBJS) \
 	   aslalg.o frame.o keyframeselect.o keyframedist.o skinmask.o \
-	   FrameDB.o edgedetection.o histograms.o plotter.o \
+	   FrameDB.o edgedetection.o histograms.o \
 	   eigens.o SignDB.o \
 	   TrainDB.o SignSeq.o Gloss.o \
 	   SkinModel.o FeatureFrame.o \
@@ -12,7 +17,7 @@ OBJS = cvsl.o \
 
 SMLS = aslalg.sml aslalg.mlb \
 	   aslalgLevel.sml \
-	   cvsl.sig cvsl.sml cvsl.mlb \
+	   $(CVSL_SMLS) \
 	   aslio.sig aslio.sml aslio.mlb \
 	   iohelpers.sml iohelpers.mlb \
 	   sorting.sml training.sml
@@ -36,6 +41,7 @@ CFLAGS=-Wall -Wextra -c $(INCLUDE) $(DEBUG)
 ##
 ## MLTon variables
 ML = mlton
+ML_PATHS = -mlb-path-var "CVSL_DIR $(CVSL_DIR)"
 ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt '-lcxcore -lcv -lhighgui -lcvaux -lml -lavutil' \
 		  -link-opt '-L$(PLPLOT_PATH)/lib -lplplotcxxd -lplplotd' \
@@ -49,12 +55,12 @@ all: $(OBJS) $(EXECUTABLE)
 
 %.o: %.cpp
 		@echo "\nCompiling $<:"
-		$(CC) $(CFLAGS) $<
+		$(CC) $(CFLAGS) $< -o $@
 		@echo "      built $@."
 
 $(EXECUTABLE): $(OBJS) $(SMLS) $(MLB)
 		@echo "\nMaking executable:"
-		$(ML) $(ML_LIBS) $(ML_FFI) $(ML_DEBUG) $(MLB) $(OBJS)
+		$(ML) $(ML_PATHS) $(ML_LIBS) $(ML_FFI) $(ML_DEBUG) $(MLB) $(OBJS)
 		@echo "    executable $@ built."
 
 clean: out

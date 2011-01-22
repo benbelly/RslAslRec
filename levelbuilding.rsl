@@ -3,7 +3,7 @@ inc "rsl.sml"
 interp:
     testDir: string
     trainDir: string
-    testFrames: int set
+    testFrames: int list
 
 fn main ( inFile ) {
     %update : trainAndLoadCandidate
