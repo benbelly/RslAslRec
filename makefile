@@ -15,7 +15,7 @@ SMLS = aslalg.sml aslalg.mlb \
 	   cvsl.sig cvsl.sml cvsl.mlb \
 	   aslio.sig aslio.sml aslio.mlb \
 	   iohelpers.sml iohelpers.mlb \
-	   sorting.sml
+	   sorting.sml training.sml
 
 MLB = aslalg.mlb
 
@@ -25,7 +25,6 @@ PLPLOT_PATH=/usr
 
 ##
 ## C++ variables
-#CC=g++-4.5
 CC=g++
 DEBUG=-g
 INCLUDE=-I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
@@ -38,15 +37,10 @@ CFLAGS=-Wall -Wextra -c $(INCLUDE) $(DEBUG)
 ## MLTon variables
 ML = mlton
 ML_LIBS = -link-opt -lstdc++ \
-		  -link-opt -lcxcore -link-opt -lcv -link-opt -lhighgui \
-		  -link-opt -lcvaux -link-opt -lml \
-		  -link-opt -lavutil \
-		  -link-opt -L$(PLPLOT_PATH)/lib \
-		  -link-opt -lplplotcxxd -link-opt -lplplotd \
-		  -link-opt -lltdl -link-opt -ldl \
-		  -link-opt -lm -link-opt -lcsirocsa \
-		  -link-opt -lcsironn -link-opt -lqhull \
-		  -link-opt -lqsastime -link-opt -lfreetype
+		  -link-opt '-lcxcore -lcv -lhighgui -lcvaux -lml -lavutil' \
+		  -link-opt '-L$(PLPLOT_PATH)/lib -lplplotcxxd -lplplotd' \
+		  -link-opt '-lltdl -ldl -lm -lcsirocsa' \
+		  -link-opt '-lcsironn -lqhull -lqsastime -lfreetype'
 ML_FFI = -default-ann 'allowFFI true'
 ML_DEBUG = -const 'Exn.keepHistory true'
 

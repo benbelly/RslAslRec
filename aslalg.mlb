@@ -1,11 +1,12 @@
 local
+in
   (* import Basis Library *)
   $(SML_LIB)/basis/basis.mlb
   cvsl.mlb
   aslio.mlb
   iohelpers.mlb
   sorting.sml
+  training.sml
   aslalgLevel.sml
-in
   aslalg.sml
 end
