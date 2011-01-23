@@ -61,7 +61,7 @@ SMLS = $(ASLREC_SMLS) \
 	   $(DATAREAD_SMLS) \
 	   aslalg.sml aslalg.mlb 
 
-OPENCV_PATH=/usr/include/opencv
+OPENCV_PATH=/home/bholm/OpenCV
 
 ##
 ## C++ variables
@@ -80,6 +80,7 @@ ML_PATHS = -mlb-path-var "CVSL_DIR $(CVSL_DIR)" \
 		   -mlb-path-var "ASLREC_DIR $(ASLREC_DIR)" \
 		   -mlb-path-var "DATAREAD_DIR $(DATAREAD_DIR)"
 ML_LIBS = -link-opt -lstdc++ \
+		  -link-opt '-L/home/bholm/OpenCV/lib' \
 		  -link-opt '-lcxcore -lcv -lhighgui -lcvaux -lml -lavutil' \
 		  -link-opt '-lplplotcxxd -lplplotd' \
 		  -link-opt '-lltdl -ldl -lm -lcsirocsa' \

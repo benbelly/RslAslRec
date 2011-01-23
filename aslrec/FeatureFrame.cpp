@@ -10,8 +10,7 @@ FeatureFrame::FeatureFrame( cv::Point tl, cv::Point br, cv::Mat d, cv::Mat w ) :
     weakHist( weak.empty() ? Histogram() :
                              generateHandHistogram( weak.size(), getBoundary( weak ) ) ),
     domPCA( pcaForHist( domHist ) ),
-    weakPCA( weak.empty() ? cv::PCA() :
-                            pcaForHist( weakHist ) )
+    weakPCA( weak.empty() ? cv::PCA() : cv::PCA() )
 {
 
 }
