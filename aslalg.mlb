@@ -1,5 +1,4 @@
 local
-in
   (* import Basis Library *)
   $(SML_LIB)/basis/basis.mlb
   $(CVSL_DIR)/cvsl.mlb
@@ -8,5 +7,6 @@ in
   $(DATAREAD_DIR)/sorting.sml
   $(DATAREAD_DIR)/training.sml
   $(ASLREC_DIR)/aslalgLevel.sml
+in
   aslalg.sml
 end

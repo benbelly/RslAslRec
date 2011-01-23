@@ -1,4 +1,4 @@
-inc "rsl.sml"
+inc "aslalg.mlb"
 
 interp:
     testDir: string
@@ -6,6 +6,5 @@ interp:
     testFrames: int list
 
 fn main ( inFile ) {
-    %update : trainAndLoadCandidate
-    accept
+    aslalg()
 }

@@ -64,3 +64,4 @@ fun aslalg () =
       *)
   end;
 
+val _ = aslalg();
