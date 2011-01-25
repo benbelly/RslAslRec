@@ -47,8 +47,8 @@ DATAREAD_SMLS = $(addprefix $(DATAREAD_DIR)/, aslio.sig aslio.sml \
 ###############################
 EXEC = levelbuilding
 RSL = $(EXEC).rsl
-#MLB = $(EXEC).mlb
-MLB = aslalg.mlb
+MLB = $(EXEC).mlb
+#MLB = aslalg.mlb
 RSL_GENED = $(EXEC)-types.sml $(EXEC)-labels.rsl $(EXEC).mlb $(EXEC).sml
 
 ###
@@ -105,11 +105,11 @@ all: $(OBJS) $(EXECUTABLE)
 		$(CC) $(CFLAGS) $< -o $@
 		@echo "      built $@."
 
-$(EXECUTABLE): $(OBJS) $(SMLS)
+$(EXECUTABLE): $(OBJS) $(SMLS) $(RSL)
 		@echo "\nMaking executable:"
-		#$(RSLC) $(RSL) 
-		#$(ML) -mlb-path-var "RSL2_DIR /home/bholm/rsl" $(MLTON_FLAGS) $(MLB) $(OBJS)
-		$(ML) $(MLTON_FLAGS) $(MLB) $(OBJS)
+		$(RSLC) $(RSL) $(MLTON_FLAGS) $(OBJS)
+		$(ML) -mlb-path-var "RSL2_DIR /home/bholm/rsl" $(MLTON_FLAGS) $(MLB) $(OBJS)
+		#$(ML) $(MLTON_FLAGS) $(MLB) $(OBJS)
 		@echo "    executable $@ built."
 
 clean: out
