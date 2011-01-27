@@ -1,12 +1,11 @@
 local
   (* import Basis Library *)
   $(SML_LIB)/basis/basis.mlb
+in
+  $(DATAREAD_DIR)/iohelpers.mlb
   $(CVSL_DIR)/cvsl.mlb
   $(DATAREAD_DIR)/aslio.mlb
-  $(DATAREAD_DIR)/iohelpers.mlb
   $(DATAREAD_DIR)/sorting.sml
   $(DATAREAD_DIR)/training.sml
   $(ASLREC_DIR)/aslalgLevel.sml
-in
-  aslalg.sml
 end

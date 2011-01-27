@@ -28,7 +28,7 @@ class SignSeq {
         double Distance( std::pair<int, int> interval, const cv::Mat &icovar );
 
     private:
-        std::vector<boost::shared_ptr<FeatureFrame> > hands;
+        std::vector<boost::shared_ptr<FeatureFrame> > frames;
 
 
         void GenerateScoresForModelFrames( SignSeqScores &scores,

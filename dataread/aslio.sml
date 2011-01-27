@@ -149,7 +149,23 @@ local
       fun imagesForRoot (Root(_, ss)) : (int list * int list) list =
           foldr op@ [] (map imagesForSentence ss);
 
+        (* The directory contents are returned in random order, so
+         * they need to be sorted *)
+      fun getSortedCandidates dir =
+        let
+          val files = getFiles dir
+          val lessThan = fn ((_,l),(_,t)) => l < t
+          val getFrameNum = fn file =>
+            Option.valOf(Int.fromString(List.nth(String.tokens (fn c=> c = #"_") file, 2)))
+          val fileNNum = ListPair.zip(files, map getFrameNum files)
+          val sorted = mergesort lessThan fileNNum
+          val (nameList, numList) = ListPair.unzip sorted
+          val fullNameList = map (fn n => dir ^ "/" ^ n) nameList
+        in
+          (Vector.fromList fullNameList, Vector.fromList numList)
+        end;
       end; (* struct end *)
+
 in
 
 structure AslIO :> ASLIO = AslIO_Imp;

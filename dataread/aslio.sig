@@ -32,4 +32,8 @@ sig
         (* Take a root, returns a list of image tuples (dom, weak) *)
     val imagesForRoot : root -> (int list * int list) list
 
+        (* The directory contents are returned in random order,
+         * so they need to be sorted *)
+    val getSortedCandidates : string -> (string vector * int vector )
+
 end

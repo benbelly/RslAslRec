@@ -22,7 +22,8 @@ class TrainDB {
         { return trainedSigns[gloss]->Sequences(); }
 
         int AddHandToList( boost::shared_ptr<FeatureFrame> frame );
-        boost::shared_ptr<FeatureFrame> GetFeatureFrame( int id ) { return features[id]; }
+        boost::shared_ptr<FeatureFrame> GetFeatureFrame( int id )
+            { return features[id]; }
         std::vector<int> ids();
 
     private:

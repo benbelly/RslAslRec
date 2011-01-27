@@ -25,6 +25,9 @@ FrameDB::FrameDB( FrameSet &os ) {
     FDB = this;
 }
 
+FrameDB::~FrameDB() {
+}
+
 void FrameDB::findHands() {
     findKeyframes();
     makeSDs();

@@ -1,4 +1,3 @@
-EXECUTABLE=aslalg
 
 ###############################
 #
@@ -49,7 +48,8 @@ EXEC = levelbuilding
 RSL = $(EXEC).rsl
 MLB = $(EXEC).mlb
 #MLB = aslalg.mlb
-RSL_GENED = $(EXEC)-types.sml $(EXEC)-labels.rsl $(EXEC).mlb $(EXEC).sml
+RSL_GENED = $(EXEC) $(EXEC).i $(EXEC)-types.sml $(EXEC).data $(EXEC)-labels.lrsl $(EXEC).tab $(EXEC).dot $(EXEC).mlb $(EXEC).sml
+
 
 ###
 # Compiling
@@ -97,7 +97,7 @@ RSLC = rslc # rslc needs to be in the PATH - see rsl NOTES file
 ##
 ## Targets
 ##
-all: $(OBJS) $(EXECUTABLE)
+all: $(OBJS) $(EXEC)
 		@echo "\nBuild is complete."
 
 %.o: %.cpp
@@ -105,7 +105,7 @@ all: $(OBJS) $(EXECUTABLE)
 		$(CC) $(CFLAGS) $< -o $@
 		@echo "      built $@."
 
-$(EXECUTABLE): $(OBJS) $(SMLS) $(RSL)
+$(EXEC): $(OBJS) $(SMLS) $(RSL)
 		@echo "\nMaking executable:"
 		$(RSLC) $(RSL) $(MLTON_FLAGS) $(OBJS)
 		$(ML) -mlb-path-var "RSL2_DIR /home/bholm/rsl" $(MLTON_FLAGS) $(MLB) $(OBJS)
@@ -114,7 +114,9 @@ $(EXECUTABLE): $(OBJS) $(SMLS) $(RSL)
 
 clean: out
 		@echo "\nCleaning up..."
-		-rm -f $(EXECUTABLE) *.o *.bak $(CVSL_DIR)/*.o $(ASLREC_DIR)/*.o $(RSL_GENED)
+		-rm -f *.o *.bak $(CVSL_DIR)/*.o \
+			   $(ASLREC_DIR)/*.o $(RSL_GENED)
+
 		@echo "    finished."
 
 out:

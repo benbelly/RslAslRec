@@ -21,11 +21,6 @@ void getSequencesC( Pointer glossPtr, int glossLen, Pointer sequencePtrs ) {
                     boost::mem_fn( &boost::shared_ptr<SignSeq>::get ) );
 }
 
-/*
- *double distanceC( Pointer seqPtr, int start, int end ) {
- *    SignSeq *sequence = (SignSeq *)seqPtr;
- *    return sequence->Distance( std::make_pair( start, end ) );
- *}
- */
-
 double getMaxScoreC() { return std::numeric_limits<double>::max(); }
+
+int getNumberOfSignsC() { return TDB->ids().size(); }

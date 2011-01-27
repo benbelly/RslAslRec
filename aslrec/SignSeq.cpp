@@ -16,18 +16,18 @@ SignSeq::~SignSeq() {
 int SignSeq::AddHands( cv::Point tl, cv::Point br,
                         const cv::Mat &dom, const cv::Mat &weak ) {
     boost::shared_ptr<FeatureFrame> framePtr( new FeatureFrame( tl, br, dom, weak ) );
-    hands.push_back( boost::shared_ptr<FeatureFrame>( framePtr ) );
+    frames.push_back( boost::shared_ptr<FeatureFrame>( framePtr ) );
     return TDB->AddHandToList( framePtr );
 }
 
 void SignSeq::CollectEigenValues( std::vector<cv::Mat> &samples ) {
-    std::transform( hands.begin(), hands.end(),
+    std::transform( frames.begin(), frames.end(),
                     std::back_inserter( samples ),
                     boost::mem_fn( &FeatureFrame::GetDominantPcaEigenValues ) );
 }
 
 double SignSeq::Distance( std::pair<int, int> interval, const cv::Mat &icovar ) {
-    SignSeqScores scores( hands.size(), interval.second - interval.first, FDB->maxHands() );
+    SignSeqScores scores( frames.size(), interval.second - interval.first, FDB->maxHands() );
     GenerateScoresForModelFrames( scores, interval, icovar );
     return GetBestScoreForEnd( scores, interval.second );
 }
@@ -35,7 +35,8 @@ double SignSeq::Distance( std::pair<int, int> interval, const cv::Mat &icovar ) 
 void SignSeq::GenerateScoresForModelFrames( SignSeqScores &scores,
                                             std::pair<int, int> interval,
                                             const cv::Mat &icovar ) {
-    for( unsigned int i = 0; i < hands.size(); ++i )
+    unsigned int numFrames = frames.size();
+    for( unsigned int i = 0; i < numFrames; ++i )
         GeneratorScoresForModel( scores, interval, i, icovar );
 }
 
@@ -58,9 +59,9 @@ void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
     std::vector<std::pair<int, int> > pairs = makePairs( handCands );
     for( unsigned int k = 0; k < handCands.size(); ++k ) {
         std::pair<int, int> handPair = pairs[k];
-        double distance = hands[modelIndex]->distance( handCands[handPair.first],
-                                                       handCands[handPair.second],
-                                                       icovar );
+        double distance = frames[modelIndex]->distance( handCands[handPair.first],
+                                                        handCands[handPair.second],
+                                                        icovar );
         std::vector<SignSeqScores::Index> predecessors = scores.legalPredecessors(
                 modelIndex, testIndex, k, std::ptr_fun( validPredecessor ) );
         SignSeqScores::Index bestPred = *( std::min_element( predecessors.begin(),

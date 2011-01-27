@@ -7,8 +7,8 @@
 extern "C" {
     int numberOfSequencesC( Pointer glossPtr, int glossLen );
     void getSequencesC( Pointer glossPtr, int glossLen, Pointer sequencePtrs );
-    //double distanceC( Pointer sequence, int start, int end );
     double getMaxScoreC();
+    int getNumberOfSignsC();
 }
 
 #endif

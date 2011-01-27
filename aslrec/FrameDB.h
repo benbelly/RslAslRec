@@ -15,6 +15,7 @@
 class FrameDB {
     public:
         FrameDB( FrameSet &frames );
+        virtual ~FrameDB();
         void findHands();
 
         struct FrameData {

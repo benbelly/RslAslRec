@@ -10,32 +10,19 @@ val training = 6;
 (* C++ functions for running the algorithm *)
 val init = _import "InitAslAlgC" : string vector * int vector * int vector * int -> unit;
 val findHands = _import "findHandsC" : unit -> unit;
+val getFrameIdsC  = _import "getFrameIdsC" : int * int array -> unit;
+val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
 
 (* * * * * * * * * * * * * * * * * * * * *
  * AslAlg functions
  * * * * * * * * * * * * * * * * * * * * *)
 
-  (* The directory contents are returned in random order, so they need to be
-   * sorted *)
-fun getSortedCandidates dir =
-  let
-    val files = getFiles dir
-    val lessThan = fn ((_,l),(_,t)) => l < t
-    val getFrameNum = fn file =>
-      Option.valOf(Int.fromString(List.nth(String.tokens (fn c=> c = #"_") file, 2)))
-    val fileNNum = ListPair.zip(files, map getFrameNum files)
-    val sorted = mergesort lessThan fileNNum
-    val (nameList, numList) = ListPair.unzip sorted
-    val fullNameList = map (fn n => dir ^ "/" ^ n) nameList
-  in
-    (Vector.fromList fullNameList, Vector.fromList numList)
-  end;
 
 fun aslalg () =
   let
     val dataDir = "/home/bholm/USF-ASL-Data-Set-v2"
     val candidateDir = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
-    val (candidateFrames, nums) = getSortedCandidates candidateDir
+    val (candidateFrames, nums) = AslIO.getSortedCandidates candidateDir
     val root = AslIO.rootForDir dataDir
     val imgs = AslIO.imagesForRoot root
     val skipSentences = [1, 18, 19, 25]
@@ -64,4 +51,24 @@ fun aslalg () =
       *)
   end;
 
-val _ = aslalg();
+(*
+ *interp:
+ *    testDir: string
+ *    trainDir: string
+ *    testFrames: int list
+ *)
+(* functions must return annotations and a set of annotated interpretations *)
+val setDirs = fn( test, train ) => fn(_) => (NONE,
+       [(NONE,
+         Interp.hcons
+         { testDir_H = test, trainDir_H = train,
+           testFrames_H = Interp.testFrames_S.hcnil } ) ] );
+
+val trainAndLoad = fn() => fn( i ) =>
+let
+  val { testDir = test, trainDir = train,
+        testFrames = frames } = i
+in
+  aslalg();
+  (NONE, [(NONE, { testFrames = Vector.foldr op:: [] (Cvsl.getIds 0) } ) ] )
+end

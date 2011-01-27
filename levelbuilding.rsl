@@ -1,10 +1,19 @@
-inc "aslalg.mlb"
+inc "aslalg.mlb" % Helper files for aslalg.sml
+inc "aslalg.sml" % Functions to drive algorithm
+inc "levelbuilding-external.sml" % Interp to string, etc
 
 interp:
     testDir: string
     trainDir: string
     testFrames: int list
 
+
 fn main ( inFile ) {
-    aslalg()
+    testDir = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
+    trainDir = "/home/bholm/USF-ASL-Data-Set-v2"
+
+    [Init] munge: setDirs( testDir, trainDir )
+    [LoadVideo] update testFrames observing testDir, trainDir: trainAndLoad()
+
+    print ifile
 }

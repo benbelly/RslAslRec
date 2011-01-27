@@ -17,7 +17,8 @@ fun cleanedRoot (AslIO.Root(d,ss)) skips : AslIO.root =
 (* Create a Root for the traning set and a Root for the candidate set *)
 fun splitSentences (AslIO.Root(d,ss)) candidateInstance : AslIO.root * AslIO.root =
   let
-    val candidate = fn sentence => (AslIO.sentenceNum sentence) = candidateInstance
+    val candidate = fn sentence =>
+            (AslIO.sentenceNum sentence) = candidateInstance
     val train = fn s => not(candidate s)
   in
     (AslIO.Root(d,List.filter train ss),

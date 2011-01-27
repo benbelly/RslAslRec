@@ -15,6 +15,6 @@ FeatureFrame::FeatureFrame( cv::Point tl, cv::Point br, cv::Mat d, cv::Mat w ) :
 
 }
 
-double FeatureFrame::distance( Histogram testDom, Histogram testWeak, const cv::Mat &icovar ) {
-    return cv::Mahalonobis( testDom, testWeak, icovar );
+double FeatureFrame::distance( Histogram testDom, Histogram /*testWeak*/, const cv::Mat &icovar ) {
+    return cv::Mahalonobis( testDom, domHist, icovar );
 }

@@ -24,4 +24,6 @@ sig
     (* args: frame type
      * return unit *)
     val displayVideo : int -> unit
+
+    val getIds : int -> int vector
 end;
