@@ -8,4 +8,5 @@ in
   $(DATAREAD_DIR)/sorting.sml
   $(DATAREAD_DIR)/training.sml
   $(ASLREC_DIR)/aslalgLevel.sml
+  $(ASLREC_DIR)/aslalgUtil.sml
 end

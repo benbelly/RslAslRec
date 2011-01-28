@@ -9,10 +9,10 @@ interp:
 
 
 fn main ( inFile ) {
-    testDir = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
-    trainDir = "/home/bholm/USF-ASL-Data-Set-v2"
+    test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
+    train = "/home/bholm/USF-ASL-Data-Set-v2"
 
-    [Init] munge: setDirs( testDir, trainDir )
+    [Init] munge: setDirs( test, train )
     [LoadVideo] update testFrames observing testDir, trainDir: trainAndLoad()
 
     print ifile

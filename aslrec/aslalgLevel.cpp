@@ -23,4 +23,14 @@ void getSequencesC( Pointer glossPtr, int glossLen, Pointer sequencePtrs ) {
 
 double getMaxScoreC() { return std::numeric_limits<double>::max(); }
 
-int getNumberOfSignsC() { return TDB->ids().size(); }
+int getNumberOfSignsC() { return TDB->NumGlosses(); }
+
+int getSignLengthC( int i ) {
+    return TDB->GetGloss( i ).size();
+}
+
+void getSignC( int i, Pointer dst ) {
+    std::string sign( TDB->GetGloss( i ) );
+    const char *cs = sign.c_str();
+    memcpy( dst, cs, sign.size() ) ;
+}

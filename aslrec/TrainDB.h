@@ -17,6 +17,9 @@ class TrainDB {
         TrainDB();
         virtual ~TrainDB();
 
+        int NumGlosses() const { return trainedSigns.size(); }
+        std::string GetGloss( int i ) const { return glosses()[i]; }
+
         SignSeq *NextSequenceForGloss( std::string );
         std::vector<boost::shared_ptr<SignSeq> > Sequences( std::string gloss )
         { return trainedSigns[gloss]->Sequences(); }
@@ -30,6 +33,8 @@ class TrainDB {
         typedef boost::shared_ptr<Gloss> GlossPtr;
         typedef std::map<std::string, GlossPtr> GlossMap;
         GlossMap trainedSigns;
+        mutable std::vector<std::string> glossesVec; // lazy initialization
+        std::vector<std::string> glosses() const;
 
         std::map<int, boost::shared_ptr<FeatureFrame> > features;
 

@@ -9,6 +9,8 @@ extern "C" {
     void getSequencesC( Pointer glossPtr, int glossLen, Pointer sequencePtrs );
     double getMaxScoreC();
     int getNumberOfSignsC();
+    int getSignLengthC( int i );
+    void getSignC( int i, Pointer dst );
 }
 
 #endif

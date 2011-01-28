@@ -98,8 +98,6 @@ void FrameDB::findKeyframes() {
     std::accumulate( graySet.begin() + 1, graySet.end(),
                      firstKeyframe,
                      AccumKeyframes( keyframes ) );
-    std::cout << "Keyframe count = " << keyframes.size() << " of " << db.size() << " frames"
-              << std::endl;
 }
 
 void FrameDB::makeSDs() {
