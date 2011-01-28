@@ -33,6 +33,8 @@ let
                          in
                            String.implode (Array.foldr op:: [] strArr)
                          end
+  val rec allwrds = fn (acc, 0) => acc
+                     | (acc, c) => let val word = makeword c in allwrds(word::acc, c - 1) end
 in
-  ["foo"]
+    allwrds([], cnt)
 end;
