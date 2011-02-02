@@ -1,3 +1,4 @@
+val numFramesC        = _import "numFramesC" : int -> int;
 
 (* Values for communicating with C++ *)
 val original = 0;
@@ -11,34 +12,54 @@ val training = 6;
  * AslAlg functions
  * * * * * * * * * * * * * * * * * * * * *)
 
-(*
- *interp:
- *    testDir: string
- *    trainDir: string
- *    testFrames: int list
- *)
-(* functions must return annotations and a set of annotated interpretations *)
-
 (* Add the train and test directory to the interpretation.
- * Called with 'munge', so the type is a little different
+ * Initialize all the other values
  *)
-val setDirs = fn( test, train ) => fn(_) => (NONE,
+val setDirs = fn(test, train) => fn(_) => (NONE,
        [(NONE,
          Interp.hcons
-         { testDir_H = test, trainDir_H = train,
-           testFrames_H = Interp.testFrames_S.hcnil } ) ] );
+         { testFrames_H = Interp.testFrames_S.hcnil,
+           trainedWords_H = Interp.trainedWords_S.hcnil,
+           maxLevel_H = 0, levelNum_H = 0, levelWord_H = "",
+           levelScores_H = Interp.levelScores_S.hcnil,
+           levelPrevs_H = Interp.levelPrevs_S.hcnil } ) ] );
 
 (* Initialize the system state - training and loading video *)
-val trainAndLoad = fn() => fn( i ) =>
-let
-  val { testDir = test, trainDir = train,
-        testFrames = frames } = i
-in
-  aslalg train test;
+val trainAndLoad = fn() => fn(i) =>
   (NONE, [(NONE, { testFrames = Vector.foldr op:: [] (Cvsl.getIds 0) } ) ] )
+
+val getWords = fn() => fn(i) => (NONE, [(NONE, { trainedWords = allWords()})]);
+
+val getMaxLevel = fn(is) =>
+let
+  val imax = foldl Int.max 0 (List.map (fn(i) =>
+                                        let
+                                          val {levelNum, testDir, trainDir, testFrames,
+                                               trainedWords, maxLevel,
+                                               levelWord, levelScores, levelPrevs} = i
+                                        in levelNum end)
+                                     is)
+in
+  imax
 end
 
-datatype sentenceItem = Start
-                      | End
-                      | Me
-                      | Gloss of string;
+val belowMaxLevel = fn (max) => fn(is) => (NONE, Int.<((getMaxLevel(is)),max))
+
+(*[FirstLevel] update levelNum, levelWord, levelScores, levelPrevs: firstLevel()*)
+val firstLevel = fn() => fn(_) =>
+let
+  val start = indexOf Start
+  val num = numFramesC(0)
+in
+  (NONE, [(NONE, { maxLevel = 0, levelNum = 0, levelWord = "",
+                   levelScores = List.tabulate(num, fn(_) => 0.0),
+                   levelPrevs = List.tabulate(num, fn(_) => 0) })])
+end
+
+val atMax = fn() => fn(i) =>
+let
+  val { maxLevel = max, levelNum = lvl, testDir, trainDir, testFrames,
+  trainedWords, levelWord, levelScores, levelPrevs } = i
+in
+  (NONE, max = lvl)
+end

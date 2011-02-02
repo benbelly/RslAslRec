@@ -3,17 +3,33 @@ inc "aslalg.sml" % Functions to drive algorithm
 inc "levelbuilding-external.sml" % Interp to string, etc
 
 interp:
-    testDir: string
-    trainDir: string
     testFrames: int list
-
+    trainedWords: string list
+    maxLevel : int
+    levelNum : int
+    levelWord : string
+    levelScores : real list
+    levelPrevs : int list
 
 fn main ( inFile ) {
-    test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
-    train = "/home/bholm/USF-ASL-Data-Set-v2"
+    ML {
+        val test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
+        val train = "/home/bholm/USF-ASL-Data-Set-v2"
+        (*val _ = aslalgLoad train test*)
+        (*val itemMap = itemIndexMap()*)
+    }
 
     [Init] munge: setDirs( test, train )
-    [LoadVideo] update testFrames observing testDir, trainDir: trainAndLoad()
+    [LoadVideo] update testFrames: trainAndLoad()
+    [GetTrainedWords] update trainedWords: getWords()
+    [FirstLevel] update maxLevel, levelNum, levelWord,
+                        levelScores, levelPrevs: firstLevel()
+
+    [LevelCheck] while all belowMaxLevel( 20 ) {
+        [OnlyHighestLevel] if atMax() {
+            accept
+        }
+    }
 
     print ifile
 }
