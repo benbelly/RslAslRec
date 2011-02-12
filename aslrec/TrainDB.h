@@ -17,6 +17,8 @@ class TrainDB {
         TrainDB();
         virtual ~TrainDB();
 
+        double Distance( std::string word, int start, int end );
+
         int NumGlosses() const { return trainedSigns.size(); }
         std::string GetGloss( int i ) const { return glosses()[i]; }
 

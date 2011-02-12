@@ -28,9 +28,9 @@ fun allWords() =
   let
     val cnt = getNumberOfSignsC()
     val makeword = fn i => let
-                            val len = getSignLengthC(i)
-                            val strArr = Array.array(len, #"*")
-                            val _ = getSignC( i, strArr )
+                             val len = getSignLengthC(i)
+                             val strArr = Array.array(len, #"*")
+                             val _ = getSignC( i, strArr )
                            in
                              String.implode (Array.foldr op:: [] strArr)
                            end
@@ -50,14 +50,31 @@ fun itemIndexMap() =
     val allwords = List.map (fn w => Gloss(w)) (allWords())
     val nonwords = [ Start, End, ME ]
     val allItems = nonwords @ allwords
-    val indices = Vector.foldr op:: [] (Vector.mapi (fn (i,_) => i) (Vector.fromList(allItems)))
+    val indices = List.tabulate(length allItems, fn i => i)
   in
     ListPair.zip(indices, allItems)
   end
 
-fun indexOf item =
+fun indexOf iMap item =
   let
-    val (idx, _) = valOf (List.find (fn (i, v) => item = v) (itemIndexMap()))
+    val (idx, _) = valOf (List.find (fn (i, v) => item = v) iMap)
   in
     idx
   end
+
+fun itemOf iMap index =
+  let
+    val (_, item) = valOf (List.find (fn (i,v) => index = i) iMap)
+  in
+    item
+  end
+
+fun items iMap indexList = map (itemOf iMap) indexList
+fun indices iMap itemList = map (indexOf iMap) itemList
+
+(*
+ *fun scoreForWord Start _ _ = []
+ *  | scoreForWord End _ _ = []
+ *  | scoreForWord ME _ prevs = [] [> ME scores depend on length of ME <]
+ *  | scoreForWord (Gloss(word)) intervals _ =
+ *)

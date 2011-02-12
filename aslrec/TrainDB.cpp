@@ -15,6 +15,10 @@ TrainDB::TrainDB() {
 TrainDB::~TrainDB() {
 }
 
+double TrainDB::Distance( std::string word, int start, int end ) {
+    return trainedSigns[word]->Distance( start, end );
+}
+
 SignSeq *TrainDB::NextSequenceForGloss( std::string g ) {
     //cerr << "Getting next sequence for " << g << endl;
     GlossMap::iterator glossI = GlossIter( g );
