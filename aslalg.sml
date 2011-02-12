@@ -15,51 +15,54 @@ val training = 6;
 (* Add the train and test directory to the interpretation.
  * Initialize all the other values
  *)
-val setDirs = fn(test, train) => fn(_) => (NONE,
+val setDirs = fn(_) => (NONE,
        [(NONE,
-         Interp.hcons
-         { testFrames_H = Interp.testFrames_S.hcnil,
-           trainedWords_H = Interp.trainedWords_S.hcnil,
-           maxLevel_H = 0, levelNum_H = 0, levelWord_H = "",
-           levelScores_H = Interp.levelScores_S.hcnil,
-           levelPrevs_H = Interp.levelPrevs_S.hcnil } ) ] );
+         Interp.rhcons(
+           { testFrames = Vector.fromList([]),
+             levelNum = 0, levelWord = 0,
+             levelScores = [], levelPrevs = [] } ) ) ] );
 
 (* Initialize the system state - training and loading video *)
-val trainAndLoad = fn() => fn(i) =>
-  (NONE, [(NONE, { testFrames = Vector.foldr op:: [] (Cvsl.getIds 0) } ) ] )
+val getIds = fn() => fn(i) =>
+  (NONE, [(NONE, { testFrames = Cvsl.getIds 0 } ) ] )
 
-val getWords = fn() => fn(i) => (NONE, [(NONE, { trainedWords = allWords()})]);
+val highestReachedLevel = fn(is) =>
+    foldl Int.max 0 (List.map (fn {levelNum} => levelNum ) is)
 
-val getMaxLevel = fn(is) =>
-let
-  val imax = foldl Int.max 0 (List.map (fn(i) =>
-                                        let
-                                          val {levelNum, testDir, trainDir, testFrames,
-                                               trainedWords, maxLevel,
-                                               levelWord, levelScores, levelPrevs} = i
-                                        in levelNum end)
-                                     is)
-in
-  imax
-end
+val belowMaxLevel = fn (max) => fn(is) =>
+  let
+    val reached = highestReachedLevel(is)
+  in
+    (NONE, fn _ => (NONE, Int.<(reached,max)))
+  end
 
-val belowMaxLevel = fn (max) => fn(is) => (NONE, Int.<((getMaxLevel(is)),max))
+val atMax = fn(is) =>
+  let
+    val reached : int = highestReachedLevel(is)
+  in
+    (NONE, (fn ({levelNum : int}) => (NONE, levelNum = reached)))
+  end
 
-(*[FirstLevel] update levelNum, levelWord, levelScores, levelPrevs: firstLevel()*)
-val firstLevel = fn() => fn(_) =>
-let
-  val start = indexOf Start
-  val num = numFramesC(0)
-in
-  (NONE, [(NONE, { maxLevel = 0, levelNum = 0, levelWord = "",
-                   levelScores = List.tabulate(num, fn(_) => 0.0),
-                   levelPrevs = List.tabulate(num, fn(_) => 0) })])
-end
+val levelZero = fn(itemMap) => fn(_) =>
+  let
+    val start = indexOf itemMap Start
+    val num = numFramesC(0)
+  in
+    (NONE, [(NONE, { levelNum = 0, levelWord = start,
+                     levelScores = List.tabulate(num, fn(_) => 0.0),
+                     levelPrevs = List.tabulate(num, fn(_) => ([], 0.0)) })])
+  end
 
-val atMax = fn() => fn(i) =>
-let
-  val { maxLevel = max, levelNum = lvl, testDir, trainDir, testFrames,
-  trainedWords, levelWord, levelScores, levelPrevs } = i
-in
-  (NONE, max = lvl)
-end
+
+(*[NextLevel] update levelNum, levelScores: scoreNextLevel()*)
+val scoreNextLevels = fn(itemMap) => fn i =>
+  let 
+    val { levelNum, levelScores, levelPrevs,
+          levelWord, testFrames } = i
+    val nextLevel = levelNum + 1
+    val nextPrevious = addToPrevious levelWord levelPrevs levelScores
+    val intervals = makeIntervals nextLevel testFrames (Vector.length testFrames)
+    val scores = scoreWordsAndIntervals itemMap intervals
+  in
+    scores
+  end
