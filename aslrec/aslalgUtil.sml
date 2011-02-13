@@ -6,6 +6,7 @@ val findHands         = _import "findHandsC" : unit -> unit;
 val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
 val getSignLengthC    = _import "getSignLengthC" : int -> int;
 val getSignC          = _import "getSignC" : int * char array -> unit;
+val distanceC         = _import "distanceC" : string * int * int * int -> real;
 
 fun aslalgLoad trainDir testDir =
   let
@@ -22,7 +23,7 @@ fun aslalgLoad trainDir testDir =
     findHands();
     trainForRoot trainingS
     (*Cvsl.saveAllImages "cvsl_out/orig" "png" 0;*)
-  end;
+  end
 
 fun allWords() =
   let
@@ -38,7 +39,7 @@ fun allWords() =
                        | (acc, c) => let val word = makeword c in allwrds(word::acc, c - 1) end
   in
       allwrds([], cnt - 1)
-  end;
+  end
 
 datatype sentenceItem = Start
                       | End
@@ -72,9 +73,22 @@ fun itemOf iMap index =
 fun items iMap indexList = map (itemOf iMap) indexList
 fun indices iMap itemList = map (indexOf iMap) itemList
 
-(*
- *fun scoreForWord Start _ _ = []
- *  | scoreForWord End _ _ = []
- *  | scoreForWord ME _ prevs = [] [> ME scores depend on length of ME <]
- *  | scoreForWord (Gloss(word)) intervals _ =
- *)
+fun scoreItemForIntervals Start _ _ = []
+  | scoreItemForIntervals End _ _ = []
+  | scoreItemForIntervals ME intervals prevScores = []
+        (* If the previous word is ME, no scores (can't have ME then ME), otherwise score length *)
+      (*
+       *let
+       *  val meIdx = indexOf ME
+       *  val lastIsME = fn (idxList,_) => (hd idxList) = meIdx
+       *in
+       *end
+       *)
+  | scoreItemForIntervals (Gloss(word)) intervals _ =
+      let
+        val len = String.size word
+        val intervalScores = map (fn i => let val (s,e) = i in (i, distanceC( word, len, s, e )) end )
+                                 intervals
+      in
+        intervalScores
+      end;

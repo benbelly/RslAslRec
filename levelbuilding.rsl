@@ -1,33 +1,31 @@
-inc "aslalg.mlb" % Helper files for aslalg.sml
-inc "aslalg.sml" % Functions to drive algorithm
-inc "levelbuilding-external.sml" % Interp to string, etc
+inc "aslalg.mlb"
+inc "aslalg.sml"
+inc "levelbuilding-external.sml"
 
 interp:
-    testFrames: int list
-    trainedWords: string list
-    maxLevel : int
+    testFrames: int vector
     levelNum : int
-    levelWord : string
-    levelScores : real list
-    levelPrevs : int list
+    levelWord : int
+    levelScores : real vector
+    levelPrevs : (int list * real) vector
 
 fn main ( inFile ) {
-    ML {
-        val test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
-        val train = "/home/bholm/USF-ASL-Data-Set-v2"
-        (*val _ = aslalgLoad train test*)
-        (*val itemMap = itemIndexMap()*)
-    }
+    test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
+    train = "/home/bholm/USF-ASL-Data-Set-v2"
+    (*ML*)
+        val _ = aslalgLoad train test
+        val itemMap = itemIndexMap()
+    (*ML*)
 
-    [Init] munge: setDirs( test, train )
-    [LoadVideo] update testFrames: trainAndLoad()
-    [GetTrainedWords] update trainedWords: getWords()
-    [FirstLevel] update maxLevel, levelNum, levelWord,
-                        levelScores, levelPrevs: firstLevel()
+    [Init] munge: setDirs
+    [LoadVideo] update testFrames: getIds()
+    [LevelZero] update levelNum, levelWord,
+                       levelScores, levelPrevs: levelZero(itemMap)
 
-    [LevelCheck] while all belowMaxLevel( 20 ) {
-        [OnlyHighestLevel] if atMax() {
-            accept
+    [LevelCheck] while all observing levelNum belowMaxLevel( 20 ) {
+        [OnlyHighestLevel] if all observing levelNum atMax {
+            (* [NextLevel] update levelNum, levelScores, levelPrevs
+                            observing levelWord testFrames: scoreNextLevels( itemMap )*)
         }
     }
 

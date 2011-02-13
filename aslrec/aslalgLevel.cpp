@@ -36,3 +36,8 @@ void getSignC( int i, Pointer dst ) {
     const char *cs = sign.c_str();
     memcpy( dst, cs, sign.size() ) ;
 }
+
+double distanceC( Pointer word, int wordLen, int start, int end ) {
+    std::string gloss( (char *)word, wordLen );
+    return TDB->Distance( gloss, start, end );
+}

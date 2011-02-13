@@ -11,6 +11,8 @@ extern "C" {
     int getNumberOfSignsC();
     int getSignLengthC( int i );
     void getSignC( int i, Pointer dst );
+
+    double distanceC( Pointer word, int wordLen, int start, int end );
 }
 
 #endif

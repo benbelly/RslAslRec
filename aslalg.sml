@@ -20,7 +20,8 @@ val setDirs = fn(_) => (NONE,
          Interp.rhcons(
            { testFrames = Vector.fromList([]),
              levelNum = 0, levelWord = 0,
-             levelScores = [], levelPrevs = [] } ) ) ] );
+             levelScores = Vector.fromList([]),
+             levelPrevs = Vector.fromList([]) } ) ) ] );
 
 (* Initialize the system state - training and loading video *)
 val getIds = fn() => fn(i) =>
@@ -49,8 +50,8 @@ val levelZero = fn(itemMap) => fn(_) =>
     val num = numFramesC(0)
   in
     (NONE, [(NONE, { levelNum = 0, levelWord = start,
-                     levelScores = List.tabulate(num, fn(_) => 0.0),
-                     levelPrevs = List.tabulate(num, fn(_) => ([], 0.0)) })])
+                     levelScores = Vector.tabulate(num, fn(_) => 0.0),
+                     levelPrevs = Vector.tabulate(num, fn(_) => ([], 0.0)) })])
   end
 
 
@@ -60,9 +61,8 @@ val scoreNextLevels = fn(itemMap) => fn i =>
     val { levelNum, levelScores, levelPrevs,
           levelWord, testFrames } = i
     val nextLevel = levelNum + 1
-    val nextPrevious = addToPrevious levelWord levelPrevs levelScores
-    val intervals = makeIntervals nextLevel testFrames (Vector.length testFrames)
-    val scores = scoreWordsAndIntervals itemMap intervals
+    val intervals = makeIntervals nextLevel testFrames levelPrevs
+    val scores = scoreItemsAndIntervals itemMap intervals levelPrevs
   in
     scores
   end
