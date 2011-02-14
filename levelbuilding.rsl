@@ -2,12 +2,17 @@ inc "aslalg.mlb"
 inc "aslalg.sml"
 inc "levelbuilding-external.sml"
 
+(*
+  The interpretation is an interval (start frame to end frame) for a word
+  with the distance for that word and the score of a predecessor. The
+  total distance of the sentence is predecessor distance + interval distance
+*)
 interp:
     testFrames: int vector
-    levelNum : int
-    levelWord : int
-    levelScores : real vector
-    levelPrevs : (int list * real) vector
+    level : int
+    word : int
+    interval : int * int * real
+    prevs : int list * real
 
 fn main ( inFile ) {
     test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
@@ -17,13 +22,16 @@ fn main ( inFile ) {
         val itemMap = itemIndexMap()
     (*ML*)
 
-    [Init] munge: setDirs
-    [LoadVideo] update testFrames: getIds()
-    [LevelZero] update levelNum, levelWord,
-                       levelScores, levelPrevs: levelZero(itemMap)
+    [Init] munge: init
+    [LoadVideo] update testFrames: getIds
+    [LevelOne] update level, word, interval, prevs
+               observing testFrames: levelOne(itemMap)
+    [ScoreLevelOne] update interval observing level, word: scoreLevel(itemMap)
 
-    [LevelCheck] while all observing levelNum belowMaxLevel( 20 ) {
-        [OnlyHighestLevel] if all observing levelNum atMax {
+    [LevelCheck] while all observing level belowMaxLevel( 20 ) {
+        [OnlyHighestLevel] if all observing level atMax {
+            [NextLevel] update level, word, interval
+                        observing testFrames: levelUp(itemMap)
             (* [NextLevel] update levelNum, levelScores, levelPrevs
                             observing levelWord testFrames: scoreNextLevels( itemMap )*)
         }

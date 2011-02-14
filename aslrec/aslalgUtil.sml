@@ -73,22 +73,18 @@ fun itemOf iMap index =
 fun items iMap indexList = map (itemOf iMap) indexList
 fun indices iMap itemList = map (indexOf iMap) itemList
 
-fun scoreItemForIntervals Start _ _ = []
-  | scoreItemForIntervals End _ _ = []
-  | scoreItemForIntervals ME intervals prevScores = []
-        (* If the previous word is ME, no scores (can't have ME then ME), otherwise score length *)
-      (*
-       *let
-       *  val meIdx = indexOf ME
-       *  val lastIsME = fn (idxList,_) => (hd idxList) = meIdx
-       *in
-       *end
-       *)
-  | scoreItemForIntervals (Gloss(word)) intervals _ =
+fun findDistance _ _ Start = 0.0
+  | findDistance _ _ End = 0.0
+  | findDistance b e ME =
       let
-        val len = String.size word
-        val intervalScores = map (fn i => let val (s,e) = i in (i, distanceC( word, len, s, e )) end )
-                                 intervals
+        val alpha = 0.35 (* value of 'nullscore' in original *)
+        val distance = Real.fromInt ((e - b) + 1) (* minimum distance of 1 *)
       in
-        intervalScores
-      end;
+        alpha * distance (* Equation (5) in paper *)
+      end
+  | findDistance b e (Gloss(word)) =
+      let
+        val distance = distanceC( word, String.size word, b, e )
+      in
+        distance
+      end
