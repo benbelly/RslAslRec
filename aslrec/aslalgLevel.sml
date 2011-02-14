@@ -23,7 +23,7 @@ in
 
   fun makeIntervalsFromEnd frame testFrames maxI =
     let
-      val (idx, _) = valOf (Vector.findi (fn(_,fId) = fId = frame) testFrames)
+      val (idx, _) = valOf (Vector.findi (fn(_,fId) => fId = frame) testFrames)
     in
       makeIntervalsFromEnd idx testFrames maxI
     end

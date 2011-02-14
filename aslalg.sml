@@ -77,11 +77,20 @@ fun levelUp(itemMap) = fn(i) =>
   let
     val { testFrames, level, word, interval } = i
     val thisLevel = level + 1
-    val (b, e) = interval
+    val (b, e, _) = interval
     val wordStr = itemOf itemMap word
     val intervals = makeIntervalsFromEnd e testFrames (Vector.length testFrames)
-    val scoresForInterval = fn (b,e) => findDistance b e wordStr
-    val 
+    val makeInterp = fn(b,e) => (NONE, { level = thisLevel, word = word,
+                                         interval = (b, e, 0.0) } )
+    val interps = Vector.foldl op:: [] (Vector.map makeInterp intervals)
+    val origInterp = (NONE, { level = level, word = word, interval = interval })
   in
+    (NONE, origInterp :: interps)
   end
 
+fun updatePrevs(is) =
+  (NONE, fn({prevs, interval, level}) =>
+    let
+      val (myStart, _, _) = interval
+      val 
+  (*(NONE, fn({prevs, interval, level}) => (NONE, [(NONE, {prevs = prevs})]))*)

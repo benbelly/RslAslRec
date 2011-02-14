@@ -14,6 +14,18 @@ interp:
     interval : int * int * real
     prevs : int list * real
 
+fn makeLevel(itemMap) {
+    [NextLevel] update level, word, interval
+                observing testFrames: levelUp(itemMap)
+    (* LevelUp just created a set of interps at new highest level, so 
+       only look at those *)
+    [InternalLevelCheck] if all observing level atMax {
+        (* [DeleteDuplicates] fold *)
+        [ScoreLevel] update interval observing level, word: scoreLevel(itemMap)
+        [GetPrevs] update all prevs observing interval, level: updatePrevs
+    }
+}
+
 fn main ( inFile ) {
     test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
     train = "/home/bholm/USF-ASL-Data-Set-v2"
@@ -30,12 +42,10 @@ fn main ( inFile ) {
 
     [LevelCheck] while all observing level belowMaxLevel( 20 ) {
         [OnlyHighestLevel] if all observing level atMax {
-            [NextLevel] update level, word, interval
-                        observing testFrames: levelUp(itemMap)
-            (* [NextLevel] update levelNum, levelScores, levelPrevs
-                            observing levelWord testFrames: scoreNextLevels( itemMap )*)
+            makeLevel(itemMap)
         }
     }
 
     print ifile
 }
+
