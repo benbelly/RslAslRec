@@ -24,7 +24,7 @@ fun init (_) = (NONE,
              prevs = ([], 0.0) } ) ) ] );
 
 (* Initialize the system state - training and loading video *)
-fun getIds (i) =
+fun getIds (_) =
   (NONE, [(NONE, { testFrames = Cvsl.getIds 0 } ) ] )
 
 (* Create the level 1 interpretation. *)
@@ -63,6 +63,9 @@ fun atMax (is) =
     (NONE, (fn ({level}) => (NONE, level = reached)))
   end
 
+fun max (is) = (Int.toString(highestReachedLevel(is)) ^ "\n")
+fun len (is) = (Int.toString(List.length(is)) ^ "\n")
+
 fun scoreLevel (itemMap) = fn(i) =>
   let
     val { interval, level, word } = i
@@ -89,8 +92,19 @@ fun levelUp(itemMap) = fn(i) =>
   end
 
 fun updatePrevs(is) =
-  (NONE, fn({prevs, interval, level}) =>
-    let
-      val (myStart, _, _) = interval
-      val 
-  (*(NONE, fn({prevs, interval, level}) => (NONE, [(NONE, {prevs = prevs})]))*)
+  (NONE, fn({prevs, interval, level, word}) =>
+           let
+             val (myStart, _, _) = interval
+             val targetEnd = myStart - 1
+             val targetLevel = level - 1
+             val validPrevs = List.filter (fn ({prevs, interval = (_, iend, _),
+                                                level = lvl, word}) =>
+                                              lvl = targetLevel andalso iend = targetEnd ) is
+             val interps = List.map (fn ({prevs = (plist, pscr : real),
+                                          interval = (_, _, scr : real),
+                                          level = lvl, word = wrd }) =>
+                                        (NONE, { prevs = ( wrd :: plist, scr + pscr ) } ) )
+                                    validPrevs
+           in
+             (NONE, interps)
+           end)

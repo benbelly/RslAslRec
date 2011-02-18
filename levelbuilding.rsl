@@ -22,11 +22,11 @@ fn makeLevel(itemMap) {
     [InternalLevelCheck] if all observing level atMax {
         (* [DeleteDuplicates] fold *)
         [ScoreLevel] update interval observing level, word: scoreLevel(itemMap)
-        [GetPrevs] update all prevs observing interval, level: updatePrevs
+        [GetPrevs] update all prevs observing interval, level, word: updatePrevs
     }
 }
 
-fn main ( inFile ) {
+fn main ( ) {
     test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     (*ML*)
@@ -36,11 +36,19 @@ fn main ( inFile ) {
 
     [Init] munge: init
     [LoadVideo] update testFrames: getIds
+    print "Trained and loaded"
+    print all: len
+
     [LevelOne] update level, word, interval, prevs
                observing testFrames: levelOne(itemMap)
+    print "Level one intervals created"
+    print all: len
+
     [ScoreLevelOne] update interval observing level, word: scoreLevel(itemMap)
+    print "Level one scored"
 
     [LevelCheck] while all observing level belowMaxLevel( 20 ) {
+        print all observing level: max
         [OnlyHighestLevel] if all observing level atMax {
             makeLevel(itemMap)
         }

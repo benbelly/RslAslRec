@@ -11,7 +11,7 @@ PCAVec makeBigVector( HistogramSet &ss ) {
     PCAVec vec = PCAVec::zeros( ss.size(), vsize );
     // Copy each incoming histogram into its own row
     for( unsigned int i = 0; i < ss.size(); ++i )
-        memcpy( vec[i], &ss[i], vsize * sizeof(double) );
+        memcpy( vec[i], ss[i][0], vsize * sizeof(double) );
     return vec;
 }
 

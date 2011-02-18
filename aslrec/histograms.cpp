@@ -10,7 +10,7 @@ inline void NormalizeHistogram( Histogram &hist, double total );
 static const int histSize = 32;
 
 HistogramSet generateHandHistograms( cv::Size size, ContourSet cs ) {
-    std::vector<cv::Mat> hs; hs.reserve( cs.size() );
+    HistogramSet hs; hs.reserve( cs.size() );
     std::transform( cs.begin(), cs.end(), std::back_inserter( hs ),
                     std::bind1st( std::ptr_fun( generateHandHistogram ), size ) );
     return hs;

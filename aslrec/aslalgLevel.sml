@@ -25,7 +25,7 @@ in
     let
       val (idx, _) = valOf (Vector.findi (fn(_,fId) => fId = frame) testFrames)
     in
-      makeIntervalsFromEnd idx testFrames maxI
+      makeIntervals idx testFrames maxI
     end
     
 end (* scope *)
