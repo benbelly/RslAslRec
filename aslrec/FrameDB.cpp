@@ -114,7 +114,6 @@ void FrameDB::makeSDs() {
         db[i->first.id].handCenters = centers( i->second );
         HistogramSet histograms = generateHandHistograms( (i->first).size(), i->second );
         db[i->first.id].histograms = histograms;
-        //db[i->first.id].pcas = pcaForHists( histograms );
     }
 }
 

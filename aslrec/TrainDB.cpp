@@ -1,6 +1,7 @@
 
 #include "TrainDB.h"
 #include "Databases.h"
+#include "TrainingData.h"
 
 #include<iostream>
 
@@ -16,7 +17,9 @@ TrainDB::~TrainDB() {
 }
 
 double TrainDB::Distance( std::string word, int start, int end ) {
-    return trainedSigns[word]->Distance( start, end );
+    static auto_ptr<TrainingData> data( new TrainingData( GlossPtrs() ) );
+    return trainedSigns[word]->Distance( data->GetPCA(), data->GetCovariance( word ),
+                                         start, end );
 }
 
 SignSeq *TrainDB::NextSequenceForGloss( std::string g ) {
@@ -42,6 +45,7 @@ int TrainDB::AddHandToList( shared_ptr<FeatureFrame> ff ) {
 
 int getId( std::pair<int, shared_ptr<FeatureFrame> > p ) { return p.first; }
 std::string getTrainedId( std::pair<std::string, shared_ptr<Gloss> > p ) { return p.first; }
+shared_ptr<Gloss> getGlossPtr( std::pair<std::string, shared_ptr<Gloss> > p ) { return p.second; }
 
 std::vector<int> TrainDB::ids() {
     std::vector<int> is; is.reserve( features.size() );
@@ -57,4 +61,11 @@ std::vector<std::string> TrainDB::glosses() const {
                         std::back_inserter( glossesVec ), std::ptr_fun( getTrainedId ) );
     }
     return glossesVec;
+}
+
+std::vector<boost::shared_ptr<Gloss> > TrainDB::GlossPtrs() const {
+    std::vector<GlossPtr> ptrs; ptrs.reserve( trainedSigns.size() );
+    std::transform( trainedSigns.begin(), trainedSigns.end(),
+                    std::back_inserter( ptrs ), std::ptr_fun( getGlossPtr ) );
+    return ptrs;
 }

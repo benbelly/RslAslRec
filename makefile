@@ -18,13 +18,12 @@ ASLREC_OBJS = $(addprefix $(ASLREC_DIR)/, aslalg.o \
 			  							  frame.o keyframeselect.o \
 			  							  keyframedist.o \
 			  							  skinmask.o edgedetection.o \
-										  eigens.o \
 										  histograms.o SkinModel.o \
 										  SignSeq.o SignSeqScores.o \
 										  Gloss.o \
 										  FeatureFrame.o \
 										  Databases.o FrameDB.o TrainDB.o \
-										  aslalgLevel.o )
+										  aslalgLevel.o TrainingData.o )
 ASLREC_SMLS = $(addprefix $(ASLREC_DIR)/, aslalgLevel.sml aslalgUtil.sml )
 
 

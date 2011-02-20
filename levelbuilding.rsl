@@ -22,8 +22,8 @@ fn makeLevel(itemMap) {
     [InternalLevelCheck] if all observing level atMax {
         (* [DeleteDuplicates] fold *)
         [ScoreLevel] update interval observing level, word: scoreLevel(itemMap)
-        [GetPrevs] update all prevs observing interval, level, word: updatePrevs
     }
+    [GetPrevs] update all prevs observing interval, level, word: updatePrevs
 }
 
 fn main ( ) {
