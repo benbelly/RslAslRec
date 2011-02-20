@@ -4,6 +4,7 @@
 #include "TrainingData.h"
 
 #include<iostream>
+#include<memory>
 
 using boost::shared_ptr;
 using std::cerr;
@@ -17,7 +18,7 @@ TrainDB::~TrainDB() {
 }
 
 double TrainDB::Distance( std::string word, int start, int end ) {
-    static auto_ptr<TrainingData> data( new TrainingData( GlossPtrs() ) );
+    static std::auto_ptr<TrainingData> data( new TrainingData( GlossPtrs() ) );
     return trainedSigns[word]->Distance( data->GetPCA(), data->GetCovariance( word ),
                                          start, end );
 }
