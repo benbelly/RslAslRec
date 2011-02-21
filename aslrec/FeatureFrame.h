@@ -15,9 +15,9 @@ struct FeatureFrame {
         std::auto_ptr<Histogram> weakHist;
 
 
-        double distance( const Histogram testDom,
+        double distance( const cv::Mat &testDom,
                          const cv::PCA &pca, const cv::Mat &covar );
-        double distance( const Histogram testDom, Histogram testWeak,
+        double distance( const cv::Mat &testDom, const cv::Mat &testWeak,
                          const cv::PCA &pca, const cv::Mat &covar );
 
     private:

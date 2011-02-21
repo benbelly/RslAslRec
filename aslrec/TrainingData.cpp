@@ -25,8 +25,8 @@ TrainingData::TrainingData( const std::vector<boost::shared_ptr<Gloss> > &gs ) :
 std::list<Histogram> TrainingData::GetHists()  {
     std::list<Histogram> hists;
     std::for_each( glosses.begin(), glosses.end(),
-                   boost::bind( &Gloss::AppendHistograms, _1, hists ) );
-    if( hists.empty() ) throw "No Histograms in TrainingData::GetHists()";
+                   boost::bind( &Gloss::AppendHistograms, _1, &hists ) );
+    if( hists.empty() ) throw std::string( "No Histograms in TrainingData::GetHists()" );
     return hists;
 }
 
@@ -39,7 +39,8 @@ std::map<std::string, std::list<Histogram> > TrainingData::GetWordHists() {
         wordHists[glossPtr->gloss] = std::list<Histogram>();
         std::vector<boost::shared_ptr<SignSeq> > seqs = glossPtr->Sequences();
         std::for_each( seqs.begin(), seqs.end(),
-                       boost::bind( &SignSeq::AppendHistograms, _1, wordHists[glossPtr->gloss] ) );
+                       boost::bind( &SignSeq::AppendHistograms, _1,
+                                    &(wordHists[glossPtr->gloss]) ) );
         ++begin;
     }
     return wordHists;
@@ -67,8 +68,12 @@ std::map<std::string, cv::Mat> TrainingData::MakeCovar()  {
     while( begin != end ) {
         const std::string &word = begin->first;
         const std::list<Histogram> &hists = begin->second;
-        std::list<Histogram> projections;
+        std::list<Histogram> flats;
         std::transform( hists.begin(), hists.end(),
+                        std::back_inserter( flats ),
+                        boost::bind( &flattenHistogram, _1 ) );
+        std::list<Histogram> projections;
+        std::transform( flats.begin(), flats.end(),
                         std::back_inserter( projections ),
                         boost::bind( &cv::PCA::project, &pca, _1 ) );
         covariants[word] = MakeBigVector( projections );

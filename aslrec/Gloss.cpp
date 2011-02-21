@@ -18,7 +18,7 @@ SignSeq *Gloss::NextSeq() {
     return ssp.get();
 }
 
-void Gloss::AppendHistograms( std::list<Histogram> &hists ) const {
+void Gloss::AppendHistograms( std::list<Histogram> *hists ) const {
     std::for_each( trainedSeqs.begin(), trainedSeqs.end(),
                    boost::bind( &SignSeq::AppendHistograms, _1, hists ) );
 }

@@ -83,6 +83,12 @@ void addImages( Histogram &dst, Histogram src ) {
     while( db != de ) *db++ += *sb++;
 }
 
+Histogram flattenHistogram( const Histogram &h ) {
+    Histogram flat = Histogram::zeros( 1, h.rows * h.cols );
+    memcpy( flat[0], h[0], h.rows * h.cols * sizeof( double ) );
+    return flat;
+}
+
 cv::Mat h2i( Frame, HistogramSet &hs ) {
     unsigned int width = hs[0].cols, height = hs[0].rows;
     Histogram histImg = Histogram::zeros( height, width );

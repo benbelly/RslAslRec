@@ -1,6 +1,4 @@
 
-#include<iostream>
-#include<numeric>
 
 //#include "logging.h"
 
@@ -13,6 +11,10 @@
 
 #include "FrameDBHelpers.h"
 #include "Databases.h"
+
+#include<iostream>
+#include<numeric>
+#include<boost/bind.hpp>
 
 using std::cout;
 using std::endl;
@@ -46,7 +48,7 @@ void FrameDB::setItem( FrameDB::Setter s, FrameSet vals ) {
 }
 
 int FrameDB::firstId() const {
-    if( db.empty() ) throw "Empty Database!";  //shrug
+    if( db.empty() ) throw std::string( "Empty Database!" );  //shrug
     return db.begin()->first;
 }
 
@@ -115,6 +117,22 @@ void FrameDB::makeSDs() {
         HistogramSet histograms = generateHandHistograms( (i->first).size(), i->second );
         db[i->first.id].histograms = histograms;
     }
+}
+
+ProjectionSet FrameDB::projections( int i, const cv::PCA &pca ) {
+    if( db[i].projections.empty() ) {
+        const HistogramSet &hists = histograms( i );
+        ProjectionSet flats; flats.reserve( hists.size() );
+        std::transform( hists.begin(), hists.end(),
+                        std::back_inserter( flats ),
+                        boost::bind( &flattenHistogram, _1 ) );
+        ProjectionSet ps; ps.reserve( hists.size() );
+        std::transform( flats.begin(), flats.end(),
+                        std::back_inserter( ps ),
+                        boost::bind( &cv::PCA::project, pca, _1 ) );
+        db[i].projections = ps;
+    }
+    return db[i].projections;
 }
 
 Frame FrameDB::histogramImg( int i ) {

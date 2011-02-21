@@ -27,6 +27,7 @@ class FrameDB {
             ContourSet hands;
             CenterSet handCenters;
             HistogramSet histograms;
+            ProjectionSet projections;
             FrameData( int i, const cv::Mat &img );
             // Don't use. Provide for std::map
             FrameData() {}
@@ -49,6 +50,7 @@ class FrameDB {
         Frame sd( int i )                { return db[i].SD; }
         Frame boundary( int i )          { return db[i].boundary; }
         HistogramSet histograms( int i ) { return db[i].histograms; }
+        ProjectionSet projections( int i, const cv::PCA &pca );
         Frame histogramImg( int i );
         ContourSet hands( int i )        { return db[i].hands; }
         CenterSet handCenters( int i )   { return db[i].handCenters; }

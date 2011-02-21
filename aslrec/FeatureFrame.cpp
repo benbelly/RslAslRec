@@ -18,26 +18,22 @@ FeatureFrame::FeatureFrame( cv::Point tl, cv::Point br, cv::Mat d, cv::Mat w ) :
 
 }
 
-double FeatureFrame::distance( const Histogram testDom,
+double FeatureFrame::distance( const cv::Mat &testDom,
                                const cv::PCA &pca, const cv::Mat &covar ) {
     if( weakHist.get() ) { // two-handed training sign - not enough hands
         std::cerr << "Not enough hands penalty assigned\n";
         return NOT_ENOUGH_HANDS;
     }
-    cv::Mat testDomProjection = pca.project( testDom );
-    return cv::Mahalonobis( testDomProjection, GetDomProjection( pca ), covar );
+    return cv::Mahalonobis( testDom, GetDomProjection( pca ), covar );
 }
 
-double FeatureFrame::distance( const Histogram testDom,
-                               const Histogram testWeak,
+double FeatureFrame::distance( const cv::Mat &testDom,
+                               const cv::Mat &testWeak,
                                const cv::PCA &pca, const cv::Mat &covar ) {
-    cv::Mat testDomProjection = pca.project( testDom ),
-            trainDomProjection = GetDomProjection( pca );
-    double distance = cv::Mahalonobis( testDomProjection, trainDomProjection, covar );
+    double distance = cv::Mahalonobis( testDom, GetDomProjection( pca ), covar );
 
     if( weakHist.get() ) {
-        cv::Mat testProj = pca.project( testWeak );
-        distance += cv::Mahalonobis( testProj, GetWeakProjection( pca ), covar );
+        distance += cv::Mahalonobis( testWeak, GetWeakProjection( pca ), covar );
     }
     else { // Single-hand sign penalty
         std::cerr << "Single hand penalty assigned\n";

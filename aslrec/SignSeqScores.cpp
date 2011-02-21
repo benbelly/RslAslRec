@@ -3,9 +3,9 @@
 #include<limits>
 
 SignSeqScores::SignSeqScores( int trainCount, int testCount, int maxHands) :
-    trainSize( trainCount ),
-    testSize( testCount ),
-    maxnumberHands( maxHands ),
+    trainSize( trainCount + 1 ),
+    testSize( testCount + 1 ),
+    maxnumberHands( maxHands + 1 ),
     scores( boost::extents[trainSize][testSize][maxnumberHands] ),
     preds( boost::extents[trainSize][testSize][maxnumberHands] )
 {

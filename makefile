@@ -69,7 +69,7 @@ CC=g++
 DEBUG=-g
 INCLUDE=-I. -I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
 		-I/usr/lib/mlton/include
-CFLAGS=-Wall -Wextra -c $(INCLUDE) $(DEBUG)
+CFLAGS=-Werror -Wall -Wextra -c $(INCLUDE) $(DEBUG)
 
 ##
 ## MLTon variables

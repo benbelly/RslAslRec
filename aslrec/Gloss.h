@@ -19,7 +19,7 @@ class Gloss {
         // Get the sequences for this gloss
         std::vector<boost::shared_ptr<SignSeq> > Sequences() const { return trainedSeqs; }
 
-        void AppendHistograms( std::list<Histogram> &hists ) const;
+        void AppendHistograms( std::list<Histogram> *hists ) const;
 
         // Find the distance from this gloss to the frame interval
         double Distance( const cv::PCA &pca, const cv::Mat &covar,

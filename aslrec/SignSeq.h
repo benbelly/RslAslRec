@@ -23,7 +23,7 @@ class SignSeq {
         int AddHands( cv::Point tl, cv::Point br,
                       const cv::Mat &dom, const cv::Mat &weak );
 
-        void AppendHistograms( std::list<Histogram> &hists ) const;
+        void AppendHistograms( std::list<Histogram> *hists ) const;
 
         double Distance( std::pair<int, int> interval, const cv::PCA &pca,
                          const cv::Mat &covar );
@@ -45,8 +45,8 @@ class SignSeq {
                                          const cv::Mat &covar );
         double GetBestScoreForEnd( SignSeqScores &scores, int end );
 
-        typedef std::pair<Histogram, boost::shared_ptr<Histogram> > HandPair;
-        std::vector<HandPair> makePairs( HistogramSet &hands );
+        typedef std::pair<cv::Mat, boost::shared_ptr<cv::Mat> > HandPair;
+        std::vector<HandPair> makePairs( ProjectionSet &hands );
         double DistanceForPair( FramePtr, HandPair &pair, const cv::PCA &pca, const cv::Mat &covar );
 };
 
