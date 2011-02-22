@@ -20,7 +20,6 @@ fn makeLevel(itemMap) {
     (* LevelUp just created a set of interps at new highest level, so 
        only look at those *)
     [InternalLevelCheck] if all observing level atMax {
-        (* [DeleteDuplicates] fold *)
         [ScoreLevel] update interval observing level, word: scoreLevel(itemMap)
     }
     [GetPrevs] update all prevs observing interval, level, word: updatePrevs
@@ -30,7 +29,7 @@ fn main ( ) {
     test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     (*ML*)
-        val _ = aslalgLoad train test
+        val grammar = aslalgLoad train test
         val itemMap = itemIndexMap()
     (*ML*)
 

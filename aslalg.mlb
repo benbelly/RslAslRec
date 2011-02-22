@@ -7,6 +7,7 @@ in
   $(DATAREAD_DIR)/aslio.mlb
   $(DATAREAD_DIR)/sorting.sml
   $(DATAREAD_DIR)/training.sml
+  $(GRAMMAR_DIR)/grammar.mlb
   $(ASLREC_DIR)/aslalgLevel.sml
   $(ASLREC_DIR)/aslalgUtil.sml
 end

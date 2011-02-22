@@ -21,8 +21,8 @@ fun aslalgLoad trainDir testDir =
     init( candidateFrames, Vector.map size candidateFrames, nums,
           Vector.length candidateFrames );
     findHands();
-    trainForRoot trainingS
-    (*Cvsl.saveAllImages "cvsl_out/orig" "png" 0;*)
+    trainForRoot trainingS;
+    root2grammar root
   end
 
 fun allWords() =
@@ -40,11 +40,6 @@ fun allWords() =
   in
       allwrds([], cnt - 1)
   end
-
-datatype sentenceItem = Start
-                      | End
-                      | ME
-                      | Gloss of string;
 
 fun itemIndexMap() =
   let

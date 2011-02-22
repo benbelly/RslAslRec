@@ -1,0 +1,7 @@
+local
+  (* import Basis Library *)
+  $(SML_LIB)/basis/basis.mlb
+  $(DATAREAD_DIR)/aslio.mlb
+in
+  grammar.sml
+end

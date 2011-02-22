@@ -1,10 +1,11 @@
+SRC_BASE = $(shell pwd)
 
 ###############################
 #
 # CVSL files
 #
 ###############################
-CVSL_DIR = cvsl
+CVSL_DIR = $(SRC_BASE)/cvsl
 CVSL_OBJS = $(CVSL_DIR)/cvsl.o $(CVSL_DIR)/plotter.o
 CVSL_SMLS = $(CVSL_DIR)/cvsl.mlb $(CVSL_DIR)/cvsl.sig $(CVSL_DIR)/cvsl.sml
 
@@ -13,7 +14,7 @@ CVSL_SMLS = $(CVSL_DIR)/cvsl.mlb $(CVSL_DIR)/cvsl.sig $(CVSL_DIR)/cvsl.sml
 # ASL recognition files
 #
 ###############################
-ASLREC_DIR = aslrec
+ASLREC_DIR = $(SRC_BASE)/aslrec
 ASLREC_OBJS = $(addprefix $(ASLREC_DIR)/, aslalg.o \
 			  							  frame.o keyframeselect.o \
 			  							  keyframedist.o \
@@ -32,11 +33,19 @@ ASLREC_SMLS = $(addprefix $(ASLREC_DIR)/, aslalgLevel.sml aslalgUtil.sml )
 # ASL Data reading files
 #
 ###############################
-DATAREAD_DIR = dataread
+DATAREAD_DIR = $(SRC_BASE)/dataread
 DATAREAD_SMLS = $(addprefix $(DATAREAD_DIR)/, aslio.sig aslio.sml \
 											  aslio.mlb \
 											  iohelpers.sml iohelpers.mlb \
 											  sorting.sml training.sml )
+
+###############################
+#
+# Grammar files
+#
+###############################
+GRAMMAR_DIR = $(SRC_BASE)/grammar
+GRAMMAR_SMLS = $(GRAMMAR_DIR)/grammar.mlb
 
 ###############################
 #
@@ -58,6 +67,7 @@ OBJS = $(CVSL_OBJS) $(ASLREC_OBJS)
 SMLS = $(ASLREC_SMLS) \
 	   $(CVSL_SMLS) \
 	   $(DATAREAD_SMLS) \
+	   $(GRAMMAR_SMLS) \
 	   aslalg.sml aslalg.mlb 
 
 OPENCV_PATH=/home/bholm/OpenCV
@@ -77,7 +87,8 @@ CFLAGS=-Werror -Wall -Wextra -c $(INCLUDE) $(DEBUG)
 ML = mlton
 ML_PATHS = -mlb-path-var "CVSL_DIR $(CVSL_DIR)" \
 		   -mlb-path-var "ASLREC_DIR $(ASLREC_DIR)" \
-		   -mlb-path-var "DATAREAD_DIR $(DATAREAD_DIR)"
+		   -mlb-path-var "DATAREAD_DIR $(DATAREAD_DIR)" \
+		   -mlb-path-var "GRAMMAR_DIR $(GRAMMAR_DIR)"
 ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt '-L/home/bholm/OpenCV/lib' \
 		  -link-opt '-lopencv_core -lopencv_highgui -lopencv_ml' \
