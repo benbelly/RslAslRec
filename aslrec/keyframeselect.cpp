@@ -23,6 +23,7 @@ double absArea( const Contour &mat );
 
 Frame AccumKeyframes::operator() ( Frame lastKey, Frame next ) {
     double diff = calculateDiff( next, lastKey );
+    diffs.push_back( diff );
     if( diff > T1 ) {
         keyframes.push_back( next );
         return next;

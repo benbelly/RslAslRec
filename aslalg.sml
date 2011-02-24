@@ -63,8 +63,13 @@ fun atMax (is) =
     (NONE, (fn ({level}) => (NONE, level = reached)))
   end
 
-fun max (is) = (Int.toString(highestReachedLevel(is)) ^ "\n")
 fun len (is) = (Int.toString(List.length(is)) ^ "\n")
+fun level (is) =
+  let
+    val level = highestReachedLevel is
+  in
+    ("Level " ^ (Int.toString level) ^ "\n")
+  end
 
 fun scoreLevel (itemMap) = fn(i) =>
   let
@@ -72,6 +77,8 @@ fun scoreLevel (itemMap) = fn(i) =>
     val (b, e, _) = interval
     val item = itemOf itemMap word
     val distance = findDistance b e item
+    val _ = print ("begin: " ^ (Int.toString b) ^ ", end: " ^ (Int.toString e) ^
+                   ", distance: " ^ (Real.toString distance) ^ "\n" )
   in
     (NONE, [(NONE, { interval = (b, e, distance ) } )] )
   end

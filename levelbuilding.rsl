@@ -47,7 +47,7 @@ fn main ( ) {
     print "Level one scored"
 
     [LevelCheck] while all observing level belowMaxLevel( 20 ) {
-        print all observing level: max
+        print all observing level: level
         [OnlyHighestLevel] if all observing level atMax {
             makeLevel(itemMap)
         }

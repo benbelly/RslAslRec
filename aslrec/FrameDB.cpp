@@ -97,9 +97,10 @@ void FrameDB::findKeyframes() {
     FrameSet graySet = grays();
     Frame firstKeyframe = graySet[0];
     keyframes.push_back( firstKeyframe );
+    std::vector<double> diffs; diffs.reserve( graySet.size() );
     std::accumulate( graySet.begin() + 1, graySet.end(),
                      firstKeyframe,
-                     AccumKeyframes( keyframes ) );
+                     AccumKeyframes( diffs, keyframes ) );
 }
 
 void FrameDB::makeSDs() {

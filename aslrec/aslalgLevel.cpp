@@ -37,7 +37,24 @@ void getSignC( int i, Pointer dst ) {
     memcpy( dst, cs, sign.size() ) ;
 }
 
+typedef std::pair<int, int> Interval;
+typedef std::pair<string, Interval> Key;
+typedef std::map<Key, double> DistanceMemoMap;
+
 double distanceC( Pointer word, int wordLen, int start, int end ) {
     std::string gloss( (char *)word, wordLen );
-    return TDB->Distance( gloss, start, end );
+    
+    // Memoize results or this will take F.O.R.E.V.E.R.
+    static DistanceMemoMap &memos = *(new DistanceMemoMap());
+    Key k = std::make_pair( gloss, std::make_pair( start, end ) );
+    double distance = std::numeric_limits<double>::max();
+    DistanceMemoMap::iterator i = memos.find( k );
+    if( i == memos.end() ) {
+        distance = TDB->Distance( gloss, start, end );
+        memos[k] = distance;
+    }
+    else {
+        distance = memos[k];
+    }
+    return distance;
 }

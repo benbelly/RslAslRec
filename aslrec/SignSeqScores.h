@@ -19,6 +19,7 @@ class SignSeqScores {
         };
         typedef boost::multi_array<Index, 3> Predecessors;
 
+        void setDistance( int model, int test, int hand, double distance );
         void setDistance( int model, int test, int hand, Index last, double distance );
         double getDistance( Index i ) { return scores[i.model][i.test][i.hand]; }
         double bestScoreForEndFrame( int end );

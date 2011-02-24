@@ -3,9 +3,9 @@
 #include<limits>
 
 SignSeqScores::SignSeqScores( int trainCount, int testCount, int maxHands) :
-    trainSize( trainCount + 1 ),
-    testSize( testCount + 1 ),
-    maxnumberHands( maxHands + 1 ),
+    trainSize( trainCount ),
+    testSize( testCount ),
+    maxnumberHands( maxHands ),
     scores( boost::extents[trainSize][testSize][maxnumberHands] ),
     preds( boost::extents[trainSize][testSize][maxnumberHands] )
 {
@@ -23,6 +23,10 @@ SignSeqScores::SignSeqScores( int trainCount, int testCount, int maxHands) :
 }
 
 SignSeqScores::~SignSeqScores() {
+}
+
+void SignSeqScores::setDistance( int model, int test, int hand, double distance ) {
+    scores[model][test][hand] = distance;
 }
 
 void SignSeqScores::setDistance( int model, int test, int hand, Index last,

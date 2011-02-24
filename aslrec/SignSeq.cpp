@@ -36,7 +36,7 @@ double SignSeq::Distance( std::pair<int, int> interval, const cv::PCA &pca,
     int size = ( interval.second - interval.first ) + 1;
     SignSeqScores scores( frames.size(), size, FDB->maxHands() );
     GenerateScoresForModelFrames( scores, interval, pca, covar );
-    return GetBestScoreForEnd( scores, size );
+    return GetBestScoreForEnd( scores, size - 1 );
 }
 
 void SignSeq::GenerateScoresForModelFrames( SignSeqScores &scores,
@@ -52,27 +52,35 @@ void SignSeq::GeneratorScoresForModel( SignSeqScores &scores,
                                        int modelIndex, const cv::PCA &pca,
                                        const cv::Mat &covar ) {
     for( int j = interval.first; j <= interval.second; ++j )
-        GenerateScoresForTestFrame( scores, modelIndex, j - interval.first, pca, covar );
+        GenerateScoresForTestFrame( scores, interval, modelIndex,
+                                    j - interval.first, pca, covar );
 }
 
 /* Helpers for GenerateScoresForTestFrame */
-bool validPredecessor( SignSeqScores::Index pre, SignSeqScores::Index cur );
+bool validPredecessor( std::pair<int, int> interval, SignSeqScores::Index pre, SignSeqScores::Index cur );
 bool bestPredecessor( SignSeqScores &scores,
                       SignSeqScores::Index l, SignSeqScores::Index r );
 
 void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
+                                          std::pair<int, int> interval,
                                           int modelIndex, int testIndex,
                                           const cv::PCA &pca, const cv::Mat &covar ) {
-    ProjectionSet handCands = FDB->projections( testIndex, pca );
+    ProjectionSet handCands = FDB->projections( interval.first + testIndex, pca );
     std::vector<HandPair> pairs = makePairs( handCands );
     for( unsigned int k = 0; k < handCands.size(); ++k ) {
         HandPair handPair = pairs[k];
         double distance = DistanceForPair( frames[modelIndex], handPair, pca, covar );
         std::vector<SignSeqScores::Index> predecessors = scores.legalPredecessors(
-                modelIndex, testIndex, k, std::ptr_fun( validPredecessor ) );
-        SignSeqScores::Index bestPred = *( std::min_element( predecessors.begin(),
-                    predecessors.end(), boost::bind( bestPredecessor, scores, _1, _2 ) ) );
-        scores.setDistance( modelIndex, testIndex, (int)k, bestPred, distance );
+                    modelIndex, testIndex, k,
+                    boost::bind( validPredecessor, interval, _1, _1 ) );
+        if( predecessors.empty() ) {
+            scores.setDistance( modelIndex, testIndex, (int)k, distance );
+        }
+        else {
+            SignSeqScores::Index bestPred = *( std::min_element( predecessors.begin(),
+                        predecessors.end(), boost::bind( bestPredecessor, scores, _1, _2 ) ) );
+            scores.setDistance( modelIndex, testIndex, (int)k, bestPred, distance );
+        }
     }
 }
 
@@ -100,11 +108,13 @@ std::vector<SignSeq::HandPair> SignSeq::makePairs( ProjectionSet &hands ) {
     return pairs;
 }
 
-bool validPredecessor( SignSeqScores::Index pre, SignSeqScores::Index cur ) {
+bool validPredecessor( std::pair<int, int> interval,
+                       SignSeqScores::Index pre, SignSeqScores::Index cur ) {
     if( cur.test <= 0 ) return false; // no predecessors for first test frame
     if( pre.model <= 0 || pre.test <= 0 ) return false; // no illegal predecessors
-    CenterPoint curCen = FDB->handCenters( cur.test )[cur.hand],
-                preCen = FDB->handCenters( pre.test )[pre.hand];
+    int firstFrame = interval.first;
+    CenterPoint curCen = FDB->handCenters( firstFrame + cur.test )[cur.hand],
+                preCen = FDB->handCenters( firstFrame + pre.test )[pre.hand];
     int xD = curCen.x - preCen.x,
         yD = curCen.y - preCen.y;
     unsigned int xSqr = xD * xD,

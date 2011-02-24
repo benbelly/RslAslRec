@@ -21,7 +21,6 @@ FeatureFrame::FeatureFrame( cv::Point tl, cv::Point br, cv::Mat d, cv::Mat w ) :
 double FeatureFrame::distance( const cv::Mat &testDom,
                                const cv::PCA &pca, const cv::Mat &covar ) {
     if( weakHist.get() ) { // two-handed training sign - not enough hands
-        std::cerr << "Not enough hands penalty assigned\n";
         return NOT_ENOUGH_HANDS;
     }
     return cv::Mahalonobis( testDom, GetDomProjection( pca ), covar );

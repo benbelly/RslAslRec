@@ -41,6 +41,7 @@ class SignSeq {
                                       int modelIndex, const cv::PCA &pca,
                                       const cv::Mat &covar );
         void GenerateScoresForTestFrame( SignSeqScores &scores,
+                                         std::pair<int, int> interval,
                                          int modelIndex, int testIndex, const cv::PCA &pca,
                                          const cv::Mat &covar );
         double GetBestScoreForEnd( SignSeqScores &scores, int end );
