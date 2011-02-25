@@ -1,0 +1,8 @@
+local
+  (* import Basis Library *)
+  $(SML_LIB)/basis/basis.mlb
+in
+  $(DATAREAD_DIR)/iohelpers.mlb
+  $(CVSL_DIR)/cvsl.mlb
+  $(DATAREAD_DIR)/aslio.mlb
+end

@@ -58,6 +58,11 @@ MLB = $(EXEC).mlb
 RSLS = $(RSL) $(EXEC)-external.sml
 RSL_GENED = $(EXEC) $(EXEC).i $(EXEC)-types.sml $(EXEC).data $(EXEC)-labels.lrsl $(EXEC).tab $(EXEC).dot $(EXEC).mlb $(EXEC).sml
 
+HANDS = handdetection
+HRSL = $(HANDS).rsl
+HMLB = $(HANDS).mlb
+HRSLS = $(HRSL) $(HANDS)funs.sml $(HANDS)help.sml
+HAND_GENED = $(HANDS) $(HANDS).i $(HANDS)-types.sml $(HANDS).data $(HANDS)-labels.lrsl $(HANDS).tab $(HANDS).dot $(HANDS).mlb $(HANDS).sml
 
 ###
 # Compiling
@@ -121,10 +126,16 @@ $(EXEC): $(OBJS) $(SMLS) $(RSLS)
 		$(RSLC) $(RSL) $(MLTON_FLAGS) $(OBJS)
 		@echo "    executable $@ built."
 
+$(HANDS): $(OBJS) $(SMLS) $(HRSLS)
+		@echo "\nMaking executable:"
+		$(RSLC) $(HRSL) $(MLTON_FLAGS) $(OBJS)
+		@echo "    executable $@ build."
+
 clean: out
 		@echo "\nCleaning up..."
 		-rm -f *.o *.bak $(CVSL_DIR)/*.o \
-			   $(ASLREC_DIR)/*.o $(RSL_GENED)
+			   $(ASLREC_DIR)/*.o $(RSL_GENED) \
+			   $(HAND_GENED)
 
 		@echo "    finished."
 

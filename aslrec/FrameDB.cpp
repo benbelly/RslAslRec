@@ -30,8 +30,13 @@ FrameDB::FrameDB( FrameSet &os ) {
 FrameDB::~FrameDB() {
 }
 
+std::vector<double> FrameDB::findKeyframes() {
+    std::vector<double> diffs; diffs.reserve( db.size() - 1 );
+    findKeyframes( diffs );
+    return diffs;
+}
+
 void FrameDB::findHands() {
-    findKeyframes();
     makeSDs();
 }
 
@@ -93,11 +98,10 @@ FrameDB::FrameData::FrameData( int i, const cv::Mat &img ) :
     cv::cvtColor( img, gray.mat, CV_BGR2GRAY );
 }
 
-void FrameDB::findKeyframes() {
+void FrameDB::findKeyframes( std::vector<double> &diffs ) {
     FrameSet graySet = grays();
     Frame firstKeyframe = graySet[0];
     keyframes.push_back( firstKeyframe );
-    std::vector<double> diffs; diffs.reserve( graySet.size() );
     std::accumulate( graySet.begin() + 1, graySet.end(),
                      firstKeyframe,
                      AccumKeyframes( diffs, keyframes ) );

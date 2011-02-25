@@ -28,6 +28,24 @@ extern "C" {
      * This is not used since the data is already broken into frames
      */
     void InitAslAlgC( char **files, int *filelens, int *frameIds, int numFiles );
+
+    /*
+     * Find the keyframes - report back on the differences between frames
+     * to allow determination of best threshold
+     */
+    void findKeyframesC( Pointer differences );
+
+    /*
+     * Get the number of keyFrames - call AFTER findKeyframesC
+     */
+    int numKeyframesC();
+
+    /*
+     * Get the array of keyframe ids (must be pre-allocated)
+     * Call AFTER findKeyframesC
+     */
+    void getKeyframeIdsC( Pointer ids );
+
     /*
      * Run the findhands algorithm on the FrameDB already initialized
      * InitAslAlg() must be called before this

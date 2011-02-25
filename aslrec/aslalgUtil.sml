@@ -2,7 +2,8 @@
 (* C++ functions for running the algorithm *)
 val init              = _import "InitAslAlgC" : string vector * int vector * int vector * int
                                                     -> unit;
-val findHands         = _import "findHandsC" : unit -> unit;
+val findKeyframesC    = _import "findKeyframesC" : real array -> unit;
+val findHandsC        = _import "findHandsC" : unit -> unit;
 val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
 val getSignLengthC    = _import "getSignLengthC" : int -> int;
 val getSignC          = _import "getSignC" : int * char array -> unit;
@@ -20,7 +21,7 @@ fun aslalgLoad trainDir testDir =
   in
     init( candidateFrames, Vector.map size candidateFrames, nums,
           Vector.length candidateFrames );
-    findHands();
+    findHandsC();
     trainForRoot trainingS;
     root2grammar root
   end

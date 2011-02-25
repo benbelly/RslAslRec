@@ -6,6 +6,7 @@
 #include <string.h>
 #include <iostream>
 #include <map>
+#include <boost/bind.hpp>
 
 using std::string;
 using std::cerr;
@@ -28,6 +29,34 @@ void InitAslAlgC( char **files, int *filelens, int *frameIds, int numFiles ) {
     FrameSet vidFrames = loadFromFiles( frameFiles );
     new FrameDB( vidFrames );
     new TrainDB();
+}
+
+/*
+ * Find the keyframes - report back on the differences between frames
+ * to allow determination of best threshold
+ */
+void findKeyframesC( Pointer differences ) {
+    std::vector<double> diffs = FDB->findKeyframes();
+    memcpy( differences, &diffs[0], diffs.size() * sizeof( double ) );
+}
+
+/*
+ * Get the number of keyFrames
+ */
+int numKeyframesC() {
+    //cout << "number of keyframes: " << FDB->keys().size() << endl;
+    return FDB->keys().size();
+}
+
+/*
+ * Get the array of keyframe ids (must be pre-allocated)
+ */
+void getKeyframeIdsC( Pointer ids ) {
+    FrameSet keys = FDB->keys();
+    std::vector<int> idVec; idVec.reserve( keys.size() );
+    std::transform( keys.begin(), keys.end(), std::back_inserter( idVec ),
+                    boost::bind( &Frame::Id, _1 ) );
+    memcpy( ids, &idVec[0], idVec.size() * sizeof( int ) );
 }
 
 /*
