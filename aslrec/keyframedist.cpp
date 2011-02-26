@@ -13,7 +13,7 @@ unsigned char zeroOrMax( unsigned long in ) {
 
 Frame avgDist2( const FrameSet &keyFrames, const Frame f ) {
     const Frame src( FDB->skin( f.id ) );
-    unsigned int size = src.mat.dataend - src.mat.datastart;
+    unsigned int size = src.mat.rows * src.mat.cols;
     unsigned long *diffSum = new unsigned long[ size ];
 
     FrameSet::const_iterator end = keyFrames.end();

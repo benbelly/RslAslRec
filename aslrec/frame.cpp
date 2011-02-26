@@ -3,6 +3,7 @@
 #include <map>
 #include <algorithm>
 #include <functional>
+#include <boost/bind.hpp>
 
 FrameSet loadFromFiles( std::vector<std::pair<std::string, int> > &filesAndFrames ) {
     FrameSet frames; frames.reserve( filesAndFrames.size() );
@@ -36,16 +37,16 @@ FrameSet loadFromVideo( std::string videoFile ) {
     return frames;
 }
 
-Frame convertTo16bit( const Frame src ) {
-    Frame dst( src.id, src.size(), image_types::big_gray );
-    src.mat.convertTo( dst.mat, image_types::big_gray );
-    return dst;
+Frame convertTo16bit( const Frame &src ) {
+    Frame dest( src.id, src.size(), image_types::big_gray );
+    src.mat.convertTo( dest.mat, image_types::big_gray );
+    return dest;
 }
 
 FrameSet gray8bitTogray16bit( const FrameSet &src ) {
     FrameSet bigs; bigs.reserve( src.size() );
     std::transform( src.begin(), src.end(), std::back_inserter( bigs ),
-                    std::ptr_fun( convertTo16bit ) );
+                    boost::bind( convertTo16bit, _1 ) );
     return bigs;
 }
 

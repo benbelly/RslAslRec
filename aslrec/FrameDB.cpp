@@ -13,6 +13,7 @@
 #include "Databases.h"
 
 #include<iostream>
+#include<sstream>
 #include<numeric>
 #include<boost/bind.hpp>
 
@@ -159,7 +160,7 @@ int FrameDB::maxHands() {
 FrameSet FrameDB::generateInitialSDs() {
     FrameSet SDs; SDs.reserve( db.size() );
     FrameSet frames = grays();
-    FrameSet bigKeys = gray8bitTogray16bit( keyframes );
+    //FrameSet bigKeys = gray8bitTogray16bit( keyframes );
     std::transform( frames.begin(), frames.end(), std::back_inserter( SDs ),
                     std::bind1st( std::ptr_fun( avgDist2 ), keyframes ) );
     return SDs;

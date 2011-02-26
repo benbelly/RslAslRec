@@ -38,7 +38,7 @@ void getSignC( int i, Pointer dst ) {
 }
 
 typedef std::pair<int, int> Interval;
-typedef std::pair<string, Interval> Key;
+typedef std::pair<std::string, Interval> Key;
 typedef std::map<Key, double> DistanceMemoMap;
 
 double distanceC( Pointer word, int wordLen, int start, int end ) {

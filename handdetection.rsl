@@ -25,5 +25,5 @@ fn main() {
 
 hfn report() {
     print "reporting"
-    hadd ["LoadVideo"]
+    hadd ["FindKeyFrames"]
 }

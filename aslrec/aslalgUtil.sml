@@ -3,6 +3,7 @@
 val init              = _import "InitAslAlgC" : string vector * int vector * int vector * int
                                                     -> unit;
 val findKeyframesC    = _import "findKeyframesC" : real array -> unit;
+val numFramesC        = _import "numFramesC" : int -> int;
 val findHandsC        = _import "findHandsC" : unit -> unit;
 val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
 val getSignLengthC    = _import "getSignLengthC" : int -> int;
@@ -18,9 +19,19 @@ fun aslalgLoad trainDir testDir =
     val candidate = 5 (* Test sentence instance 5 *)
     val cleaned = cleanedRoot root skipSentences
     val (trainingS, _) = splitSentences cleaned candidate
+    val _ = init( candidateFrames, Vector.map size candidateFrames, nums,
+                  Vector.length candidateFrames );
+    val numFrames = numFramesC( 0 )
+    val diffs = Array.array( numFrames, ~1.0 )
   in
-    init( candidateFrames, Vector.map size candidateFrames, nums,
-          Vector.length candidateFrames );
+    findKeyframesC( diffs );
+     Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
+    (*
+     *Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
+     *Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
+     *)
+    Cvsl.saveAllImages "cvsl_out/sd" "png" 3;
+    (*Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;*)
     findHandsC();
     trainForRoot trainingS;
     root2grammar root
