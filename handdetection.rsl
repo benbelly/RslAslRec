@@ -15,7 +15,7 @@ fn main() {
     (*ML*)
         val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
     (*ML*)
-    test = "/home/ben/Documents/school/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
+    test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
 
     [Init] munge: initInterp
     [LoadVideo] update srcDir: loadDir( test )

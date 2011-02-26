@@ -26,8 +26,8 @@ fn makeLevel(itemMap) {
 }
 
 fn main ( ) {
-    test = "/home/ben/Documents/school/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
-    train = "/home/ben/Documents/school/USF-ASL-Data-Set-v2"
+    test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
+    train = "/home/bholm/USF-ASL-Data-Set-v2"
     (*ML*)
         val grammar = aslalgLoad train test
         val itemMap = itemIndexMap()

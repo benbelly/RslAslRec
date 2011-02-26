@@ -25,14 +25,14 @@ fun aslalgLoad trainDir testDir =
     val diffs = Array.array( numFrames, ~1.0 )
   in
     findKeyframesC( diffs );
-     Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
-    (*
-     *Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
-     *Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
-     *)
-    Cvsl.saveAllImages "cvsl_out/sd" "png" 3;
-    (*Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;*)
     findHandsC();
+    (*
+    Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
+    Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
+    Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
+    Cvsl.saveAllImages "cvsl_out/sd" "png" 3;
+    *)
+    Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;
     trainForRoot trainingS;
     root2grammar root
   end

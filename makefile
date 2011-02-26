@@ -95,7 +95,7 @@ ML_PATHS = -mlb-path-var "CVSL_DIR $(CVSL_DIR)" \
 		   -mlb-path-var "DATAREAD_DIR $(DATAREAD_DIR)" \
 		   -mlb-path-var "GRAMMAR_DIR $(GRAMMAR_DIR)"
 ML_LIBS = -link-opt -lstdc++ \
-		  -link-opt '-L/home/bholm/OpenCV/lib' \
+		  -link-opt "-L$(OPENCV_PATH)/lib" \
 		  -link-opt '-lopencv_core -lopencv_highgui -lopencv_ml' \
 		  -link-opt '-lopencv_imgproc' \
 		  -link-opt '-lplplotcxxd -lplplotd' \
