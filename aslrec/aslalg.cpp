@@ -65,7 +65,6 @@ void getKeyframeIdsC( Pointer ids ) {
  */
 void findHandsC() {
     FDB->findHands();
-    FrameSet sds = FDB->sds();
 }
 
 /*

@@ -37,4 +37,11 @@ in
       Array.vector keysIds
     end
 
+  fun findHands() =
+    let
+        val _ = findHandsC();
+    in
+      numFramesC (3)
+    end
+
 end

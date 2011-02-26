@@ -8,10 +8,14 @@ notes:
 interp:
     srcDir : string
     frame : int
+    diff : int
     keyframe : bool
 
 fn main() {
-    test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
+    (*ML*)
+        val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
+    (*ML*)
+    test = "/home/ben/Documents/school/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
 
     [Init] munge: initInterp
     [LoadVideo] update srcDir: loadDir( test )
@@ -20,6 +24,9 @@ fn main() {
 
     [FindKeyFrames] update all keyframe observing frame: keyframes
 
+    [DifferenceImages] update all diff observing frame: differenceImages
+
+    print all: printSDs
     print all: len
 }
 
