@@ -11,11 +11,14 @@ interp:
     diff : int
     keyframe : bool
 
-fn main() {
+fn main(test) {
     (*ML*)
         val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
     (*ML*)
-    test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i"
+    (* test = "/home/rlaz/raid/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i" *)
+	print "Input file:"
+	print test
+
 
     [Init] munge: initInterp
     [LoadVideo] update srcDir: loadDir( test )
