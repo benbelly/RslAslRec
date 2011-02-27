@@ -33,4 +33,8 @@ sig
     val displayVideo : int -> unit
 
     val getIds : int -> int vector
+
+	(* RZ: exposing low-level images for ICCV *)
+	val getImage: int -> int -> (char vector * int * int * int)
+	val showImage: char vector * int * int * int -> unit
 end;

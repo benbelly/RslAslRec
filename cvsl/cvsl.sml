@@ -72,6 +72,10 @@ local
       fun displayAllImages t = displayAll t true;
       fun displayVideo t = displayAll t false;
 
+      (* RZ: ICCV addition *)
+      fun showImage (img, w, h, dt ) =
+        showImageC( img, w, h, dt, true)
+
       end;
 in
   structure Cvsl :> CVSL = OpenCV_cvsl;
