@@ -8,8 +8,15 @@ notes:
 interp:
     srcDir : string
     frame : int
-    diff : int
     keyframe : bool
+    diff : int
+	img: char vector * int * int * int
+
+fn fShowFrames() {
+	print "Displaying frames (press any key to advance)"
+	print all: sNumFramesMsg
+	write all observing img to "/dev/null": sDisplayFrames
+}
 
 fn main(test) {
     (*ML*)
@@ -19,18 +26,24 @@ fn main(test) {
 	print "Input file:"
 	print test
 
+	(* Create initial interpretation, attach directory for frame images *)
+    munge: initInterp
+    update srcDir: loadDir( test )
 
-    [Init] munge: initInterp
-    [LoadVideo] update srcDir: loadDir( test )
-
-    [GetFrames] update frame: getFrames
+    [GetFrames] update frame, img: getFramesImages
+	print "Loading images"
+	fShowFrames()
 
     [FindKeyFrames] update all keyframe observing frame: keyframes
+	if observing keyframe bIsKeyFrame {
+		fShowFrames()
+	}
 
     [DifferenceImages] update all diff observing frame: differenceImages
 
-    print all: printSDs
-    print all: len
+    (* print all: printSDs
+    print all: len *)
+	fShowFrames()
 }
 
 hfn report() {
