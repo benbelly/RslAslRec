@@ -37,12 +37,8 @@ fn fShowUnique() {
 		}
 }
 
-fn main(test) {
-    t1 = 300
-    (*ML*)
-        val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
-    (*ML*)
-    (* test = "/home/rlaz/raid/USF-ASL-Data-Set-v2/Sentence 2.5 lipread cannot i" *)
+fn main(test, minMaxPixelComponentSize) {
+    t1 = valOf(Int.fromString(minMaxPixelComponentSize))
 	print "Input file:"
 	print test
 
@@ -52,7 +48,8 @@ fn main(test) {
 
     [GetFrames] update frame, img: getFramesImages
 	print "Loading images"
-	fShowFrames()
+	print all: sNumFramesMsg
+	(* fShowFrames() *)
 
     [FindKeyFrames] update all keyframe observing frame: keyframes(t1)
 	if observing keyframe bIsKeyFrame {
