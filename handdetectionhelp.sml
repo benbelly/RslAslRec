@@ -4,7 +4,7 @@ local
   (* C++ functions for running the algorithm *)
   val initAslAlgC       = _import "InitAslAlgC" : string vector * int vector * int vector * int
                                                       -> unit;
-  val findKeyframesC    = _import "findKeyframesC" : real array -> unit;
+  val findKeyframesC    = _import "findKeyframesC" : int * real array -> unit;
   val numKeyframesC     = _import "numKeyframesC" : unit -> int;
   val getKeyframeIdsC   = _import "getKeyframeIdsC" : int array -> unit;
   val numFramesC        = _import "numFramesC" : int -> int;
@@ -18,12 +18,12 @@ in
   fun init (frames, sizes, nums, numnums) =
     initAslAlgC( frames, sizes, nums, numnums )
 
-  fun keyframeDiffs() =
+  fun keyframeDiffs t1 =
     let
       (* Calculate keyframes and collect differences *)
       val numFrames = numFramesC( 0 )
       val diffArray = Array.array( numFrames - 1, ~1.0 )
-      val _ = findKeyframesC( diffArray )
+      val _ = findKeyframesC( t1, diffArray )
     in
       Array.vector diffArray
     end

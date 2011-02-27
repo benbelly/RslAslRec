@@ -19,6 +19,7 @@ fn fShowFrames() {
 }
 
 fn main(test) {
+    t1 = 300
     (*ML*)
         val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
     (*ML*)
@@ -34,7 +35,7 @@ fn main(test) {
 	print "Loading images"
 	fShowFrames()
 
-    [FindKeyFrames] update all keyframe observing frame: keyframes
+    [FindKeyFrames] update all keyframe observing frame: keyframes(t1)
 	if observing keyframe bIsKeyFrame {
 		fShowFrames()
 	}

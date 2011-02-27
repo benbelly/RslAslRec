@@ -3,7 +3,8 @@
 fun len is = "Interp set length is " ^ Int.toString(List.length is) ^ "\n"
 
 fun initInterp _ =
-  (NONE, [(NONE, Interp.rhcons( { srcDir = "", frame = [], diff = ~1, keyframe = false } ))] )
+  (NONE, [(NONE, Interp.rhcons( { img = (Vector.fromList( [] : char list ), ~1, ~1, ~1),
+                                  srcDir = "", frame = ~1, diff = ~1, keyframe = false } ))] )
 
 fun loadDir testDir = fn _ =>
   let
@@ -23,9 +24,9 @@ fun getFrames (_) =
   end
 
   (* There should just be one interpretation here *)
-fun keyframes _ =
+fun keyframes t1 = fn  _ =>
   let
-    val diffArray = keyframeDiffs()
+    val diffArray = keyframeDiffs t1
     val keyIds = keyframeIds()
   in
     (SOME (FrameDiffs diffArray), fn ({keyframe, frame}) =>

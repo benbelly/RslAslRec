@@ -77,7 +77,8 @@ std::map<std::string, cv::Mat> TrainingData::MakeCovar()  {
                         std::back_inserter( projections ),
                         boost::bind( &cv::PCA::project, &pca, _1 ) );
         cv::Mat cov, inv, mean;
-        cv::calcCovarMatrix( MakeBigVector( projections ), cov, mean, CV_COVAR_ROWS );
+        cv::calcCovarMatrix( MakeBigVector( projections ), cov, mean,
+                             CV_COVAR_NORMAL | CV_COVAR_ROWS );
         cv::invert( cov, inv, cv::DECOMP_SVD );
         covariants[word] = inv;
         ++begin;

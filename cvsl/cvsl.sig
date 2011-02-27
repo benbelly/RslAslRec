@@ -32,9 +32,12 @@ sig
      * return unit *)
     val displayVideo : int -> unit
 
+    (* Takes a type, return a vector of ids *)
     val getIds : int -> int vector
 
-	(* RZ: exposing low-level images for ICCV *)
+    (* takes a type and id, returns image, height, width, cv type *)
 	val getImage: int -> int -> (char vector * int * int * int)
+
+    (* take an image, width, height, and cv type *)
 	val showImage: char vector * int * int * int -> unit
 end;

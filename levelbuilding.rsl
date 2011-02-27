@@ -28,8 +28,9 @@ fn makeLevel(itemMap) {
 fn main ( ) {
     test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 12.5 why"
     train = "/home/bholm/USF-ASL-Data-Set-v2"
+    t1 = 300
     (*ML*)
-        val grammar = aslalgLoad train test
+        val grammar = aslalgLoad t1 train test
         val itemMap = itemIndexMap()
     (*ML*)
 

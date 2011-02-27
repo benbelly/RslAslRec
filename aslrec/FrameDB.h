@@ -15,7 +15,7 @@ class FrameDB {
     public:
         FrameDB( FrameSet &frames );
         virtual ~FrameDB();
-        std::vector<double> findKeyframes();
+        std::vector<double> findKeyframes( const unsigned int T1 );
         void findHands();
 
         struct FrameData {
@@ -73,7 +73,7 @@ class FrameDB {
         FrameSet keyframes;
         const std::string videoFile;
 
-        void findKeyframes( std::vector<double> &diffs );
+        void findKeyframes( const unsigned int T1, std::vector<double> &diffs );
         void makeSDs();
 
         FrameSet generateInitialSDs();

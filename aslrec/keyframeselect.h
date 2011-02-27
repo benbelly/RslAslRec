@@ -6,9 +6,12 @@
 // Functor to find keyframes
 // This requires grayscale images
 struct AccumKeyframes {
-    AccumKeyframes( std::vector<double> &ds,
-                    FrameSet &kfs ) : keyframes( kfs ),
+    AccumKeyframes( const unsigned int t1,
+                    std::vector<double> &ds,
+                    FrameSet &kfs ) : T1( t1 ),
+                                      keyframes( kfs ),
                                       diffs( ds ) {}
+    const unsigned int T1;
     FrameSet &keyframes;
     std::vector<double> &diffs;
     Frame operator() ( Frame lastKey, Frame next );

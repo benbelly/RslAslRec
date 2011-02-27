@@ -31,9 +31,9 @@ FrameDB::FrameDB( FrameSet &os ) {
 FrameDB::~FrameDB() {
 }
 
-std::vector<double> FrameDB::findKeyframes() {
+std::vector<double> FrameDB::findKeyframes( const unsigned int T1 ) {
     std::vector<double> diffs; diffs.reserve( db.size() - 1 );
-    findKeyframes( diffs );
+    findKeyframes( T1, diffs );
     return diffs;
 }
 
@@ -99,13 +99,13 @@ FrameDB::FrameData::FrameData( int i, const cv::Mat &img ) :
     cv::cvtColor( img, gray.mat, CV_BGR2GRAY );
 }
 
-void FrameDB::findKeyframes( std::vector<double> &diffs ) {
+void FrameDB::findKeyframes( const unsigned int T1, std::vector<double> &diffs ) {
     FrameSet graySet = grays();
     Frame firstKeyframe = graySet[0];
     keyframes.push_back( firstKeyframe );
     std::accumulate( graySet.begin() + 1, graySet.end(),
                      firstKeyframe,
-                     AccumKeyframes( diffs, keyframes ) );
+                     AccumKeyframes( T1, diffs, keyframes ) );
 }
 
 void FrameDB::makeSDs() {

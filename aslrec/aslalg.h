@@ -30,10 +30,11 @@ extern "C" {
     void InitAslAlgC( char **files, int *filelens, int *frameIds, int numFiles );
 
     /*
-     * Find the keyframes - report back on the differences between frames
+     * Find the keyframes using threshold T1
+     * report back on the differences between frames
      * to allow determination of best threshold
      */
-    void findKeyframesC( Pointer differences );
+    void findKeyframesC( int T1, Pointer differences );
 
     /*
      * Get the number of keyFrames - call AFTER findKeyframesC

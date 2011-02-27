@@ -33,11 +33,12 @@ void InitAslAlgC( char **files, int *filelens, int *frameIds, int numFiles ) {
 }
 
 /*
- * Find the keyframes - report back on the differences between frames
+ * Find the keyframes using threshold T1
+ * report back on the differences between frames
  * to allow determination of best threshold
  */
-void findKeyframesC( Pointer differences ) {
-    std::vector<double> diffs = FDB->findKeyframes();
+void findKeyframesC( int T1, Pointer differences ) {
+    std::vector<double> diffs = FDB->findKeyframes( T1 );
     memcpy( differences, &diffs[0], diffs.size() * sizeof( double ) );
 }
 

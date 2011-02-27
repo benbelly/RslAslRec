@@ -2,7 +2,7 @@
 (* C++ functions for running the algorithm *)
 val init              = _import "InitAslAlgC" : string vector * int vector * int vector * int
                                                     -> unit;
-val findKeyframesC    = _import "findKeyframesC" : real array -> unit;
+val findKeyframesC    = _import "findKeyframesC" : int * real array -> unit;
 val numFramesC        = _import "numFramesC" : int -> int;
 val findHandsC        = _import "findHandsC" : unit -> unit;
 val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
@@ -10,7 +10,7 @@ val getSignLengthC    = _import "getSignLengthC" : int -> int;
 val getSignC          = _import "getSignC" : int * char array -> unit;
 val distanceC         = _import "distanceC" : string * int * int * int -> real;
 
-fun aslalgLoad trainDir testDir =
+fun aslalgLoad t1 trainDir testDir =
   let
     val (candidateFrames, nums) = AslIO.getSortedCandidates testDir
     val root = AslIO.rootForDir trainDir
@@ -24,7 +24,7 @@ fun aslalgLoad trainDir testDir =
     val numFrames = numFramesC( 0 )
     val diffs = Array.array( numFrames, ~1.0 )
   in
-    findKeyframesC( diffs );
+    findKeyframesC( t1, diffs );
     findHandsC();
     (*
     Cvsl.saveAllImages "cvsl_out/orig" "png" 0;
