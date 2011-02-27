@@ -44,4 +44,51 @@ in
       numFramesC (3)
     end
 
+  (* RZ additions for ICCV *)
+  fun sImageProps is = 
+    let
+      val head = hd is
+      val {img = (image, w, h, dt) } = head
+    in
+        "Image width: " ^ Int.toString(w) 
+            ^ " height: " ^ Int.toString(h)
+            ^ " type: " ^ Int.toString(dt)
+    end
+
+  val sImgDisplay = fn i =>
+  let
+    val {img = (image, w, h, dt) } = i
+    val _ = Cvsl.showImage(image,w,h,dt)
+  in
+    ()
+  end
+
+  fun sDisplayFrames is = 
+  let
+    val _ = List.app
+        sImgDisplay
+        is
+  in
+    ""
+  end
+  
+  (* RZ: ICCV addition *)
+  fun sNumFramesMsg is = "  Number of Frames: " ^ Int.toString(List.length is) ^ "\n"
+ 
+  fun bIsKeyFrame {keyframe} = (NONE, keyframe)
+
+  fun uniqueImage (i : Interp.r) = 
+  let
+    val {img = image, srcDir = s, ... } = i
+  in
+    (NONE, [ (NONE, {img = image, srcDir = s, frame = ~1, diff = ~1, keyframe = false}) ])
+  end
+
+  val interpToString = fn (i: Interp.r) =>
+  let
+    val {frame, keyframe, ...} = i
+  in
+    "Frame: " ^ Int.toString(frame) ^ " Key? " ^ Bool.toString(keyframe) 
+  end
+
 end

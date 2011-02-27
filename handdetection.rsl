@@ -12,10 +12,29 @@ interp:
     diff : int
 	img: char vector * int * int * int
 
+(*ML*)
+        val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
+(*ML*)
+
 fn fShowFrames() {
 	print "Displaying frames (press any key to advance)"
 	print all: sNumFramesMsg
 	write all observing img to "/dev/null": sDisplayFrames
+}
+
+fn fShowUnique() {
+	(* Identify unique frames and discard, keeping current interp. set *)
+	duplicate 	
+		{ 
+			update: uniqueImage 
+			print "Unique frames:"
+			fShowFrames()
+			print ifile
+			reject
+		} 
+		{ 	
+			accept 
+		}
 }
 
 fn main(test) {
@@ -37,10 +56,13 @@ fn main(test) {
 
     [FindKeyFrames] update all keyframe observing frame: keyframes(t1)
 	if observing keyframe bIsKeyFrame {
+		print "Key Frames:"
 		fShowFrames()
 	}
 
-    [DifferenceImages] update all diff observing frame: differenceImages
+	fShowUnique()
+
+    [DifferenceImages] update all diff, img observing frame: dDifferenceImages
 
     (* print all: printSDs
     print all: len *)
