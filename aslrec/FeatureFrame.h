@@ -8,9 +8,11 @@
 #include <boost/shared_ptr.hpp>
 
 struct FeatureFrame {
-        FeatureFrame( cv::Point tl, cv::Point br, cv::Mat dom, cv::Mat weak );
+        FeatureFrame( cv::Point tl, cv::Point br, cv::Mat dom,
+                      boost::shared_ptr<cv::Mat> weak );
         cv::Point faceTopLeft, faceBottomRight;
-        cv::Mat dom, weak;
+        cv::Mat dom;
+        boost::shared_ptr<cv::Mat> weak;
         Histogram domHist;
         std::auto_ptr<Histogram> weakHist;
 

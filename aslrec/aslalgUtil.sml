@@ -27,7 +27,7 @@ fun aslalgLoad trainDir testDir =
     findKeyframesC( diffs );
     findHandsC();
     (*
-    Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
+    Cvsl.saveAllImages "cvsl_out/orig" "png" 0;
     Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
     Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
     Cvsl.saveAllImages "cvsl_out/sd" "png" 3;

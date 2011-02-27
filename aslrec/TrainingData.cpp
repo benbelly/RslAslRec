@@ -46,12 +46,12 @@ std::map<std::string, std::list<Histogram> > TrainingData::GetWordHists() {
     return wordHists;
 }
 
-cv::Mat TrainingData::MakeBigVector( std::list<Histogram> &hists ) {
+cv::Mat TrainingData::MakeBigVector( const std::list<Histogram> &hists ) {
     Histogram h = *(hists.begin());
     // Make a giant matrix where each histogram is a row
     int rows = hists.size();
     Histogram big = Histogram::zeros( rows, h.rows * h.cols );
-    std::list<Histogram>::iterator iter = hists.begin();
+    std::list<Histogram>::const_iterator iter = hists.begin();
     for( int i = 0; i < rows; ++i, ++iter )
         memcpy( big[i], iter->data, h.rows * h.cols * sizeof(double) );
     return big;
@@ -76,7 +76,10 @@ std::map<std::string, cv::Mat> TrainingData::MakeCovar()  {
         std::transform( flats.begin(), flats.end(),
                         std::back_inserter( projections ),
                         boost::bind( &cv::PCA::project, &pca, _1 ) );
-        covariants[word] = MakeBigVector( projections );
+        cv::Mat cov, inv, mean;
+        cv::calcCovarMatrix( MakeBigVector( projections ), cov, mean, CV_COVAR_ROWS );
+        cv::invert( cov, inv, cv::DECOMP_SVD );
+        covariants[word] = inv;
         ++begin;
     }
     return covariants;

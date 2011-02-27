@@ -7,6 +7,7 @@
 #include <iostream>
 #include <map>
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 
 using std::string;
 using std::cerr;
@@ -234,10 +235,13 @@ int addHandsToSeqC( Pointer seqPtr,
                     Pointer faceCorners,
                     int h1NumPts, Pointer h1Pts,
                     int h2NumPts, Pointer h2Pts ) {
-    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray ),
-            weak = cv::Mat::zeros( height, width, image_types::gray );
+    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
+    boost::shared_ptr<cv::Mat> weak( (cv::Mat *)0 );
     makeImageFromData( hand, h1NumPts, (int *)h1Pts );
-    if( h2NumPts ) makeImageFromData( weak, h2NumPts, (int *)h2Pts );
+    if( h2NumPts ) {
+        weak.reset( new cv::Mat( cv::Mat::zeros( height, width, image_types::gray ) ) );
+        makeImageFromData( *(weak.get()), h2NumPts, (int *)h2Pts );
+    }
     int *facePts = (int *)faceCorners;
     cv::Point topLeft( facePts[0], facePts[1] ), bottomRight( facePts[2], facePts[3] );
     SignSeq *seq = (SignSeq *)seqPtr;

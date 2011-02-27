@@ -3,7 +3,7 @@
 fun len is = "Interp set length is " ^ Int.toString(List.length is) ^ "\n"
 
 fun initInterp _ =
-  (NONE, [(NONE, Interp.rhcons( { srcDir = "", frame = ~1, diff = ~1, keyframe = false } ))] )
+  (NONE, [(NONE, Interp.rhcons( { srcDir = "", frame = [], diff = ~1, keyframe = false } ))] )
 
 fun loadDir testDir = fn _ =>
   let

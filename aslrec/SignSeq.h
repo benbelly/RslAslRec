@@ -21,7 +21,7 @@ class SignSeq {
         virtual ~SignSeq();
 
         int AddHands( cv::Point tl, cv::Point br,
-                      const cv::Mat &dom, const cv::Mat &weak );
+                      const cv::Mat &dom, boost::shared_ptr<cv::Mat> weak );
 
         void AppendHistograms( std::list<Histogram> *hists ) const;
 

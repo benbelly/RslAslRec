@@ -14,7 +14,7 @@ SignSeq::~SignSeq() {
 }
 
 int SignSeq::AddHands( cv::Point tl, cv::Point br,
-                        const cv::Mat &dom, const cv::Mat &weak ) {
+                        const cv::Mat &dom, boost::shared_ptr<cv::Mat> weak ) {
     boost::shared_ptr<FeatureFrame> framePtr( new FeatureFrame( tl, br, dom, weak ) );
     frames.push_back( boost::shared_ptr<FeatureFrame>( framePtr ) );
     return TDB->AddHandToList( framePtr );

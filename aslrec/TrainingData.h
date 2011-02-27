@@ -24,7 +24,7 @@ class TrainingData {
         std::map<std::string, std::list<Histogram> > wordHists;
         std::map<std::string, std::list<Histogram> > GetWordHists();
 
-        cv::Mat MakeBigVector( std::list<Histogram> &hists );
+        cv::Mat MakeBigVector( const std::list<Histogram> &hists );
 
         cv::PCA pca;
         cv::PCA MakePCA() ;
