@@ -18,7 +18,8 @@ class FrameDB {
 
         std::vector<double> findKeyframes( const unsigned int T1 );
 
-        void setSDs( FrameSet &sds );
+        void setSingleSD ( Frame sd );
+        void setAllSDs( FrameSet &sds );
         void initialSDs();
 
         void findHands();

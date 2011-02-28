@@ -88,6 +88,14 @@ fun dDifferenceImages _ =
                 (NONE, [(NONE, {diff = Cvsl.getImage 3 frameId })]))
   end
 
+    (*[SkinmaskDiff] update diff observing frameId, skin: skinmaskDiffs*)
+fun skinmaskDiffs i =
+  let
+    val { frameId, diff = (sd, w, h, t), skin = (sk, _, _, _) } = i
+  in
+    (NONE, [(NONE, { diff = skinmaskSD frameId sd sk w h t })])
+  end
+
 (* RZ: ICCV addition *)
 fun sNumFramesMsg is = "  Number of Frames: " ^ Int.toString(List.length is) ^ "\n"
  

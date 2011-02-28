@@ -75,7 +75,22 @@ void initialSDsC( Pointer ids, Pointer grays, int grayCount,
                                             keyCount,
                                             width, height, type );
     FrameSet sds = generateInitialSDs( grayFrames, keyFrames );
-    FDB->setSDs( sds );
+    FDB->setAllSDs( sds );
+}
+
+/*
+ * Mask a difference image with the skin mask
+ */
+void skinmaskSDC( int id, Pointer sd, Pointer skin,
+                  int width, int height, int type ) {
+    FrameSet sds = loadFromByteArray( &id, (char *)sd, 1,
+                                      width, height, type );
+    FrameSet skins = loadFromByteArray( &id, (char *)skin, 1,
+                                        width, height, type );
+    Frame sdFrame = sds[0], skinFrame = skins[0];
+    cv::Mat masked;
+    sdFrame.mat.copyTo( masked, skinFrame.mat );
+    FDB->setSingleSD( Frame( id, masked ) );
 }
 
 /*

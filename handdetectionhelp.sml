@@ -10,6 +10,9 @@ local
   val makeInitSDsC      = _import "initialSDsC" : int vector * char vector * int *
                                                   int vector * char vector * int * 
                                                   int * int * int -> unit;
+  val skinmaskSDC       = _import "skinmaskSDC" : int * char vector *
+                                                  char vector *
+                                                  int * int * int -> unit;
   val numFramesC        = _import "numFramesC" : int -> int;
   val findHandsC        = _import "findHandsC" : unit -> unit;
   val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
@@ -57,5 +60,12 @@ in
       val keyLen = List.length keys
     in
       makeInitSDsC( idvec, grayVec, grayLen, keyIdVec, keyVec, keyLen, w, h, t )
+    end
+
+  fun skinmaskSD id sd skin w h t =
+    let
+      val _ = skinmaskSDC( id, sd, skin, w, h, t )
+    in
+      Cvsl.getImage 3 id
     end
 end

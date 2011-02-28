@@ -56,6 +56,12 @@ extern "C" {
                       int width, int height, int type );
 
     /*
+     * Mask a difference image with the skin mask
+     */
+    void skinmaskSDC( int id, Pointer sd, Pointer skin,
+                      int width, int height, int type );
+
+    /*
      * Run the findhands algorithm on the FrameDB already initialized
      * InitAslAlg() must be called before this
      */

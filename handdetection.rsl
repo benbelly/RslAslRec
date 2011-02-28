@@ -51,7 +51,11 @@ fn getHandContours() {
     [DiffImage] update all diff
                 observing keyframe, frameId, gray: initialDiffImages
 
+    (* Section 4.1, step 2.b part 1 *)
+    [SkinmaskDiff] update diff observing frameId, skin: skinmaskDiffs
+
     fShowDifferences()
+
     [DifferenceImages] update all diff observing frameId: dDifferenceImages
 
 }

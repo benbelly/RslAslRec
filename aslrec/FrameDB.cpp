@@ -109,7 +109,11 @@ void FrameDB::findKeyframes( const unsigned int T1, std::vector<double> &diffs )
                      AccumKeyframes( T1, diffs, keyframes ) );
 }
 
-void FrameDB::setSDs( FrameSet &sds ) {
+void FrameDB::setSingleSD( Frame f ) {
+    db[f.id].SD = f;
+}
+
+void FrameDB::setAllSDs( FrameSet &sds ) {
     setItem( setSD, sds );
 }
 
