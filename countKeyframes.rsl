@@ -17,19 +17,21 @@ fn main(infile, min, max, increment) {
     munge: dInitInterp
 	update srcDir: loadDir(infile)
     update frameId, frame: dGetFramesImages
+	print cat("Input File: ",infile)
 	print all: sNumInterpsMsg("Images loaded: ")
+	print ""
 
 	while observing t1 bNext(incT, maxT) {
  	   update all keyframe, t1 observing frameId: 
 	   		dKeyframes(minT, incT)
 		
 		print all: sT1Value
-
    		if observing keyframe bIsKeyFrame {
 			print all: sNumInterpsMsg("  Keyframes: ")
     	} else {
 			print all: sNumInterpsMsg("  Non-keyframes: ")
 		}
+		print ""
 	}
 }
 
