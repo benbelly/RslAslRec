@@ -2,65 +2,33 @@ inc "detect.mlb"
 inc "countKeyframeshelp.sml"
 inc "countKeyframesfuns.sml"
 
-notes:
-    FrameDiffs : real vector
-
 interp:
     srcDir : string
     frameId : int
-    frame : char vector * int * int * int
+	t1: int
     keyframe : bool
-    diff : int
+    frame : char vector * int * int * int
 
-fn fShowFrames() {
-    print all: sNumFramesMsg("Displaying Frames (press any key to advance)")
-    write all observing frame to "/dev/null": sDisplayFrames
-}
+fn main(infile, min, max, increment) {
+	minT = intToString(min)
+	maxT = intToString(max)
+	incT = intToString(increment)
 
-fn fShowUnique() {
-    (* Identify unique frames and discard, keeping current interp. set *)
-    duplicate     
-        { 
-            update: uniqueImage 
-            print "Unique frames:"
-            fShowFrames()
-            print ifile
-            reject
-        } 
-        {     
-            accept 
-        }
-}
+    munge: dInitInterp
+	update srcDir: loadDir(infile)
+    update frameId, frame: dGetFramesImages
+	print all: sNumInterpsMsg("Images loaded: ")
 
-(*ML*)
-fun intArg (s) = valOf(Int.fromString(s))
-fun bNext (t,max) = 
-	fn i =>  (NONE, !t < max + 1) 
-val getVal = fn v => !v
-(*ML*)
-
-fn main(test,min,max,increment) {
-	incT = intArg(increment)
-	maxT = intArg(max)
-	(*ML*) val T1 = ref (intArg(min)) (*ML*)
-
-    munge: initInterp
-    update srcDir: loadDir( test )
-
-    update frameId, frame: getFramesImages
-	print all: sNumFramesMsg("Images loaded: ")
-
-	while bNext(T1,maxT) {
- 	   update all keyframe observing frameId: 
-	   		keyframes(getVal(T1))
+	while observing t1 bNext(incT, maxT) {
+ 	   update all keyframe, t1 observing frameId: 
+	   		dKeyframes(minT, incT)
 		
-		print "\n"
-		print sIntStringMsg("Threshold: ", getVal(T1))
+		print all: sT1Value
 
    		if observing keyframe bIsKeyFrame {
-			print all: sNumFramesMsg("Frames: Key ")
+			print all: sNumInterpsMsg("  Keyframes: ")
     	} else {
-			print all: sNumFramesMsg(", Non-key ")
+			print all: sNumInterpsMsg("  Non-keyframes: ")
 		}
 	}
 }

@@ -44,4 +44,9 @@ in
       numFramesC (3)
     end
 
+    (*ML*)
+    fun intToString (s) = valOf(Int.fromString(s))
+    fun bNext (incT, maxT) = 
+	    fn { t1 } =>  (NONE, t1 + incT < maxT + 1)
+
 end

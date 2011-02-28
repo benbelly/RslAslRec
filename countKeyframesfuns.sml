@@ -16,10 +16,10 @@ val defaultFrame = ( Vector.fromList( [] : char list ), ~1, ~1, ~1 )
 
 fun len is = "Interp set length is " ^ Int.toString(List.length is) ^ "\n"
 
-fun initInterp _ =
-  (NONE, [(NONE, Interp.rhcons( { srcDir = "", frameId = ~1,
-                                  frame = defaultFrame,
-                                  diff = ~1, keyframe = false } ))] )
+fun dInitInterp _ =
+    (NONE, [(NONE, Interp.rhcons( { srcDir = "", frameId = ~1,
+                                  frame = defaultFrame, t1 = ~1,
+                                  keyframe = false } ))] )
 
 fun loadDir testDir = fn _ =>
   let
@@ -38,23 +38,28 @@ fun getFrames (_) =
     (NONE, interps)
   end
 
-fun getFramesImages (_) =
+fun dGetFramesImages (_) =
   let 
     val frames = Vector.foldl op:: [] (Cvsl.getIds 0)
-    val interps = map (fn f => (NONE, { frameId = f, frame = Cvsl.getImage 0 f })) frames
+    val interps = map (fn f => (NONE, { frameId = f, T1 = ~1, frame = Cvsl.getImage 0 f })) frames
   in
     (NONE, interps)
   end
 
 
   (* There should just be one interpretation here *)
-fun keyframes t1 = fn  _ =>
+fun dKeyframes (minT, incT) = fn is =>
   let
-    val diffArray = keyframeDiffs t1
+    val {keyframe, frameId, t1} = hd(is)
+    val threshold = if t1 < 0
+            then minT
+            else t1 + incT
+    val diffArray = keyframeDiffs threshold
     val keyIds = keyframeIds()
   in
-    (SOME (FrameDiffs diffArray), fn ({keyframe, frameId}) =>
-      (NONE, [(NONE, { keyframe = (Vector.exists (fn i => i = frameId) keyIds) } )] ))
+    (NONE, fn ({keyframe, frameId, t1}) =>
+      (NONE, [(NONE, { t1 = threshold, 
+        keyframe = (Vector.exists (fn i => i = frameId) keyIds) } )] ))
   end
 
 fun dDifferenceImages _ =
@@ -66,8 +71,15 @@ fun dDifferenceImages _ =
   end
 
 (* RZ: ICCV addition *)
-fun sNumFramesMsg (s) =
-    fn is => s ^ Int.toString(List.length is) 
+fun sNumInterpsMsg (s) =
+    fn is => s ^ Int.toString(List.length is) ^ "\n"
+
+fun sT1Value (is : InterpSet.r) =
+    let
+        val {t1, ...} = hd(is)
+    in
+      "Threshold: " ^ Int.toString(t1) ^ "\n"
+    end
 
 fun sIntStringMsg (s,i) =
     s ^ Int.toString(i) 
@@ -76,17 +88,17 @@ fun bIsKeyFrame {keyframe} = (NONE, keyframe)
 
 fun uniqueImage (i : Interp.r) = 
   let
-    val {frame, srcDir, diff, ... } = i
+    val {frame, srcDir, ... } = i
   in
     (NONE, [ (NONE, { srcDir = srcDir, frameId = ~1, frame = frame,
-                      diff = diff, keyframe = false }) ])
+                      keyframe = false }) ])
   end
 
 val interpToString = fn (i: Interp.r) =>
   let
-    val {frameId, keyframe, ...} = i
+    val {frameId, keyframe, t1, ...} = i
   in
-    "Frame: " ^ Int.toString(frameId) ^ " Key? " ^ Bool.toString(keyframe) 
+    "T1: " ^ Int.toString(t1) ^ " Frame: " ^ Int.toString(frameId) ^ " Keyframe: " ^ Bool.toString(keyframe) ^ "\n"
   end
 
   (* RZ additions for ICCV *)
@@ -117,18 +129,4 @@ fun sDisplayFrames is =
     ""
   end
 
-fun sDiffDisplay i =
-  let
-    val {diff} = i
-    val _ = Cvsl.showImage diff
-  in
-    ()
-  end
-
-fun sDisplayDifferences is =
-  let
-    val _ = List.app sDiffDisplay is
-  in
-    ""
-  end
   
