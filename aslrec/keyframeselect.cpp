@@ -1,20 +1,23 @@
 
 
-#include <numeric>
-#include <algorithm>
-#include <iterator>
-#include <memory>
-#include <functional>
-
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
 #include "keyframeselect.h"
 #include "consts.h"
-//#include "logging.h"
 #include "utility.h"
 
 #include "Databases.h"
+
+#include <numeric>
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <functional>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 double calculateDiff( const Frame &l, const Frame &r );
 double sizeOfLargestConnectedComponent( cv::Mat &differenceImage );
@@ -57,13 +60,11 @@ double sizeOfLargestConnectedComponent( cv::Mat &differenceImage ) {
     cv::findContours( differenceImage, contours,
                       CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE );
     /*
-     TRACEAREA( maxAreaOfContours( contours ) )
-     *#ifdef TRACE
+     *cout << ( maxAreaOfContours( contours ) ) << endl;
      *cv::Mat out = cv::Mat::zeros( differenceImage.size(), differenceImage.type() );
      *cv::drawContours( out, contours, -1, cv::Scalar( 255 ) );
      *cv::imshow( "contours", out );
      *cv::waitKey( );
-     *#endif
      */
     return maxAreaOfContours( contours );
 }

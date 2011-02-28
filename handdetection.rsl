@@ -7,63 +7,65 @@ notes:
 
 interp:
     srcDir : string
-    frame : int
+    frameId : int
+    frame : char vector * int * int * int
     keyframe : bool
     diff : int
-	img: char vector * int * int * int
 
 (*ML*)
         val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
 (*ML*)
 
 fn fShowFrames() {
-	print "Displaying frames (press any key to advance)"
-	print all: sNumFramesMsg
-	write all observing img to "/dev/null": sDisplayFrames
+    print "Displaying frames (press any key to advance)"
+    print all: sNumFramesMsg
+    write all observing frame to "/dev/null": sDisplayFrames
 }
 
 fn fShowUnique() {
-	(* Identify unique frames and discard, keeping current interp. set *)
-	duplicate 	
-		{ 
-			update: uniqueImage 
-			print "Unique frames:"
-			fShowFrames()
-			print ifile
-			reject
-		} 
-		{ 	
-			accept 
-		}
+    (* Identify unique frames and discard, keeping current interp. set *)
+    duplicate     
+        { 
+            update: uniqueImage 
+            print "Unique frames:"
+            fShowFrames()
+            print ifile
+            reject
+        } 
+        {     
+            accept 
+        }
 }
 
 fn main(test, minMaxPixelComponentSize) {
     t1 = valOf(Int.fromString(minMaxPixelComponentSize))
 	print "Input file:"
 	print test
+    print "T1:"
+    print minMaxPixelComponentSize
 
-	(* Create initial interpretation, attach directory for frame images *)
+    (* Create initial interpretation, attach directory for frame images *)
     munge: initInterp
     update srcDir: loadDir( test )
 
-    [GetFrames] update frame, img: getFramesImages
+    [GetFrames] update frameId, frame: getFramesImages
 	print "Loading images"
 	print all: sNumFramesMsg
 	(* fShowFrames() *)
 
-    [FindKeyFrames] update all keyframe observing frame: keyframes(t1)
-	if observing keyframe bIsKeyFrame {
-		print "Key Frames:"
-		fShowFrames()
-	}
+    [FindKeyFrames] update all keyframe observing frameId: keyframes(t1)
+    if observing keyframe bIsKeyFrame {
+        print "Key Frames:"
+        fShowFrames()
+    }
 
-	fShowUnique()
+    fShowUnique()
 
-    [DifferenceImages] update all diff, img observing frame: dDifferenceImages
+    [DifferenceImages] update all diff, frame observing frameId: dDifferenceImages
 
     (* print all: printSDs
     print all: len *)
-	fShowFrames()
+    fShowFrames()
 }
 
 hfn report() {
