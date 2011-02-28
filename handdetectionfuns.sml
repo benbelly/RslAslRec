@@ -19,7 +19,9 @@ fun len is = "Interp set length is " ^ Int.toString(List.length is) ^ "\n"
 fun initInterp _ =
   (NONE, [(NONE, Interp.rhcons( { srcDir = "", frameId = ~1,
                                   frame = defaultFrame,
-                                  diff = defaultFrame, keyframe = false } ))] )
+                                  diff = defaultFrame, skin = defaultFrame,
+                                  gray = defaultFrame,
+                                  keyframe = false } ))] )
 
 fun loadDir testDir = fn _ =>
   let
@@ -46,8 +48,12 @@ fun getFramesImages (_) =
     (NONE, interps)
   end
 
+fun skinMasks { frameId, skin } =
+  (NONE, [(NONE, {skin = Cvsl.getImage 2 frameId })])
 
-  (* There should just be one interpretation here *)
+fun grayScales { frameId, gray } =
+  (NONE, [(NONE, {gray = Cvsl.getImage 1 frameId })])
+
 fun keyframes t1 = fn  _ =>
   let
     val diffArray = keyframeDiffs t1
@@ -55,6 +61,23 @@ fun keyframes t1 = fn  _ =>
   in
     (SOME (FrameDiffs diffArray), fn ({keyframe, frameId}) =>
       (NONE, [(NONE, { keyframe = (Vector.exists (fn i => i = frameId) keyIds) } )] ))
+  end
+
+fun initialDiffImages is =
+  let
+    val toId = fn {keyframe, frameId, gray, diff} => frameId
+    val toSize = fn {keyframe, frameId, gray = (_, w, h, t), diff } => (w, h, t)
+    val toGray = fn {keyframe, frameId, gray = (gImg, _, _, _), diff} => gImg
+    val isKey = fn {keyframe, frameId, gray, diff} => keyframe
+    val grays = List.map toGray is
+    val ids = List.map toId is
+    val keys = List.map toGray (List.filter isKey is)
+    val keyIds = List.map toId (List.filter isKey is)
+    val (w,h,t) = toSize (hd(is))
+    val _ = makeInitSDs ids grays keyIds keys w h t
+  in
+    (NONE, fn({keyframe, frameId, gray, diff}) =>
+                (NONE, [(NONE, {diff = Cvsl.getImage 3 frameId})]))
   end
 
 fun dDifferenceImages _ =
@@ -72,10 +95,11 @@ fun bIsKeyFrame {keyframe} = (NONE, keyframe)
 
 fun uniqueImage (i : Interp.r) = 
   let
-    val {frame, srcDir, diff, ... } = i
+    val {frame, srcDir, diff, skin, gray, ... } = i
   in
     (NONE, [ (NONE, { srcDir = srcDir, frameId = ~1, frame = frame,
-                      diff = diff, keyframe = false }) ])
+                      diff = diff, skin = skin, gray = gray,
+                      keyframe = false }) ])
   end
 
 val interpToString = fn (i: Interp.r) =>

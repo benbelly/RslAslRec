@@ -7,6 +7,9 @@ local
   val findKeyframesC    = _import "findKeyframesC" : int * real array -> unit;
   val numKeyframesC     = _import "numKeyframesC" : unit -> int;
   val getKeyframeIdsC   = _import "getKeyframeIdsC" : int array -> unit;
+  val makeInitSDsC      = _import "initialSDsC" : int vector * char vector * int *
+                                                  int vector * char vector * int * 
+                                                  int * int * int -> unit;
   val numFramesC        = _import "numFramesC" : int -> int;
   val findHandsC        = _import "findHandsC" : unit -> unit;
   val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
@@ -44,4 +47,15 @@ in
       numFramesC (3)
     end
 
+  fun makeInitSDs ids grays keyIds keys w h t =
+    let
+      val idvec = Vector.fromList ids
+      val grayVec = Vector.concat grays
+      val grayLen = List.length grays
+      val keyIdVec = Vector.fromList keyIds
+      val keyVec = Vector.concat keys
+      val keyLen = List.length keys
+    in
+      makeInitSDsC( idvec, grayVec, grayLen, keyIdVec, keyVec, keyLen, w, h, t )
+    end
 end

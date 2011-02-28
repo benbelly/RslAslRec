@@ -48,6 +48,14 @@ extern "C" {
     void getKeyframeIdsC( Pointer ids );
 
     /*
+     * Run the initialSDsC command to execute the first 
+     * function in the difference image generation
+     */
+    void initialSDsC( Pointer ids, Pointer grays, int grayCount,
+                      Pointer keyIds, Pointer keys, int keyCount,
+                      int width, int height, int type );
+
+    /*
      * Run the findhands algorithm on the FrameDB already initialized
      * InitAslAlg() must be called before this
      */

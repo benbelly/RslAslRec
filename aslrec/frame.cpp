@@ -19,10 +19,6 @@ FrameSet loadFromFiles( std::vector<std::pair<std::string, int> > &filesAndFrame
 
 FrameSet loadFromVideo( std::string videoFile ) {
     cv::VideoCapture cap( videoFile );
-    /*
-     *fourcc = cap.get( CV_CAP_PROP_FOURCC );
-     *fps = cap.get( CV_CAP_PROP_FPS );
-     */
     int numFrames = cap.get( CV_CAP_PROP_FRAME_COUNT );
     FrameSet frames; frames.reserve( numFrames );
 
@@ -33,6 +29,19 @@ FrameSet loadFromVideo( std::string videoFile ) {
         cv::Mat copy( img.size(), img.type() );
         img.copyTo( copy );
         frames.push_back( Frame( i++, copy ) );
+    }
+    return frames;
+}
+
+FrameSet loadFromByteArray( int *ids, char *arr, int count,
+                            int width, int height, int type ) {
+    FrameSet frames; frames.reserve( count );
+    for( int i = 0; i < count; ++i ) {
+        int id = ids[i];
+        cv::Mat img = cv::Mat::zeros( height, width, type );
+        int bytes = height * width * img.elemSize1();
+        memcpy( img.data, arr + ( i * bytes ), bytes );
+        frames.push_back( Frame( id, img ) );
     }
     return frames;
 }

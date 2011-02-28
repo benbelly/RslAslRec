@@ -1,6 +1,7 @@
 
 #include "Databases.h"
 #include "aslalg.h"
+#include "differenceImageFunctions.h"
 
 #include <string>
 #include <string.h>
@@ -59,6 +60,22 @@ void getKeyframeIdsC( Pointer ids ) {
     std::transform( keys.begin(), keys.end(), std::back_inserter( idVec ),
                     boost::bind( &Frame::Id, _1 ) );
     memcpy( ids, &idVec[0], idVec.size() * sizeof( int ) );
+}
+/*
+ * Run the initialSDsC command to execute the first 
+ * function in the difference image generation
+ */
+void initialSDsC( Pointer ids, Pointer grays, int grayCount,
+                  Pointer keyIds, Pointer keys, int keyCount,
+                  int width, int height, int type ) {
+    FrameSet grayFrames = loadFromByteArray( (int*)ids, (char*)grays,
+                                             grayCount,
+                                             width, height, type );
+    FrameSet keyFrames = loadFromByteArray( (int*)keyIds, (char*)keys,
+                                            keyCount,
+                                            width, height, type );
+    FrameSet sds = generateInitialSDs( grayFrames, keyFrames );
+    FDB->setSDs( sds );
 }
 
 /*

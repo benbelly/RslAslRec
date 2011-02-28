@@ -46,6 +46,9 @@ typedef std::vector<CenterPoint> CenterSet;
 FrameSet loadFromFiles( std::vector<std::pair<std::string, int> > &files);
 FrameSet loadFromVideo( std::string filename );
 
+FrameSet loadFromByteArray( int *ids, char *arr, int count,
+                            int width, int height, int type );
+
 ///
 // Utility functions that should probably go somewhere else
 ///

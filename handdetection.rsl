@@ -10,6 +10,8 @@ interp:
     frameId : int
     keyframe : bool
     frame : char vector * int * int * int
+    gray : char vector * int * int * int
+    skin : char vector * int * int * int
     diff : char vector * int * int * int
 
 (*ML*)
@@ -44,11 +46,15 @@ fn fShowUnique() {
 }
 
 fn getHandContours() {
-    [DifferenceImages] update all diff observing frameId: dDifferenceImages
+
+    (* Section 4.1, step 2.a *)
+    [DiffImage] update all diff
+                observing keyframe, frameId, gray: initialDiffImages
 
     fShowDifferences()
-}
+    [DifferenceImages] update all diff observing frameId: dDifferenceImages
 
+}
 
 fn main(test, minMaxPixelComponentSize) {
     t1 = valOf(Int.fromString(minMaxPixelComponentSize))
@@ -64,13 +70,17 @@ fn main(test, minMaxPixelComponentSize) {
     [GetFrames] update frameId, frame: getFramesImages
 	print "Loading images"
 	print all: sNumFramesMsg
-	(* fShowFrames() *)
 
+    [GetSkinMask] update skin observing frameId: skinMasks
+    [GetGrayScale] update gray observing frameId: grayScales
     [FindKeyFrames] update all keyframe observing frameId: keyframes(t1)
+
+    (*
     if observing keyframe bIsKeyFrame {
         print "Key Frames:"
         fShowFrames()
     }
+    *)
 
     getHandContours()
 

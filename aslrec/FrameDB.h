@@ -15,7 +15,12 @@ class FrameDB {
     public:
         FrameDB( FrameSet &frames );
         virtual ~FrameDB();
+
         std::vector<double> findKeyframes( const unsigned int T1 );
+
+        void setSDs( FrameSet &sds );
+        void initialSDs();
+
         void findHands();
 
         struct FrameData {
@@ -76,7 +81,6 @@ class FrameDB {
         void findKeyframes( const unsigned int T1, std::vector<double> &diffs );
         void makeSDs();
 
-        FrameSet generateInitialSDs();
         FrameSet maskedSDs( FrameSet );
 
         typedef Frame (*Accessor)( RowType );
