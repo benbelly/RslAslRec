@@ -9,7 +9,7 @@ interp:
     keyframe : bool
     frame : char vector * int * int * int
 
-fn main(infile, min, max, increment) {
+fn main(infile, outfile, min, max, increment) {
 	minT = intToString(min)
 	maxT = intToString(max)
 	incT = intToString(increment)
@@ -17,21 +17,21 @@ fn main(infile, min, max, increment) {
     munge: dInitInterp
 	update srcDir: loadDir(infile)
     update frameId, frame: dGetFramesImages
-	print cat("Input File: ",infile)
-	print all: sNumInterpsMsg("Images loaded: ")
-	print ""
+	write ++ cat("Input File: ",infile) to outfile
+	write ++ all to outfile: sNumInterpsMsg("Images loaded: ")
+	write ++ "" to outfile 
 
 	while observing t1 bNext(incT, maxT) {
  	   update all keyframe, t1 observing frameId: 
 	   		dKeyframes(minT, incT)
 		
-		print all: sT1Value
+		write ++ all to outfile: sT1Value
    		if observing keyframe bIsKeyFrame {
-			print all: sNumInterpsMsg("  Keyframes: ")
+			write ++ all to outfile: sNumInterpsMsg("  Keyframes: ")
     	} else {
-			print all: sNumInterpsMsg("  Non-keyframes: ")
+			write ++ all to outfile: sNumInterpsMsg("  Non-keyframes: ")
 		}
-		print ""
+		write ++ "" to outfile
 	}
 }
 

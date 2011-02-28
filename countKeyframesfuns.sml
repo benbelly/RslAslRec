@@ -72,13 +72,13 @@ fun dDifferenceImages _ =
 
 (* RZ: ICCV addition *)
 fun sNumInterpsMsg (s) =
-    fn is => s ^ Int.toString(List.length is) ^ "\n"
+    fn is => s ^ Int.toString(List.length is) 
 
 fun sT1Value (is : InterpSet.r) =
     let
         val {t1, ...} = hd(is)
     in
-      "Threshold: " ^ Int.toString(t1) ^ "\n"
+      "Threshold: " ^ Int.toString(t1) 
     end
 
 fun sIntStringMsg (s,i) =
@@ -119,6 +119,8 @@ val sImgDisplay = fn i =>
   in
     ()
   end
+
+fun cat(s1,s2) = s1 ^ s2
 
 fun sDisplayFrames is = 
   let
