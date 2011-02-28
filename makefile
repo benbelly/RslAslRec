@@ -65,6 +65,14 @@ HMLB = $(HANDS).mlb
 HRSLS = $(HRSL) $(HANDS)funs.sml $(HANDS)help.sml
 HAND_GENED = $(HANDS) $(HANDS).i $(HANDS)-types.sml $(HANDS).data $(HANDS)-labels.lrsl $(HANDS).tab $(HANDS).dot $(HANDS).mlb $(HANDS).sml
 
+COUNT = countKeyframes
+CRSL = $(COUNT).rsl
+CMLB = $(COUNT).mlb
+CRSLS = $(CRSL) $(COUNT)funs.sml $(COUNT)help.sml
+COUNT_GENED = $(COUNT) $(COUNT).i $(COUNT)-types.sml $(COUNT).data $(COUNT)-labels.lrsl $(COUNT).tab $(COUNT).dot $(COUNT).mlb $(COUNT).sml
+
+
+
 ###
 # Compiling
 ###
@@ -76,7 +84,7 @@ SMLS = $(ASLREC_SMLS) \
 	   $(GRAMMAR_SMLS) \
 	   aslalg.sml aslalg.mlb 
 
-OPENCV_PATH=/home/bholm/OpenCV
+OPENCV_PATH=/home/rlaz/raid/OpenCV
 
 ##
 ## C++ variables
@@ -131,6 +139,12 @@ $(HANDS): $(OBJS) $(SMLS) $(HRSLS)
 		@echo "\nMaking executable:"
 		$(RSLC) $(HRSL) $(MLTON_FLAGS) $(OBJS)
 		@echo "    executable $@ build."
+
+$(COUNT): $(OBJS) $(SMLS) $(HRSLS)
+		@echo "\nMaking executable:"
+		$(RSLC) $(CRSL) $(MLTON_FLAGS) $(OBJS)
+		@echo "    executable $@ build."
+
 
 clean: out
 		@echo "\nCleaning up..."
