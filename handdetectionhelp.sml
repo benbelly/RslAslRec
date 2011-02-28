@@ -39,7 +39,7 @@ in
 
   fun findHands() =
     let
-        val _ = findHandsC();
+      val _ = findHandsC();
     in
       numFramesC (3)
     end

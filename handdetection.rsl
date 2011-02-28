@@ -8,9 +8,9 @@ notes:
 interp:
     srcDir : string
     frameId : int
-    frame : char vector * int * int * int
     keyframe : bool
-    diff : int
+    frame : char vector * int * int * int
+    diff : char vector * int * int * int
 
 (*ML*)
         val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
@@ -20,6 +20,12 @@ fn fShowFrames() {
     print "Displaying frames (press any key to advance)"
     print all: sNumFramesMsg
     write all observing frame to "/dev/null": sDisplayFrames
+}
+
+fn fShowDifferences() {
+    print "Displaying difference images (press any key to advance)"
+    print all: sNumFramesMsg
+    write all observing diff to "/dev/null": sDisplayDifferences
 }
 
 fn fShowUnique() {
@@ -36,6 +42,13 @@ fn fShowUnique() {
             accept 
         }
 }
+
+fn getHandContours() {
+    [DifferenceImages] update all diff observing frameId: dDifferenceImages
+
+    fShowDifferences()
+}
+
 
 fn main(test, minMaxPixelComponentSize) {
     t1 = valOf(Int.fromString(minMaxPixelComponentSize))
@@ -59,13 +72,8 @@ fn main(test, minMaxPixelComponentSize) {
         fShowFrames()
     }
 
-    fShowUnique()
+    getHandContours()
 
-    [DifferenceImages] update all diff, frame observing frameId: dDifferenceImages
-
-    (* print all: printSDs
-    print all: len *)
-    fShowFrames()
 }
 
 hfn report() {

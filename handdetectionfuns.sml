@@ -19,7 +19,7 @@ fun len is = "Interp set length is " ^ Int.toString(List.length is) ^ "\n"
 fun initInterp _ =
   (NONE, [(NONE, Interp.rhcons( { srcDir = "", frameId = ~1,
                                   frame = defaultFrame,
-                                  diff = ~1, keyframe = false } ))] )
+                                  diff = defaultFrame, keyframe = false } ))] )
 
 fun loadDir testDir = fn _ =>
   let
@@ -61,8 +61,8 @@ fun dDifferenceImages _ =
   let
     val _ = findHands()
   in
-    (NONE, fn ({diff, frameId, frame}) =>
-                (NONE, [(NONE, {diff = frameId, frame = Cvsl.getImage 3 frameId })]))
+    (NONE, fn ({diff, frameId}) =>
+                (NONE, [(NONE, {diff = Cvsl.getImage 3 frameId })]))
   end
 
 (* RZ: ICCV addition *)
@@ -72,10 +72,10 @@ fun bIsKeyFrame {keyframe} = (NONE, keyframe)
 
 fun uniqueImage (i : Interp.r) = 
   let
-    val {frame, srcDir, ... } = i
+    val {frame, srcDir, diff, ... } = i
   in
     (NONE, [ (NONE, { srcDir = srcDir, frameId = ~1, frame = frame,
-                      diff = ~1, keyframe = false }) ])
+                      diff = diff, keyframe = false }) ])
   end
 
 val interpToString = fn (i: Interp.r) =>
@@ -109,6 +109,21 @@ fun sDisplayFrames is =
     val _ = List.app
         sImgDisplay
         is
+  in
+    ""
+  end
+
+fun sDiffDisplay i =
+  let
+    val {diff} = i
+    val _ = Cvsl.showImage diff
+  in
+    ()
+  end
+
+fun sDisplayDifferences is =
+  let
+    val _ = List.app sDiffDisplay is
   in
     ""
   end
