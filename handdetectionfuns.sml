@@ -110,12 +110,24 @@ fun uniqueImage (i : Interp.r) =
                       keyframe = false }) ])
   end
 
+fun uniqueDiffImage (i : Interp.r) = 
+  let
+    val {frame, frameId, srcDir, diff, skin, gray, ... } = i
+  in
+    (NONE, [ (SOME(FrameId(frameId)), { srcDir = srcDir, frameId = ~1, frame = defaultFrame,
+                      diff = diff, skin = defaultFrame, gray = defaultFrame,
+                      keyframe = false }) ])
+  end
+
 val interpToString = fn (i: Interp.r) =>
   let
     val {frameId, keyframe, ...} = i
   in
-    "Frame: " ^ Int.toString(frameId) ^ " Key? " ^ Bool.toString(keyframe) 
+    "FrameId: " ^ Int.toString(frameId) ^ " Key? " ^ Bool.toString(keyframe) 
   end
+
+val hcInterpToString = fn (i : Interp.t) =>
+    interpToString(Interp.rvalue i)
 
   (* RZ additions for ICCV *)
 fun sImageProps is = 
@@ -159,4 +171,89 @@ fun sDisplayDifferences is =
   in
     ""
   end
-  
+
+
+(* Output attributes *)
+val interpEdgeToString = fn t =>
+    fn (i, elist) =>
+    let
+      val istring = hcInterpToString(i) ^ ":\n"
+      val estring =
+        List.foldl
+        (fn (e', s') =>
+        let
+             val esrc = (DGraph.Node.id (DGraph.Edge.src e'))
+             val edst = (DGraph.Node.id (DGraph.Edge.dst e'))
+             val label = Trace.EdgeLabel.toString(Trace.labelOnEdge(t,e'))
+        in
+          s' ^ ("  (" ^ Word32.toString(esrc) ^ ", " ^ Word32.toString(edst) ^
+          "): " ^ label ^ "\n")
+        end
+        )
+        ""
+        elist
+       val _ = TextIO.print(istring ^ estring) 
+    in
+      istring ^ estring
+    end
+
+val tableEntryToString = fn (i, elist) =>
+    let
+      val istring = hcInterpToString(i) ^ ":\n"
+      val estring = 
+           List.foldl
+           (fn ((label, _, (e : DGraph.Edge.t)), s')  =>
+            let
+              val esrc = (DGraph.Node.id (DGraph.Edge.src e))
+              val edst = (DGraph.Node.id (DGraph.Edge.dst e))
+            in
+                s' ^ ("  (" ^ Word32.toString(esrc) ^", " ^ Word32.toString(edst) ^ "): "
+                ^ label ^ "\n")
+            end
+           )
+           ""
+           elist
+       (* Hack: side-effect *)
+       val _ = TextIO.print(istring ^ estring) 
+    in
+      istring ^ estring
+    end
+
+val hprintTraceTable = fn (is, ah, trace) =>
+    let
+      val _ = TextIO.print("---------------------------------------\n")
+      val _ = TextIO.print(" Attribute Table ")
+      val _ = TextIO.print("size: " ^ Int.toString((HashTable.tablesize ah)) ^
+      "\n")
+      val it = Trace.getInterpEdgeTable (trace)
+       val _ = TextIO.print(" Trace edge table size: " ^
+         (Int.toString(HashTable.tablesize(it))) ^ "\n")  
+      val _ = TextIO.print(" Passed Interpretations: " ^ (Int.toString(List.length is))
+        ^ "\n")
+      val _ = TextIO.print("---------------------------------------\n")
+
+      val _ = HashTable.mapi (interpEdgeToString(trace)) it 
+    in
+      ""
+    end
+
+val sHprintUserTable = fn (is, ah, trace ) =>
+    let
+      val _ = TextIO.print("---------------------------------------\n")
+      val _ = TextIO.print(" Attribute Table ")
+      val _ = TextIO.print("size: " ^ Int.toString((HashTable.tablesize ah)) ^
+      "\n")
+      val it = Trace.getInterpEdgeTable (trace)
+       val _ = TextIO.print(" Trace edge table size: " ^
+         (Int.toString(HashTable.tablesize(it))) ^ "\n")  
+      val _ = TextIO.print(" Interpretations: " ^ (Int.toString(List.length is))
+        ^ "\n")
+      val _ = TextIO.print("---------------------------------------\n")
+
+      val _ = TextIO.print("\nUSER TABLE:\n")
+      val _ = HashTable.mapi tableEntryToString ah
+    in
+      ""
+    end
+
+

@@ -4,6 +4,7 @@ inc "handdetectionfuns.sml"
 
 notes:
     FrameDiffs : real vector
+	FrameId: int
 
 interp:
     srcDir : string
@@ -34,10 +35,11 @@ fn fShowUnique() {
     (* Identify unique frames and discard, keeping current interp. set *)
     duplicate     
         { 
-            update: uniqueImage 
+            [ Unique ] update: uniqueDiffImage 
             print "Unique frames:"
-            fShowFrames()
-            print ifile
+			print all: sNumFramesMsg
+
+            (* fShowDifferences() *)
             reject
         } 
         {     
@@ -50,13 +52,12 @@ fn getHandContours() {
     (* Section 4.1, step 2.a *)
     [DiffImage] update all diff
                 observing keyframe, frameId, gray: initialDiffImages
-
+	
     (* Section 4.1, step 2.b part 1 *)
     [SkinmaskDiff] update diff observing frameId, skin: skinmaskDiffs
 
-    fShowDifferences()
-
     [DifferenceImages] update all diff observing frameId: dDifferenceImages
+	(* fShowDifferences() *)
 
 }
 
@@ -74,6 +75,8 @@ fn main(test, minMaxPixelComponentSize) {
     [GetFrames] update frameId, frame: getFramesImages
 	print "Loading images"
 	print all: sNumFramesMsg
+	print ifile
+	(* fShowFrames() *)
 
     [GetSkinMask] update skin observing frameId: skinMasks
     [GetGrayScale] update gray observing frameId: grayScales
@@ -91,6 +94,29 @@ fn main(test, minMaxPixelComponentSize) {
 }
 
 hfn report() {
-    print "reporting"
-    hadd ["FindKeyFrames"]
+	reject
+	print "QUERYING:"
+
+	hadd ["GetFrames"]
+	print "Number of original frames:"
+	print all: sNumFramesMsg
+	hprint all: sHprintUserTable
+	reject
+
+	hadd all
+	print "Number of Frames Produced In Total:"
+	print all:sNumFramesMsg
+	hprint all: sHprintUserTable
+	reject
+
+    hadd ["Skinmask","Diff"]
+	print "Number of unique frames at Skinmask... and Diff...:"
+	print all: sNumFramesMsg
+	hprint all: sHprintUserTable
+	fShowUnique()
+	reject
+
+	hadd [ "Unique" ]
+	print "Number of unqiue frames for diff images (2 locs):"
+	print all: sNumFramesMsg
 }
