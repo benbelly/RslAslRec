@@ -62,6 +62,21 @@ extern "C" {
                       int width, int height, int type );
 
     /*
+     * Edgedetect a difference image and remove those pixels
+     */
+    void edgeAndMaskSDC( int id, Pointer sd, int w, int h, int t );
+
+    /*
+     * RemoveSmallComponents from a difference image
+     */
+    void removeSmallComponentsC( int id, Pointer sd, int w, int h, int t );
+
+    /*
+     * Extract the boundary image for a difference image
+     */
+    void extractBoundaryC( int id, Pointer sd, int w, int h, int t );
+
+    /*
      * Run the findhands algorithm on the FrameDB already initialized
      * InitAslAlg() must be called before this
      */

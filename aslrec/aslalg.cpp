@@ -94,6 +94,37 @@ void skinmaskSDC( int id, Pointer sd, Pointer skin,
 }
 
 /*
+ * Edgedetect a difference image and remove those pixels
+ */
+void edgeAndMaskSDC( int id, Pointer sd, int w, int h, int t ) {
+    FrameSet sds = loadFromByteArray( &id, (char*)sd, 1, w, h, t );
+    Frame sdFrame = sds[0];
+    Frame edge = getEdge( sdFrame, true );
+    Frame negated = negateAndMaskFrame( sdFrame, edge );
+    FDB->setSingleSD( negated );
+}
+
+/*
+ * RemoveSmallComponents from a difference image
+ */
+void removeSmallComponentsC( int id, Pointer sd, int w, int h, int t ) {
+    FrameSet sds = loadFromByteArray( &id, (char*)sd, 1, w, h, t );
+    Frame sdFrame = sds[0];
+    Frame removed = removeComponentsFromFrame( sdFrame );
+    FDB->setSingleSD( removed );
+}
+
+/*
+ * Extract the boundary image for a difference image
+ */
+void extractBoundaryC( int id, Pointer sd, int w, int h, int t ) {
+    FrameSet sds = loadFromByteArray( &id, (char*)sd, 1, w, h, t );
+    Frame sdFrame = sds[0];
+    std::pair<Frame, ContourSet> boundary = getBoundaryImage( sdFrame );
+    FDB->setBoundary( boundary.first );
+}
+
+/*
  * Run the findhands algorithm on the FrameDB already initialized
  * InitAslAlg() must be called before this
  */

@@ -4,14 +4,17 @@
 
 #include "frame.h"
 
+Frame getEdge( Frame f, bool dilate );
 FrameSet getEdges( FrameSet &frames );
 FrameSet getDilatedEdges( FrameSet &frames );
+Frame negateAndMaskFrame( Frame SD, Frame mask );
 FrameSet negateAndMask( FrameSet &SDs, FrameSet &masks );
 
-FrameSet removeSmallConnectedComponents( FrameSet &fs );
 Frame removeComponentsFromFrame( Frame f );
+FrameSet removeSmallConnectedComponents( FrameSet &fs );
 
 typedef std::vector< std::pair<Frame, ContourSet> > FrameHandSet;
+std::pair<Frame, ContourSet> getBoundaryImage( Frame f );
 FrameHandSet getBoundaryImages( FrameSet &fs );
 
 Contour getBoundary( const cv::Mat &img );

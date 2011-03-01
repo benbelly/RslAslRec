@@ -39,6 +39,9 @@ std::vector<double> FrameDB::findKeyframes( const unsigned int T1 ) {
 }
 
 void FrameDB::findHands() {
+    initialSDs();
+    skinmaskSDs();
+    edgeAndMask();
     makeSDs();
 }
 
@@ -103,6 +106,7 @@ FrameDB::FrameData::FrameData( int i, const cv::Mat &img ) :
 void FrameDB::findKeyframes( const unsigned int T1, std::vector<double> &diffs ) {
     FrameSet graySet = grays();
     Frame firstKeyframe = graySet[0];
+    keyframes.clear();
     keyframes.push_back( firstKeyframe );
     std::accumulate( graySet.begin() + 1, graySet.end(),
                      firstKeyframe,
@@ -117,17 +121,36 @@ void FrameDB::setAllSDs( FrameSet &sds ) {
     setItem( setSD, sds );
 }
 
+void FrameDB::setBoundary( Frame b ) {
+    db[b.id].boundary = b;
+}
+
 void FrameDB::initialSDs() {
     FrameSet init = generateInitialSDs( grays(), keyframes );
     setItem( setSD, init );
 }
 
-void FrameDB::makeSDs() {
+void FrameDB::skinmaskSDs() {
     FrameSet init = sds();
     FrameSet SDs = maskedSDs( init );
+    setItem( setSD, SDs );
+}
+
+void FrameDB::edgeAndMask() {
+    FrameSet SDs = sds();
     FrameSet edges = getDilatedEdges( SDs );
     FrameSet negated = negateAndMask( SDs, edges );
+    setItem( setSD, negated );
+}
+
+void FrameDB::removeSmalls() {
+    FrameSet negated = sds();
     FrameSet cleaned = removeSmallConnectedComponents( negated );
+    setItem( setSD, cleaned );
+}
+
+void FrameDB::makeSDs() {
+    FrameSet cleaned = sds();
     FrameHandSet boundaries = getBoundaryImages( cleaned );
     for( FrameHandSet::iterator i = boundaries.begin(); i != boundaries.end(); ++i ) {
         db[i->first.id].boundary = i->first;

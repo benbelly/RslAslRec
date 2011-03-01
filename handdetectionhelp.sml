@@ -13,6 +13,12 @@ local
   val skinmaskSDC       = _import "skinmaskSDC" : int * char vector *
                                                   char vector *
                                                   int * int * int -> unit;
+  val edgeAndMaskSDC    = _import "edgeAndMaskSDC" : int * char vector *
+                                                     int * int * int -> unit;
+  val removeSmallComponentsC = _import "removeSmallComponentsC" : int * char vector *
+                                                     int * int * int -> unit;
+  val extractBoundaryC  = _import "extractBoundaryC" : int * char vector *
+                                                        int * int * int -> unit;
   val numFramesC        = _import "numFramesC" : int -> int;
   val findHandsC        = _import "findHandsC" : unit -> unit;
   val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
@@ -67,5 +73,26 @@ in
       val _ = skinmaskSDC( id, sd, skin, w, h, t )
     in
       Cvsl.getImage 3 id
+    end
+
+  fun edgeAndMaskSD frameId sd w h t =
+    let
+      val _ = edgeAndMaskSDC(frameId, sd, w, h, t)
+    in
+      Cvsl.getImage 3 frameId
+    end
+
+  fun removeSmallsFromSD frameId sd w h t =
+    let
+      val _ = removeSmallComponentsC(frameId, sd, w, h, t)
+    in
+      Cvsl.getImage 3 frameId
+    end
+
+  fun extractBoundaryImage frameId sd w h t =
+    let
+      val _ = extractBoundaryC( frameId, sd, w, h, t)
+    in
+      Cvsl.getImage 4 frameId
     end
 end

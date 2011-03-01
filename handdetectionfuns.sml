@@ -15,12 +15,16 @@
 val defaultFrame = ( Vector.fromList( [] : char list ), ~1, ~1, ~1 )
 
 fun len is = "Interp set length is " ^ Int.toString(List.length is) ^ "\n"
+fun keyframeSize is = "keyframe size is " ^
+                      Int.toString(List.length (List.filter (fn i:Interp.r =>
+                        let val { keyframe, ...} = i in keyframe end) is)) ^
+                        "\n"
 
 fun initInterp _ =
   (NONE, [(NONE, Interp.rhcons( { srcDir = "", frameId = ~1,
                                   frame = defaultFrame,
                                   diff = defaultFrame, skin = defaultFrame,
-                                  gray = defaultFrame,
+                                  gray = defaultFrame, boundary = defaultFrame,
                                   keyframe = false } ))] )
 
 fun loadDir testDir = fn _ =>
@@ -96,6 +100,29 @@ fun skinmaskDiffs i =
     (NONE, [(NONE, { diff = skinmaskSD frameId sd sk w h t })])
   end
 
+    (*[EdgeAndMask] update diff observing frameId: edgeAndMaskDiffs*)
+fun edgeAndMaskDiffs i =
+  let
+    val { frameId, diff = (sd, w, h, t) } = i
+  in
+    (NONE, [(NONE, { diff = edgeAndMaskSD frameId sd w h t })])
+  end
+
+    (*[RemoveSmallComponents] update diff observing frameId: removeSmallComponents*)
+fun removeSmallComponents i =
+  let
+    val { frameId, diff = (sd, w, h, t) } = i
+  in
+    (NONE, [(NONE, { diff = removeSmallsFromSD frameId sd w h t })])
+  end
+
+    (*[BoundaryImage] update boundary observing frameId, diff: extractBoundary*)
+fun extractBoundary i =
+  let
+    val { frameId, diff = (sd, w, h, t), boundary } = i
+  in 
+    (NONE, [(NONE, { boundary = extractBoundaryImage frameId sd w h t })])
+  end
 (* RZ: ICCV addition *)
 fun sNumFramesMsg is = "  Number of Frames: " ^ Int.toString(List.length is) ^ "\n"
  
@@ -103,20 +130,21 @@ fun bIsKeyFrame {keyframe} = (NONE, keyframe)
 
 fun uniqueImage (i : Interp.r) = 
   let
-    val {frame, srcDir, diff, skin, gray, ... } = i
+    val {frame, srcDir, diff, skin, gray, boundary, ... } = i
   in
     (NONE, [ (NONE, { srcDir = srcDir, frameId = ~1, frame = frame,
                       diff = diff, skin = skin, gray = gray,
+                      boundary = boundary,
                       keyframe = false }) ])
   end
 
 fun uniqueDiffImage (i : Interp.r) = 
   let
-    val {frame, frameId, srcDir, diff, skin, gray, ... } = i
+    val {frame, frameId, srcDir, diff, skin, boundary, gray, ... } = i
   in
     (NONE, [ (SOME(FrameId(frameId)), { srcDir = srcDir, frameId = ~1, frame = defaultFrame,
-                      diff = diff, skin = defaultFrame, gray = defaultFrame,
-                      keyframe = false }) ])
+                      diff = diff, skin = defaultFrame, boundary = defaultFrame,
+                      gray = defaultFrame, keyframe = false }) ])
   end
 
 val interpToString = fn (i: Interp.r) =>
@@ -172,6 +200,20 @@ fun sDisplayDifferences is =
     ""
   end
 
+fun sBoundaryDisplay i =
+  let
+    val {boundary} = i
+    val _ = Cvsl.showImage boundary
+  in
+    ()
+  end
+
+fun sDisplayBoundaries is =
+  let
+    val _ = List.app sBoundaryDisplay is
+  in
+    ""
+  end
 
 (* Output attributes *)
 val interpEdgeToString = fn t =>

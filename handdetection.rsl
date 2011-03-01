@@ -14,9 +14,10 @@ interp:
     gray : char vector * int * int * int
     skin : char vector * int * int * int
     diff : char vector * int * int * int
+    boundary : char vector * int * int * int
 
 (*ML*)
-        val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
+    val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
 (*ML*)
 
 fn fShowFrames() {
@@ -29,6 +30,12 @@ fn fShowDifferences() {
     print "Displaying difference images (press any key to advance)"
     print all: sNumFramesMsg
     write all observing diff to "/dev/null": sDisplayDifferences
+}
+
+fn fShowBoundaries() {
+    print "Displaying boundary images (press any key to advance)"
+    print all: sNumFramesMsg
+    write all observing boundary to "/dev/null": sDisplayBoundaries
 }
 
 fn fShowUnique() {
@@ -56,8 +63,17 @@ fn getHandContours() {
     (* Section 4.1, step 2.b part 1 *)
     [SkinmaskDiff] update diff observing frameId, skin: skinmaskDiffs
 
-    [DifferenceImages] update all diff observing frameId: dDifferenceImages
-	(* fShowDifferences() *)
+    (* Section 4.1, steps c and d *)
+    [EdgeAndMask] update diff observing frameId: edgeAndMaskDiffs
+
+    (* Section 4.1, step e *)
+    [RemoveSmallComponents] update diff observing frameId: removeSmallComponents
+
+    (* Section 4.1, step f *)
+    [BoundaryImage] update boundary observing frameId, diff: extractBoundary
+
+	fShowBoundaries()
+    (* [DifferenceImages] update all diff observing frameId: dDifferenceImages *)
 
 }
 
@@ -74,13 +90,12 @@ fn main(test, minMaxPixelComponentSize) {
 
     [GetFrames] update frameId, frame: getFramesImages
 	print "Loading images"
-	print all: sNumFramesMsg
-	print ifile
-	(* fShowFrames() *)
 
     [GetSkinMask] update skin observing frameId: skinMasks
     [GetGrayScale] update gray observing frameId: grayScales
     [FindKeyFrames] update all keyframe observing frameId: keyframes(t1)
+
+    print all: keyframeSize
 
     (*
     if observing keyframe bIsKeyFrame {
