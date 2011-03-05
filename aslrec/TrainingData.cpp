@@ -26,18 +26,21 @@ std::list<Histogram> TrainingData::GetHists()  {
     std::list<Histogram> hists;
     std::for_each( glosses.begin(), glosses.end(),
                    boost::bind( &Gloss::AppendHistograms, _1, &hists ) );
-    if( hists.empty() ) throw std::string( "No Histograms in TrainingData::GetHists()" );
+    if( hists.empty() )
+        throw std::string( "No Histograms in TrainingData::GetHists()" );
     return hists;
 }
 
 std::map<std::string, std::list<Histogram> > TrainingData::GetWordHists() {
     std::map<std::string, std::list<Histogram> > wordHists;
-    std::vector<boost::shared_ptr<Gloss> >::iterator begin = glosses.begin(),
-                                                     end = glosses.end();
+    std::vector<boost::shared_ptr<Gloss> >::iterator
+                            begin = glosses.begin(),
+                            end = glosses.end();
     while( begin != end ) {
         boost::shared_ptr<Gloss> glossPtr(*begin);
         wordHists[glossPtr->gloss] = std::list<Histogram>();
-        std::vector<boost::shared_ptr<SignSeq> > seqs = glossPtr->Sequences();
+        std::vector<boost::shared_ptr<SignSeq> > seqs =
+                                                glossPtr->Sequences();
         std::for_each( seqs.begin(), seqs.end(),
                        boost::bind( &SignSeq::AppendHistograms, _1,
                                     &(wordHists[glossPtr->gloss]) ) );
@@ -58,13 +61,18 @@ cv::Mat TrainingData::MakeBigVector( const std::list<Histogram> &hists ) {
 }
 
 cv::PCA TrainingData::MakePCA()  {
-    return cv::PCA( MakeBigVector( allHists ), cv::Mat(), CV_PCA_DATA_AS_ROW, maxComponents );
+    // maxComponents is defined in consts.h
+    Histogram h = *(allHists.begin());
+    return cv::PCA( MakeBigVector( allHists ), cv::Mat(),
+                    CV_PCA_DATA_AS_ROW, maxComponents );
 }
 
 std::map<std::string, cv::Mat> TrainingData::MakeCovar()  {
     std::map<std::string, cv::Mat> covariants;
-    std::map<std::string, std::list<Histogram> >::iterator begin = wordHists.begin(),
-                                                           end = wordHists.end();
+    std::map<std::string, std::list<Histogram> >::iterator
+        begin = wordHists.begin(),
+        end = wordHists.end();
+
     while( begin != end ) {
         const std::string &word = begin->first;
         const std::list<Histogram> &hists = begin->second;
