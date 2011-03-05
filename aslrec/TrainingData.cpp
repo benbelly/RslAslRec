@@ -68,17 +68,23 @@ std::map<std::string, cv::Mat> TrainingData::MakeCovar()  {
     while( begin != end ) {
         const std::string &word = begin->first;
         const std::list<Histogram> &hists = begin->second;
+        Histogram src = *(hists.begin());
         std::list<Histogram> flats;
         std::transform( hists.begin(), hists.end(),
                         std::back_inserter( flats ),
                         boost::bind( &flattenHistogram, _1 ) );
+        Histogram flat = *(flats.begin());
         std::list<Histogram> projections;
         std::transform( flats.begin(), flats.end(),
                         std::back_inserter( projections ),
                         boost::bind( &cv::PCA::project, &pca, _1 ) );
+        Histogram proj = *(projections.begin());
         cv::Mat cov, inv, mean;
         cv::calcCovarMatrix( MakeBigVector( projections ), cov, mean,
                              CV_COVAR_NORMAL | CV_COVAR_ROWS );
+        for( int i = 0; i < cov.rows; ++i )
+            for( int j = 0; j < cov.cols; ++j )
+                if( i != j ) cov.at<double>( i, j ) = 0.0;
         cv::invert( cov, inv, cv::DECOMP_SVD );
         covariants[word] = inv;
         ++begin;

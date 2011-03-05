@@ -85,7 +85,7 @@ void addImages( Histogram &dst, Histogram src ) {
 
 Histogram flattenHistogram( const Histogram &h ) {
     Histogram flat = Histogram::zeros( 1, h.rows * h.cols );
-    memcpy( flat[0], h[0], h.rows * h.cols * sizeof( double ) );
+    memcpy( flat.data, h.data, h.rows * h.cols * sizeof( double ) );
     return flat;
 }
 

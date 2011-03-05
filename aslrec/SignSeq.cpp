@@ -113,8 +113,10 @@ bool validPredecessor( std::pair<int, int> interval,
     if( cur.test <= 0 ) return false; // no predecessors for first test frame
     if( pre.model <= 0 || pre.test <= 0 ) return false; // no illegal predecessors
     int firstFrame = interval.first;
-    CenterPoint curCen = FDB->handCenters( firstFrame + cur.test )[cur.hand],
-                preCen = FDB->handCenters( firstFrame + pre.test )[pre.hand];
+    CenterSet curSet = FDB->handCenters( firstFrame + cur.test ),
+              preSet = FDB->handCenters( firstFrame + pre.test );
+    if( curSet.empty() || preSet.empty() ) return true;
+    CenterPoint curCen = curSet[cur.hand], preCen = preSet[pre.hand];
     int xD = curCen.x - preCen.x,
         yD = curCen.y - preCen.y;
     unsigned int xSqr = xD * xD,
