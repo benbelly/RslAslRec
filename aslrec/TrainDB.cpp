@@ -19,7 +19,7 @@ TrainDB::~TrainDB() {
 
 double TrainDB::Distance( std::string word, int start, int end ) {
     static std::auto_ptr<TrainingData> data( new TrainingData( GlossPtrs() ) );
-    return trainedSigns[word]->Distance( data->GetPCA(), data->GetCovariance( word ),
+    return trainedSigns[word]->Distance( data->GetPCA(), data->GetCovariance(),
                                          start, end );
 }
 

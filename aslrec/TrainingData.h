@@ -14,7 +14,7 @@ class TrainingData {
     public:
         TrainingData( const std::vector<boost::shared_ptr<Gloss> > &glosses );
          cv::PCA &GetPCA() ;
-         cv::Mat &GetCovariance( std::string word ) ;
+         cv::Mat &GetCovariance();
     private:
         std::vector<boost::shared_ptr<Gloss> > glosses;
 
@@ -29,7 +29,7 @@ class TrainingData {
         cv::PCA pca;
         cv::PCA MakePCA() ;
 
-        std::map<std::string, cv::Mat> covar;
-        std::map<std::string, cv::Mat> MakeCovar() ;
+        cv::Mat covar;
+        cv::Mat MakeCovar() ;
 };
 #endif
