@@ -1,8 +1,9 @@
 
 #include "frame.h"
+#include "TrainingData.h"
 #include "histograms.h"
 #include "consts.h"
-#include "TrainingData.h"
+#include "writer.h"
 #include <boost/bind.hpp>
 
 TrainingData::TrainingData( const std::vector<boost::shared_ptr<Gloss> > &gs ) :
@@ -28,6 +29,11 @@ std::list<Histogram> TrainingData::GetHists()  {
                    boost::bind( &Gloss::AppendHistograms, _1, &hists ) );
     if( hists.empty() )
         throw std::string( "No Histograms in TrainingData::GetHists()" );
+    /*
+     *std::vector<Histogram> vh;
+     *std::copy( hists.begin(), hists.end(), std::back_inserter( vh ) );
+     *writeMats( "cvsl_out/hist", vh );
+     */
     return hists;
 }
 
@@ -55,31 +61,29 @@ cv::Mat TrainingData::MakeBigVector( const std::list<Histogram> &hists ) {
     int rows = hists.size();
     Histogram big = Histogram::zeros( rows, h.rows * h.cols );
     std::list<Histogram>::const_iterator iter = hists.begin();
-    for( int i = 0; i < rows; ++i, ++iter )
+    for( int i = 0; i < rows; ++i, ++iter ) {
         memcpy( big[i], iter->data, h.rows * h.cols * sizeof(double) );
+        big[i];
+    }
     return big;
 }
 
 cv::PCA TrainingData::MakePCA()  {
     // maxComponents is defined in consts.h
-    Histogram h = *(allHists.begin());
     return cv::PCA( MakeBigVector( allHists ), cv::Mat(),
                     CV_PCA_DATA_AS_ROW, maxComponents );
 }
 
 cv::Mat TrainingData::MakeCovar()  {
     const std::list<Histogram> &hists = allHists;
-    Histogram src = *(hists.begin());
     std::list<Histogram> flats;
     std::transform( hists.begin(), hists.end(),
                     std::back_inserter( flats ),
                     boost::bind( &flattenHistogram, _1 ) );
-    Histogram flat = *(flats.begin());
     std::list<Histogram> projections;
     std::transform( flats.begin(), flats.end(),
                     std::back_inserter( projections ),
                     boost::bind( &cv::PCA::project, &pca, _1 ) );
-    Histogram proj = *(projections.begin());
     cv::Mat cov, inv, mean;
     cv::calcCovarMatrix( MakeBigVector( projections ), cov, mean,
                          CV_COVAR_NORMAL | CV_COVAR_ROWS );

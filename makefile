@@ -25,7 +25,8 @@ ASLREC_OBJS = $(addprefix $(ASLREC_DIR)/, aslalg.o \
 										  FeatureFrame.o \
 										  Databases.o FrameDB.o TrainDB.o \
 										  aslalgLevel.o TrainingData.o \
-										  differenceImageFunctions.o )
+										  differenceImageFunctions.o \
+										  writer.o)
 ASLREC_SMLS = $(addprefix $(ASLREC_DIR)/, aslalgLevel.sml aslalgUtil.sml )
 
 

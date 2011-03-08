@@ -72,7 +72,7 @@ Histogram generateHandHistogram( cv::Size size, Contour c ) {
 inline void NormalizeHistogram( Histogram &hist, double total ) {
     Histogram::iterator hbegin = hist.begin(), hend = hist.end();
     while( hbegin != hend ) {
-        *hbegin = sqrt( *hbegin / total );
+        *hbegin = total > 0 ? sqrt( *hbegin / total ) : 0.0;
         ++hbegin;
     }
 }
