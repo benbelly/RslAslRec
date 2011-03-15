@@ -1,10 +1,10 @@
 inc "detect.mlb"
-inc "handdetectionhelp.sml"
-inc "handdetectionfuns.sml"
+inc "hd-decision.sml"
+inc "hd-interp.sml"
 
 notes:
     FrameDiffs : real vector
-	FrameId: int
+    FrameId: int
 
 interp:
     srcDir : string
@@ -44,7 +44,7 @@ fn fShowUnique() {
         { 
             [ Unique ] update: uniqueDiffImage 
             print "Unique frames:"
-			print all: sNumFramesMsg
+            print all: sNumFramesMsg
 
             (* fShowDifferences() *)
             reject
@@ -59,7 +59,7 @@ fn getHandContours() {
     (* Section 4.1, step 2.a *)
     [DiffImage] update all diff
                 observing keyframe, frameId, gray: initialDiffImages
-	
+    
     (* Section 4.1, step 2.b part 1 *)
     [SkinmaskDiff] update diff observing frameId, skin: skinmaskDiffs
 
@@ -72,15 +72,14 @@ fn getHandContours() {
     (* Section 4.1, step f *)
     [BoundaryImage] update boundary observing frameId, diff: extractBoundary
 
-	fShowBoundaries()
-    (* [DifferenceImages] update all diff observing frameId: dDifferenceImages *)
+    fShowBoundaries()
 
 }
 
 fn main(test, minMaxPixelComponentSize) {
     t1 = valOf(Int.fromString(minMaxPixelComponentSize))
-	print "Input file:"
-	print test
+    print "Input file:"
+    print test
     print "T1:"
     print minMaxPixelComponentSize
 
@@ -89,7 +88,7 @@ fn main(test, minMaxPixelComponentSize) {
     update srcDir: loadDir( test )
 
     [GetFrames] update frameId, frame: getFramesImages
-	print "Loading images"
+    print "Loading images"
 
     [GetSkinMask] update skin observing frameId: skinMasks
     [GetGrayScale] update gray observing frameId: grayScales
@@ -109,29 +108,29 @@ fn main(test, minMaxPixelComponentSize) {
 }
 
 hfn report() {
-	reject
-	print "QUERYING:"
+    reject
+    print "QUERYING:"
 
-	hadd ["GetFrames"]
-	print "Number of original frames:"
-	print all: sNumFramesMsg
-	hprint all: sHprintUserTable
-	reject
+    hadd ["GetFrames"]
+    print "Number of original frames:"
+    print all: sNumFramesMsg
+    hprint all: sHprintUserTable
+    reject
 
-	hadd all
-	print "Number of Frames Produced In Total:"
-	print all:sNumFramesMsg
-	hprint all: sHprintUserTable
-	reject
+    hadd all
+    print "Number of Frames Produced In Total:"
+    print all:sNumFramesMsg
+    hprint all: sHprintUserTable
+    reject
 
     hadd ["Skinmask","Diff"]
-	print "Number of unique frames at Skinmask... and Diff...:"
-	print all: sNumFramesMsg
-	hprint all: sHprintUserTable
-	fShowUnique()
-	reject
+    print "Number of unique frames at Skinmask... and Diff...:"
+    print all: sNumFramesMsg
+    hprint all: sHprintUserTable
+    fShowUnique()
+    reject
 
-	hadd [ "Unique" ]
-	print "Number of unqiue frames for diff images (2 locs):"
-	print all: sNumFramesMsg
+    hadd [ "Unique" ]
+    print "Number of unqiue frames for diff images (2 locs):"
+    print all: sNumFramesMsg
 }
