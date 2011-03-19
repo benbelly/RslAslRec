@@ -4,6 +4,7 @@
 
 #include "boost/multi_array.hpp"
 #include<vector>
+#include<limits>
 
 class SignSeqScores {
     public:
@@ -21,6 +22,7 @@ class SignSeqScores {
 
         void setDistance( int model, int test, int hand, double distance );
         void setDistance( int model, int test, int hand, Index last, double distance );
+        double maxDistance() { return std::numeric_limits<double>::max(); }
         double getDistance( Index i ) { return scores[i.model][i.test][i.hand]; }
         double bestScoreForEndFrame( int end );
 
@@ -38,11 +40,13 @@ class SignSeqScores {
                   i3( model - 1, test, hand ),
                   current( model, test, hand );
             std::vector<Index> indices;
+
+            if( valid( i3, current ) ) indices.push_back( i3 );
+
             for( int i = 0; i < maxnumberHands; ++i ) {
                 i1.hand = i; i2.hand = i; i3.hand = i;
                 if( valid( i1, current ) ) indices.push_back( i1 );
                 if( valid( i2, current ) ) indices.push_back( i2 );
-                if( valid( i3, current ) ) indices.push_back( i3 );
             }
             return indices;
         }

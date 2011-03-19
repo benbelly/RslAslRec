@@ -11,22 +11,70 @@ interp:
     testFrames: int vector
     level : int
     word : int
-    interval : int * int * real
+    score : real
+    interval : int * int
     prevs : int list * real
 
-fn makeLevel(itemMap) {
-    [NextLevel] update level, word, interval
-                observing testFrames: levelUp(itemMap)
-    (* LevelUp just created a set of interps at new highest level, so 
-       only look at those *)
-    [InternalLevelCheck] if all observing level atMax {
-        [ScoreLevel] update interval observing level, word: scoreLevel(itemMap)
+fn grammarCheck(itemMap, grammar) {
+    print "Checking grammar "
+    print all: len
+    [KillBadGrammar] if observing word, prevs badGrammar(itemMap, grammar, 3) {
+        print "Rejecting:\n"
+        (* print: i2s(itemMap) *)
+        reject
     }
-    [GetPrevs] update all prevs observing interval, level, word: updatePrevs
+    print "Grammar checked "
+    print all: len
 }
 
-fn main ( ) {
-    test = "/home/bholm/USF-ASL-Data-Set-v2/Sentence 12.5 why"
+fn makeLevel(itemMap, grammar) {
+    print "Leveling up "
+    print all: len
+    [NextLevel] munge: levelUpMunge(itemMap)
+                    (*
+                    [NextLevel] update all level
+                                observing testFrames, word, interval: levelUp(itemMap)
+                    *)
+    (* LevelUp just created a set of interps at new highest level, so 
+       only look at those *)
+    print "Getting atMax "
+    print all: len
+    [InternalLevelCheck] if all observing level atMax {
+        print "Scoring "
+        print all: len
+        [ScoreLevel] update score observing interval, level, word: scoreLevel(itemMap)
+        [KillHighScores] if observing score scoredOut {
+            print "Killing score-out\n"
+            reject
+        }
+    }
+    print "Getting prevs "
+    print all: len
+    [GetPrevs] update all prevs observing score, interval, level, word: updatePrevs
+    grammarCheck(itemMap, grammar)
+    [InternalLevelCheck] if all observing level atMax {
+        [TrimToBest] if all observing word, interval, prevs
+                     notBestForEnd {
+            print "Not best "
+            print all: len
+            reject
+         }
+    }
+}
+
+fn finish(itemMap, grammar) {
+    [GetAtEnd] if observing interval, testFrames atEnd {
+        [AddEnd] update word, prevs
+                 observing score: addEnd(itemMap)
+    }
+    else {
+        reject
+    }
+    grammarCheck(itemMap, grammar)
+}
+
+fn main ( testDir ) {
+    test = testDir (* "/home/bholm/USF-ASL-Data-Set-v2/Sentence 12.5 why" *)
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     t1 = 300
     (*ML*)
@@ -36,23 +84,33 @@ fn main ( ) {
 
     [Init] munge: init
     [LoadVideo] update testFrames: getIds
-    print "Trained and loaded"
+    print "Trained and loaded\n"
     print all: len
 
-    [LevelOne] update level, word, interval, prevs
-               observing testFrames: levelOne(itemMap)
-    print "Level one intervals created"
+    [LevelZero] update level, word, interval, score, prevs
+                observing testFrames: levelZero(itemMap)
+    print "Level zero intervals created\n"
     print all: len
-
-    [ScoreLevelOne] update interval observing level, word: scoreLevel(itemMap)
-    print "Level one scored"
 
     [LevelCheck] while all observing level belowMaxLevel( 20 ) {
-        print all observing level: level
+        print all observing level: prlevel
+        print all: len
         [OnlyHighestLevel] if all observing level atMax {
-            makeLevel(itemMap)
+            print "Making level "
+            print all: len
+            makeLevel(itemMap, grammar)
+        }
+        print "Dropping old incomplete "
+        print all: len
+        [DropOldLevels] if all observing level, interval, testFrames
+                        oldIncompleteLevel {
+            reject
         }
     }
+
+    print "Done leveling\n"
+
+    finish( itemMap, grammar )
 
     print ifile
 }

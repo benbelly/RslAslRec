@@ -29,10 +29,14 @@ class SignSeq {
                          const cv::Mat &covar );
 
     private:
+        typedef std::map<int, boost::shared_ptr<SignSeqScores> > MemoMap;
+        MemoMap scoreMemos;
         typedef boost::shared_ptr<FeatureFrame> FramePtr;
         typedef std::vector<FramePtr> FrameList;
         FrameList frames;
 
+        void Distance( SignSeqScores &scores, std::pair<int, int> interval,
+                         const cv::PCA &pca, const cv::Mat &covar );
         void GenerateScoresForModelFrames( SignSeqScores &scores,
                                            std::pair<int, int> interval,
                                            const cv::PCA &pca, const cv::Mat &covar );
@@ -44,11 +48,18 @@ class SignSeq {
                                          std::pair<int, int> interval,
                                          int modelIndex, int testIndex, const cv::PCA &pca,
                                          const cv::Mat &covar );
-        double GetBestScoreForEnd( SignSeqScores &scores, int end );
 
         typedef std::pair<cv::Mat, boost::shared_ptr<cv::Mat> > HandPair;
+        void Cost( SignSeqScores &scores, std::pair<int, int> interval,
+                   int modelIndex, int testIndex, int handIndex,
+                   const HandPair &handPair,
+                   const cv::PCA &pca, const cv::Mat &covar );
+
+        double GetBestScoreForEnd( SignSeqScores &scores, int end );
+
         std::vector<HandPair> makePairs( ProjectionSet &hands );
-        double DistanceForPair( FramePtr, HandPair &pair, const cv::PCA &pca, const cv::Mat &covar );
+        double DistanceForPair( FramePtr, const HandPair &pair,
+                                const cv::PCA &pca, const cv::Mat &covar );
 };
 
 #endif

@@ -9,12 +9,14 @@
 std::pair<int, double *> loadSkinModel() {
     FILE *in = fopen( "skinmodel.model", "rb" );
     double step = 0;
-    fread( &step, sizeof(double), 1, in );
+    size_t  sz = fread( &step, sizeof(double), 1, in );
+    if( !sz ) throw std::string( "Nothing read" );
 
     int l = 256 / step;
     int arrSize = l * l * l;
     double* model = new double[arrSize];
-    fread( model, sizeof(double), arrSize, in);
+    sz = fread( model, sizeof(double), arrSize, in);
+    if( !sz ) throw std::string( "Another nothing read" );
 
     return std::make_pair( step, model );
 }

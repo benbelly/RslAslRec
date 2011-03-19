@@ -62,6 +62,11 @@ int FrameDB::firstId() const {
     return db.begin()->first;
 }
 
+int FrameDB::lastId() const {
+    if( db.empty() ) throw std::string( "Empty Database!" );  //shrug
+    return db.rbegin()->first;
+}
+
 std::vector<int> FrameDB::ids() const {
     std::vector<int> idvec;
     std::transform( db.begin(), db.end(), std::back_inserter( idvec ),

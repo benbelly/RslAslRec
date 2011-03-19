@@ -47,7 +47,7 @@ DATAREAD_SMLS = $(addprefix $(DATAREAD_DIR)/, aslio.sig aslio.sml \
 #
 ###############################
 GRAMMAR_DIR = $(SRC_BASE)/grammar
-GRAMMAR_SMLS = $(GRAMMAR_DIR)/grammar.mlb
+GRAMMAR_SMLS = $(GRAMMAR_DIR)/grammar.mlb $(GRAMMAR_DIR)/grammar.sml
 
 ###############################
 #
@@ -91,10 +91,11 @@ OPENCV_PATH=/home/bholm/raid/OpenCV
 ## C++ variables
 ##
 CC=g++
-DEBUG=-g
+#DEBUG=-g
+OPT=-O3
 INCLUDE=-I. -I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
 		-I/usr/lib/mlton/include
-CFLAGS=-Werror -Wall -Wextra -c $(INCLUDE) $(DEBUG)
+CFLAGS=-Werror -Wall -Wextra -c $(INCLUDE) $(DEBUG) $(OPT)
 
 ##
 ## MLTon variables
@@ -113,6 +114,7 @@ ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt '-lcsironn -lqhull -lqsastime -lfreetype'
 ML_FFI = -default-ann 'allowFFI true'
 ML_DEBUG = -const 'Exn.keepHistory true'
+ML_OPT = -cc-opt O3 -codegen native -as-opt O3 -profile time
 MLTON_FLAGS = $(ML_PATHS) $(ML_LIBS) $(ML_FFI) $(ML_DEBUG)
 
 ##

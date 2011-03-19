@@ -95,3 +95,13 @@ fun findDistance _ _ Start = 0.0
       in
         distance
       end
+
+fun goodWords(itemMap) =
+  let
+    val startIdx = indexOf itemMap Start
+    val endIdx = indexOf itemMap End
+    val (wordIdxs, _) = ListPair.unzip itemMap
+  in
+    List.filter (fn idx => idx <> startIdx andalso idx <> endIdx) wordIdxs
+  end
+

@@ -63,8 +63,11 @@ fun keyframes t1 = fn  _ =>
     val diffArray = keyframeDiffs t1
     val keyIds = keyframeIds()
   in
-    (SOME (FrameDiffs diffArray), fn ({keyframe, frameId}) =>
-      (NONE, [(NONE, { keyframe = (Vector.exists (fn i => i = frameId) keyIds) } )] ))
+    (SOME (FrameDiffs diffArray),
+     fn ({keyframe, frameId}) =>
+      (NONE,
+       [(NONE,
+         { keyframe = (Vector.exists (fn i => i = frameId) keyIds) } )] ))
   end
 
 fun initialDiffImages is =

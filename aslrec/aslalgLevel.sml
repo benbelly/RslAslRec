@@ -7,25 +7,32 @@ val getMaxScoreC = _import "getMaxScoreC" : unit -> real;
 in
 
   (* start is the starting index, testFrames is a vector of frameIds *)
-  fun makeIntervals start testFrames maxI =
+  fun makeIntervals start testFrames =
     let
       val frames = VectorSlice.slice( testFrames, start, NONE )
       val len = VectorSlice.length frames
-      val mi = maxI + 1
+      val mi = (Vector.length testFrames) + 1
       val slice = fn(v,i,sz) => if (i + sz > len) then VectorSlice.subslice(v, i, NONE)
                                 else VectorSlice.subslice(v, i, SOME sz)
       val matchSlice = fn (bIdx, b) => VectorSlice.map (fn(e) => (b,e))
                                                        (slice(frames,bIdx,mi))
       val pairVec = VectorSlice.mapi matchSlice frames
+      val result = Vector.concat (Vector.foldr op:: [] pairVec)
+      (*
+       *val _ = print ("length: " ^ (Int.toString len) ^
+       *               ", pairCount: " ^ (Int.toString (Vector.length result)) ^"\n")
+       *)
     in
-      Vector.concat (Vector.foldr op:: [] pairVec)
+      result
     end
 
-  fun makeIntervalsFromEnd frame testFrames maxI =
+  fun makeIntervalsFromEnd frame testFrames =
     let
-      val (idx, _) = valOf (Vector.findi (fn(_,fId) => fId = frame) testFrames)
+      val found = (Vector.findi (fn(_,fId) => fId = frame) testFrames)
+      val (idx, _) = case found of NONE => (~1,~1)
+                                 | SOME (idx, id) => (idx, id)
     in
-      makeIntervals idx testFrames maxI
+      if idx < 0 then Vector.fromList([]) else makeIntervals idx testFrames
     end
     
 end (* scope *)

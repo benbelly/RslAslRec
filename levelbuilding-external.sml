@@ -1,26 +1,34 @@
 
-val interpToString = fn _ =>
+fun spaceCat (a, b) = a ^ " " ^ b
+fun spaceList l = List.foldl spaceCat "" l
+fun commaCat (a, b) = a ^ ", " ^ b
+fun commaList l = List.foldl commaCat "" l
+fun intStr i = Int.toString(i)
+fun realStr r = Real.toString(r)
+
+fun intervalStr (b,e) = "(" ^ (intStr b) ^ ", " ^ (intStr e) ^ ")"
+
+fun i2s itemMap = fn i =>
 let
 (*
- *  val { testFrames, levelNum,
- *        levelWord, levelScores,
- *        levelPrevs } = i
- *  val spaceCat = fn (a, b) => a ^ " " ^ b
- *  val commaCat = fn (a, b) => a ^ ", " ^ b
- *  [>val prev2Str = fn (w, s) => (List.foldr spaceCat "" w) ^ "@" ^ (Real.toString s)<]
- *  *)
- in
-   "Well now, I just don't know yet\n"
- (*      [> Frame ids <]
- *  "FrameIds = [" ^ (Vector.foldr commaCat "" (Vector.map Int.toString testFrames)) ^ "]\n" ^
- *      [> Level <]
- *  "level " ^ (Int.toString levelNum) ^ "\n" ^
- *  "levelWord = " ^ Int.toString(levelWord) ^ "\n" ^
- *      [> Scores <]
- *  "[" ^ (Vector.foldr commaCat "" (Vector.map Real.toString levelScores)) ^ "]\n"
- *      [> Sentence <]
- *  [>^ "Sentence so far: " ^ (List.foldr spaceCat "" (List.rev soFar)) ^ "\n"<]
- *      [> Previous score <]
- *  [>^ "[" ^ (List.foldr commaCat "" (List.map prev2Str levelPrevs)) ^ "]\n"<]
+ *interp:
+ *    testFrames: int vector
+ *    level : int
+ *    word : int
+ *    score : real
+ *    interval : int * int
+ *    prevs : int list * real
  *)
+  val { testFrames, level,
+        word, score,
+        interval, prevs } = i
+  val wordStr = fn wordIdx => sItemToString (itemOf itemMap wordIdx)
+  val prevStr = fn (ps, s) => "[ " ^ (commaList (List.map wordStr ps)) ^ " ] @" ^
+                              (realStr s) ^ "\n"
+ in
+   "Level: " ^ (intStr level) ^ "\n" ^
+   "Word: " ^ (wordStr word) ^ "\n" ^
+   "Score: " ^ (realStr score) ^ "\n" ^
+   "Interval: " ^ (intervalStr interval) ^ "\n" ^
+   "Prevs: " ^ (prevStr prevs) ^ "\n"
 end

@@ -1,6 +1,5 @@
 
 #include "SignSeqScores.h"
-#include<limits>
 
 SignSeqScores::SignSeqScores( int trainCount, int testCount, int maxHands) :
     trainSize( trainCount ),
@@ -12,8 +11,6 @@ SignSeqScores::SignSeqScores( int trainCount, int testCount, int maxHands) :
 
     double initScore = std::numeric_limits<double>::max();
     Index initIndex;
-    //std::fill( scores.begin(), scores.end(), initScore ); // won't compile. Sheesh.
-    //std::fill( preds.begin(), preds.end(), initIndex );
     for( int train = 0; train < trainSize; ++train )
         for( int test = 0; test < testSize; ++test )
             for( int hand = 0; hand < maxnumberHands; ++hand ) {
@@ -30,10 +27,11 @@ void SignSeqScores::setDistance( int model, int test, int hand, double distance 
 }
 
 void SignSeqScores::setDistance( int model, int test, int hand, Index last,
-                                 double distance ) {
+                                 double thisDistance ) {
     double predDist = scores[last.model][last.test][last.hand];
-    if( last.model != -1 && last.test != -1 )
-        scores[model][test][hand] = distance + predDist;
+    double distance = predDist == std::numeric_limits<double>::max() ? predDist
+                                                                     : predDist + thisDistance;
+    scores[model][test][hand] = distance;
     preds[model][test][hand] = last;
 }
 
