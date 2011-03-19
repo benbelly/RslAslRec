@@ -113,9 +113,9 @@ ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt '-lltdl -ldl -lm -lcsirocsa' \
 		  -link-opt '-lcsironn -lqhull -lqsastime -lfreetype'
 ML_FFI = -default-ann 'allowFFI true'
-ML_DEBUG = -const 'Exn.keepHistory true'
-ML_OPT = -cc-opt O3 -codegen native -as-opt O3 -profile time
-MLTON_FLAGS = $(ML_PATHS) $(ML_LIBS) $(ML_FFI) $(ML_DEBUG)
+#ML_DEBUG = -const 'Exn.keepHistory true'
+ML_OPT = -codegen native -profile time
+MLTON_FLAGS = $(ML_PATHS) $(ML_LIBS) $(ML_FFI) $(ML_DEBUG) $(ML_OPT)
 
 ##
 ## RSL variables

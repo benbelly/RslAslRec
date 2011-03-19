@@ -58,15 +58,18 @@ fun root2grammar root =
     List.foldl entryInsert entries pairs
   end
 
-fun validPredecessor grammar item pred =
+fun validPredecessor _ ME _ = true
+  | validPredecessor _ _ ME = true
+  | validPredecessor grammar item pred =
   let 
-    val iword = sItemToString item
-    val pword = sItemToString pred
-    val _ = print ("Checking " ^ pword ^ " before " ^ iword ^ "\n")
     val ss = predecessors grammar item
     val valid = Option.isSome (List.find (fn p => p = pred) ss)
-    val is = if valid then " is " else " is not "
-    val _ = print (pword ^ is ^ "a valid predecessor of " ^ iword ^ "\n")
+    (*
+     *val iword = sItemToString item
+     *val pword = sItemToString pred
+     *val is = if valid then " is " else " is not "
+     *val _ = print (pword ^ is ^ "a valid predecessor of " ^ iword ^ "\n")
+     *)
   in
     valid
   end
@@ -75,9 +78,6 @@ fun validSequence grammar seq depth =
   let
     val toTake = Int.min(depth, List.length seq)
     val pairs = pairWithNext (List.take(seq, toTake))
-    val _ = print ("Validating sequence of size " ^ (Int.toString(List.length seq)) ^
-                   " at depth " ^ (Int.toString(depth)) ^ "\n")
-    val _ = print ("sizeof pairs = " ^ (Int.toString(List.length pairs)) ^ "\n")
   in
     List.all (fn (item, pred) => validPredecessor grammar item pred) pairs
   end

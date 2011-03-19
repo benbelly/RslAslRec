@@ -69,6 +69,7 @@ fun len (is) = (Int.toString(List.length(is)) ^ "\n")
 fun prlevel (is) =
   let
     val level = highestReachedLevel is
+    val _ = if level = 3 then Posix.Process.exit(Word8.fromInt(1)) else 0
   in
     ("Level " ^ (Int.toString level) ^ "\n")
   end
@@ -204,6 +205,7 @@ fun addEnd(itemMap) = fn(i) =>
   end
 
 fun updatePrevs(is) =
+let val _ = print "Prevs start\n" in
   (NONE, fn({prevs, score, interval, level, word}) =>
            let
              val (myStart, _) = interval
@@ -220,3 +222,4 @@ fun updatePrevs(is) =
            in
              (NONE, interps)
            end)
+end

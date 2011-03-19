@@ -31,6 +31,7 @@ fn makeLevel(itemMap, grammar) {
     print "Leveling up "
     print all: len
     [NextLevel] munge: levelUpMunge(itemMap)
+    print all observing level: prlevel
                     (*
                     [NextLevel] update all level
                                 observing testFrames, word, interval: levelUp(itemMap)
