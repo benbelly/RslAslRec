@@ -17,19 +17,19 @@ interp:
 
 fn grammarCheck(itemMap, grammar) {
     print "Checking grammar "
-    print all: len
+    print all observing level: len
     [KillBadGrammar] if observing word, prevs badGrammar(itemMap, grammar, 3) {
         print "Rejecting:\n"
         (* print: i2s(itemMap) *)
         reject
     }
     print "Grammar checked "
-    print all: len
+    print all observing level: len
 }
 
 fn makeLevel(itemMap, grammar) {
     print "Leveling up "
-    print all: len
+    print all observing level: len
     [NextLevel] munge: levelUpMunge(itemMap)
     print all observing level: prlevel
                     (*
@@ -39,10 +39,10 @@ fn makeLevel(itemMap, grammar) {
     (* LevelUp just created a set of interps at new highest level, so 
        only look at those *)
     print "Getting atMax "
-    print all: len
+    print all observing level: len
     [InternalLevelCheck] if all observing level atMax {
         print "Scoring "
-        print all: len
+        print all observing level: len
         [ScoreLevel] update score observing interval, level, word: scoreLevel(itemMap)
         [KillHighScores] if observing score scoredOut {
             print "Killing score-out\n"
@@ -50,14 +50,14 @@ fn makeLevel(itemMap, grammar) {
         }
     }
     print "Getting prevs "
-    print all: len
+    print all observing level: len
     [GetPrevs] update all prevs observing score, interval, level, word: updatePrevs
     grammarCheck(itemMap, grammar)
     [InternalLevelCheck] if all observing level atMax {
         [TrimToBest] if all observing word, interval, prevs
                      notBestForEnd {
             print "Not best "
-            print all: len
+            print all observing level: len
             reject
          }
     }
@@ -86,23 +86,23 @@ fn main ( testDir ) {
     [Init] munge: init
     [LoadVideo] update testFrames: getIds
     print "Trained and loaded\n"
-    print all: len
+    print all observing level: len
 
     [LevelZero] update level, word, interval, score, prevs
                 observing testFrames: levelZero(itemMap)
     print "Level zero intervals created\n"
-    print all: len
+    print all observing level: len
 
     [LevelCheck] while all observing level belowMaxLevel( 20 ) {
         print all observing level: prlevel
-        print all: len
+        print all observing level: len
         [OnlyHighestLevel] if all observing level atMax {
             print "Making level "
-            print all: len
+            print all observing level: len
             makeLevel(itemMap, grammar)
         }
         print "Dropping old incomplete "
-        print all: len
+        print all observing level: len
         [DropOldLevels] if all observing level, interval, testFrames
                         oldIncompleteLevel {
             reject

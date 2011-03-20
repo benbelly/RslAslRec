@@ -28,7 +28,6 @@ local
       datatype root = Root of string * sentence list;
 
       exception BadData of string;
-
       (*
        * Functions to create features
        *)
@@ -78,6 +77,18 @@ local
           in
           frames
           end;
+
+      (*datatype frame = Frame of int * feature * feature * feature;*)
+      fun handsForDir dir : int list list =
+        let
+          val dats = getDatFiles dir
+          val frames = map frameFromFile dats
+          val grabHand = fn (Frame (_,_,(Dominant ps),_)) => ps
+                          | _ => []
+          val allHands = map grabHand frames
+        in
+          allHands
+        end
 
       (*
        * Functions to create glosses

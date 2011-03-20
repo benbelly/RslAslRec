@@ -63,7 +63,7 @@ RSL_GENED = $(EXEC) $(EXEC).i $(EXEC)-types.sml $(EXEC).data $(EXEC)-labels.lrsl
 HANDS = handdetection
 HRSL = $(HANDS).rsl
 HMLB = $(HANDS).mlb
-HRSLS = $(HRSL) $(HANDS)funs.sml $(HANDS)help.sml
+HRSLS = $(HRSL) hd-interp.sml hd-decision.sml
 HAND_GENED = $(HANDS) $(HANDS).i $(HANDS)-types.sml $(HANDS).data $(HANDS)-labels.lrsl $(HANDS).tab $(HANDS).dot $(HANDS).mlb $(HANDS).sml
 
 COUNT = countKeyframes

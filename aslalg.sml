@@ -107,6 +107,7 @@ fun badGrammar (itemMap, grammar, depth) = fn (i) =>
     (NONE, not (validSequence grammar prevItems depth))
   end
 
+  (* TODO: Fix this to only find the best for each word/end once *)
 fun notBestForEnd(is) =
   let
     val wordInterps = fn w => List.filter (fn {word, interval, prevs} => word = w) is
@@ -170,8 +171,6 @@ fun levelUpMunge itemMap  = fn(is) =>
                                                      (Vector.map wordsForInterval intervals))
     val consed = List.map (fn i => (NONE, Interp.rhcons(i))) interpList
     val orig = InterpSet.fold (fn (i,l) => (NONE, i)::l) [] is
-    val _ = print ("Consed size: " ^ (Int.toString(List.length consed)) ^"\n")
-    val _ = print ("Orig size: " ^ (Int.toString(List.length orig)) ^"\n")
   in
     (NONE, orig @ consed )
   end
@@ -205,7 +204,6 @@ fun addEnd(itemMap) = fn(i) =>
   end
 
 fun updatePrevs(is) =
-let val _ = print "Prevs start\n" in
   (NONE, fn({prevs, score, interval, level, word}) =>
            let
              val (myStart, _) = interval
@@ -222,4 +220,3 @@ let val _ = print "Prevs start\n" in
            in
              (NONE, interps)
            end)
-end

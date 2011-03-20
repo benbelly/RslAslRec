@@ -10,6 +10,7 @@ interp:
     srcDir : string
     frameId : int
     keyframe : bool
+    truehand : int vector
     frame : char vector * int * int * int
     gray : char vector * int * int * int
     skin : char vector * int * int * int
@@ -90,18 +91,10 @@ fn main(test, minMaxPixelComponentSize) {
     [GetFrames] update frameId, frame: getFramesImages
     print "Loading images"
 
+    (* Get the skin, grayscale, and key frames used by other steps *)
     [GetSkinMask] update skin observing frameId: skinMasks
     [GetGrayScale] update gray observing frameId: grayScales
     [FindKeyFrames] update all keyframe observing frameId: keyframes(t1)
-
-    print all: keyframeSize
-
-    (*
-    if observing keyframe bIsKeyFrame {
-        print "Key Frames:"
-        fShowFrames()
-    }
-    *)
 
     getHandContours()
 

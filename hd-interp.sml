@@ -23,6 +23,7 @@ fun keyframeSize is = "keyframe size is " ^
 fun initInterp _ =
   (NONE, [(NONE, Interp.rhcons( { srcDir = "", frameId = ~1,
                                   frame = defaultFrame,
+                                  truehand = Vector.fromList( [] : int list ),
                                   diff = defaultFrame, skin = defaultFrame,
                                   gray = defaultFrame, boundary = defaultFrame,
                                   keyframe = false } ))] )
@@ -147,6 +148,7 @@ fun uniqueDiffImage (i : Interp.r) =
   in
     (NONE, [ (SOME(FrameId(frameId)), { srcDir = srcDir, frameId = ~1, frame = defaultFrame,
                       diff = diff, skin = defaultFrame, boundary = defaultFrame,
+                      truehand = Vector.fromList( [] : int list ),
                       gray = defaultFrame, keyframe = false }) ])
   end
 
