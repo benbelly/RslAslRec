@@ -17,6 +17,7 @@ typedef std::vector< std::pair<Frame, ContourSet> > FrameHandSet;
 std::pair<Frame, ContourSet> getBoundaryImage( Frame f );
 FrameHandSet getBoundaryImages( FrameSet &fs );
 
+ContourSet getHands( const cv::Mat &img );
 Contour getBoundary( const cv::Mat &img );
 
 CenterPoint center( Contour );

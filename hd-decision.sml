@@ -1,6 +1,5 @@
 
 local
-
   (* C++ functions for running the algorithm *)
   val initAslAlgC       = _import "InitAslAlgC" : string vector * int vector * int vector * int
                                                       -> unit;
@@ -25,6 +24,10 @@ local
   val getSignLengthC    = _import "getSignLengthC" : int -> int;
   val getSignC          = _import "getSignC" : int * char array -> unit;
   val distanceC         = _import "distanceC" : string * int * int * int -> real;
+
+  val numHandsC         = _import "numHandsC" : int * int * int * char vector -> int;
+  val distancesC        = _import "distancesC" : real array * int * int * int * int vector *
+                                                 int * char vector -> unit;
 in
 
   fun init (frames, sizes, nums, numnums) =
@@ -94,5 +97,14 @@ in
       val _ = extractBoundaryC( frameId, sd, w, h, t)
     in
       Cvsl.getImage 4 frameId
+    end
+
+  fun distances truth diff w h t =
+    let
+      val handCount = numHandsC( w, h, t, diff )
+      val dArray = Array.array(handCount, ~1.0)
+      val _ = distancesC( dArray, w, h, Vector.length truth, truth, t, diff )
+    in
+      Array.vector dArray
     end
 end

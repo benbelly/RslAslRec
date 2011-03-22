@@ -73,23 +73,24 @@ fn getHandContours() {
     (* Section 4.1, step f *)
     [BoundaryImage] update boundary observing frameId, diff: extractBoundary
 
-    fShowBoundaries()
+    (*fShowBoundaries()*)
 
 }
 
-fn main(test, minMaxPixelComponentSize) {
+fn main(test, train, minMaxPixelComponentSize) {
     t1 = valOf(Int.fromString(minMaxPixelComponentSize))
     print "Input file:"
     print test
-    print "T1:"
+    print "\nT1:"
     print minMaxPixelComponentSize
+    print "\n"
 
     (* Create initial interpretation, attach directory for frame images *)
     munge: initInterp
-    update srcDir: loadDir( test )
+    update srcDir: loadDir( test, train )
 
-    [GetFrames] update frameId, frame: getFramesImages
-    print "Loading images"
+    [GetFrames] update frameId, frame, truehand: getFramesImages(test)
+    print "Loading images\n"
 
     (* Get the skin, grayscale, and key frames used by other steps *)
     [GetSkinMask] update skin observing frameId: skinMasks
@@ -103,6 +104,12 @@ fn main(test, minMaxPixelComponentSize) {
 hfn report() {
     reject
     print "QUERYING:"
+
+    hadd ["DiffImage"]
+    print "Number of frames: "
+    print all: sNumFramesMsg
+    print: sPrintDiffAccuracy
+    reject
 
     hadd ["GetFrames"]
     print "Number of original frames:"

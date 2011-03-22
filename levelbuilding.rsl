@@ -48,6 +48,7 @@ fn makeLevel(itemMap, grammar) {
             print "Killing score-out\n"
             reject
         }
+        print: i2s(itemMap)
     }
     print "Getting prevs "
     print all observing level: len

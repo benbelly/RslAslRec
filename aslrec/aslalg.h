@@ -93,12 +93,31 @@ extern "C" {
      * InitAslAlg() must be called first, and seqPtr should
      * be provided by seqForGlossC()
      */
-    int addHandsToSeqC( Pointer seqPtr,
-                        int width, int height,
-                        Pointer faceCorners,
-                        int h1NumPts, Pointer h1Pts,
-                        int h2NumPts, Pointer h2Pts );
+    void addHandsToSeqC( Pointer seqPtr,
+                         int width, int height,
+                         Pointer faceCorners,
+                         int h1NumPts, Pointer h1Pts,
+                         int h2NumPts, Pointer h2Pts );
 
+    /*
+     * Return the number of hand candidates detected in test frame
+     */
+    int numHandsC( int width, int height,
+                   int type, Pointer pts );
+    /*
+     * Return the Mahalanobis distance of each hand candidate to the
+     * ground truth hand (provided)
+     */
+    void distancesC( Pointer mDistances,
+                     int width, int height,
+                     int trainNum, Pointer trainPts,
+                     int type, Pointer testImg );
+    /*
+     * Return the x,y coordinate of each hand candidate's center
+     */
+    void centersC( Pointer xs, Pointer ys,
+                   int w, int h, int type,
+                   Pointer img );
 }
 
 #endif

@@ -28,11 +28,17 @@ fun initInterp _ =
                                   gray = defaultFrame, boundary = defaultFrame,
                                   keyframe = false } ))] )
 
-fun loadDir testDir = fn _ =>
+fun loadDir (testDir, trainDir) = fn _ =>
   let
     val (candidateFrames, nums) = AslIO.getSortedCandidates testDir
     val _ = init( candidateFrames, Vector.map size candidateFrames, nums,
                   Vector.length candidateFrames );
+    val root = AslIO.rootForDir trainDir
+    val skipSentences = [1, 18, 19, 25]
+    val candidate = 5 (* Test sentence instance 5 *)
+    val cleaned = cleanedRoot root skipSentences
+    val (trainingS, _) = splitSentences cleaned candidate
+    val _ = trainForRoot trainingS
   in
     (NONE, [(NONE, {srcDir = testDir})])
   end
@@ -45,10 +51,18 @@ fun getFrames (_) =
     (NONE, interps)
   end
 
-fun getFramesImages (_) =
+fun getFramesImages testDir = fn (_) =>
   let 
     val frames = Vector.foldl op:: [] (Cvsl.getIds 0)
-    val interps = map (fn f => (NONE, { frameId = f, frame = Cvsl.getImage 0 f })) frames
+    val trues = AslIO.handsForDir testDir
+    val ids = List.map Int.toString (List.map (fn (i,_) => i) trues)
+    val _ = print ("["^ (String.concatWith ", " ids ) ^ "]\n")
+    val interps = map (fn f =>
+      let
+        val (_, trHand) = valOf(List.find (fn (id, _) => f = id) trues)
+      in
+        (NONE, { frameId = f, frame = Cvsl.getImage 0 f, truehand = trHand })
+      end) frames
   in
     (NONE, interps)
   end
@@ -127,6 +141,26 @@ fun extractBoundary i =
   in 
     (NONE, [(NONE, { boundary = extractBoundaryImage frameId sd w h t })])
   end
+
+(*
+ *interp:
+ *    frameId : int
+ *    truehand : int vector
+ *    diff : char vector * int * int * int
+ *)
+fun sPrintDiffAccuracy (i : Interp.r) =
+  let
+    val { frameId, truehand, diff = (diffImg, w, h, t), ... } = i
+    val frameStr = Int.toString frameId
+    val mDistances = distances truehand diffImg w h t
+    val sorted = mergesort Real.< (Vector.foldl op:: [] mDistances)
+    val realStr = String.concatWith ", " (List.map Real.toString sorted)
+  in
+    TextIO.print( "Mahalanobis Distances for " ^ frameStr ^ "\n" );
+    TextIO.print( "[" ^ realStr ^ "]\n" );
+    ""
+  end
+
 (* RZ: ICCV addition *)
 fun sNumFramesMsg is = "  Number of Frames: " ^ Int.toString(List.length is) ^ "\n"
  

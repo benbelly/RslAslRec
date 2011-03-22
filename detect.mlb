@@ -5,4 +5,6 @@ in
   $(DATAREAD_DIR)/iohelpers.mlb
   $(CVSL_DIR)/cvsl.mlb
   $(DATAREAD_DIR)/aslio.mlb
+  $(DATAREAD_DIR)/training.sml
+  $(DATAREAD_DIR)/sorting.sml
 end

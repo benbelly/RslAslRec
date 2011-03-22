@@ -2,6 +2,7 @@
 #include "Databases.h"
 #include "aslalg.h"
 #include "differenceImageFunctions.h"
+#include "cvsl/cvhelpers.h"
 
 #include <string>
 #include <string.h>
@@ -259,7 +260,7 @@ void getFrameC( int id, int type, Pointer img ) {
 }
 
 /*
- * Helper function for 
+ * Helper function for creating images from the training data
  * The input data skips scan lines and does weird things
  * This tries to correct for _most_ of it.
  */
@@ -289,16 +290,24 @@ Pointer seqForGlossC( int glossLen, Pointer glossPtr ) {
     return (Pointer) TDB->NextSequenceForGloss( gloss );
 }
 
+/* Create a hand from the list of points */
+cv::Mat makeHandFromPointList( int width, int height,
+                               int numPts, Pointer pts ) {
+    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
+    makeImageFromData( hand, numPts, (int *)pts );
+    return hand;
+}
+                            
 /*
  * Add hands and face to the provided sign sequence
  * InitAslAlg() must be called first, and seqPtr should
  * be provided by seqForGlossC()
  */
-int addHandsToSeqC( Pointer seqPtr,
-                    int width, int height,
-                    Pointer faceCorners,
-                    int h1NumPts, Pointer h1Pts,
-                    int h2NumPts, Pointer h2Pts ) {
+void addHandsToSeqC( Pointer seqPtr,
+                     int width, int height,
+                     Pointer faceCorners,
+                     int h1NumPts, Pointer h1Pts,
+                     int h2NumPts, Pointer h2Pts ) {
     cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
     boost::shared_ptr<cv::Mat> weak( (cv::Mat *)0 );
     makeImageFromData( hand, h1NumPts, (int *)h1Pts );
@@ -310,6 +319,54 @@ int addHandsToSeqC( Pointer seqPtr,
     cv::Point topLeft( facePts[0], facePts[1] ), bottomRight( facePts[2], facePts[3] );
     SignSeq *seq = (SignSeq *)seqPtr;
     seq->AddHands( topLeft, bottomRight, hand, weak );
-    return 0;
 }
 
+/*
+ * Return the number of hand candidates detected in test frame
+ */
+int numHandsC( int w, int h, int type, Pointer imgArr ) {
+    cv::Mat img = makeMat( imgArr, w, h, type );
+    return getHands( img ).size();
+}
+
+/*
+ * Return the Mahalanobis distance of each hand candidate to the
+ * ground truth hand (provided)
+ */
+void distancesC( Pointer mDistances,
+                 int width, int height,
+                 int trainNum, Pointer trainPts,
+                 int type, Pointer testImg ) {
+    cv::PCA pca = TDB->Pca();
+    cv::Mat train = makeHandFromPointList( width, height, trainNum, trainPts );
+    Histogram trainHist = generateHandHistogram( train.size(), getBoundary( train ) );
+    cv::Mat trainProj = pca.project( trainHist );
+
+    cv::Mat icovar = TDB->Covariance();
+
+    cv::Mat testSrc = makeMat( testImg, width, height, type );
+    ContourSet testHands = getHands( testSrc );
+    HistogramSet hs = generateHandHistograms( testSrc.size(), testHands );
+    ProjectionSet ps; ps.reserve( testHands.size() );
+    std::transform( hs.begin(), hs.end(), std::back_inserter( ps ),
+                    boost::bind( &cv::PCA::project, pca, _1 ) );
+    std::transform( ps.begin(), ps.end(), (double *)mDistances,
+                    boost::bind( cv::Mahalanobis, _1, trainProj, icovar ) );
+}
+
+/*
+ * Return the x,y coordinate of each hand candidate's center
+ */
+float getX( CenterPoint &p ) { return p.x; }
+float getY( CenterPoint &p ) { return p.y; }
+void centersC( Pointer xs, Pointer ys,
+               int w, int h, int type,
+               Pointer imgArr ) {
+    cv::Mat img = makeMat( imgArr, w, h, type );
+    ContourSet contours = getHands( img );
+    CenterSet cs = centers( contours );
+    std::transform( cs.begin(), cs.end(), (float *)xs,
+                    boost::bind( getX, _1 ) );
+    std::transform( cs.begin(), cs.end(), (float *)ys,
+                    boost::bind( getY, _1 ) );
+}

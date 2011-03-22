@@ -10,7 +10,7 @@ using boost::shared_ptr;
 using std::cerr;
 using std::endl;
 
-TrainDB::TrainDB() {
+TrainDB::TrainDB() : data( (TrainingData *)0 ) {
     TDB = this;
 }
 
@@ -18,7 +18,7 @@ TrainDB::~TrainDB() {
 }
 
 double TrainDB::Distance( std::string word, int start, int end ) {
-    static std::auto_ptr<TrainingData> data( new TrainingData( GlossPtrs() ) );
+    if( !data.get() ) data.reset( new TrainingData( GlossPtrs() ) );
     return trainedSigns[word]->Distance( data->GetPCA(), data->GetCovariance(),
                                          start, end );
 }

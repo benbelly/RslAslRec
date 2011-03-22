@@ -123,6 +123,12 @@ std::pair<Frame, ContourSet> getBoundaryImage( Frame f ) {
     return std::pair<Frame, ContourSet>( clean, contours );
 }
 
+ContourSet getHands( const cv::Mat &img ) {
+    cv::Mat dst( img.size(), img.type() );
+    ContourSet contours( getCompactAndSmallContours( dst ) );
+    return contours;
+}
+
 Contour getBoundary( const cv::Mat &src ) {
     cv::Mat img = cv::Mat::zeros( src.size(), src.type() );
     src.copyTo( img );

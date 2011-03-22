@@ -14,7 +14,6 @@ fun aslalgLoad t1 trainDir testDir =
   let
     val (candidateFrames, nums) = AslIO.getSortedCandidates testDir
     val root = AslIO.rootForDir trainDir
-    val imgs = AslIO.imagesForRoot root
     val skipSentences = [1, 18, 19, 25]
     val candidate = 5 (* Test sentence instance 5 *)
     val cleaned = cleanedRoot root skipSentences

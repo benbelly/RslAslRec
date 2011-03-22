@@ -5,6 +5,8 @@ local
 	
     fun getDatFiles dirName : string list =
 	List.filter (fn f => String.isSuffix ".dat" f) (getFiles dirName);
+    fun getJpgFiles dirName : string list =
+	List.filter (fn f => String.isSuffix ".jpg" f) (getFiles dirName);
     fun getSignSubDirs dirName : string list =
 	List.filter (fn d => String.isPrefix "sign" d) (getSubDirs dirName);
     fun getSentenceSubDirs dirName : string list =
@@ -79,16 +81,17 @@ local
           end;
 
       (*datatype frame = Frame of int * feature * feature * feature;*)
-      fun handsForDir dir : int list list =
+      fun handsForDir dir : (int * int vector) list = inDir dir (fn () =>
         let
           val dats = getDatFiles dir
+          val nums = map getFrameNum dats
           val frames = map frameFromFile dats
-          val grabHand = fn (Frame (_,_,(Dominant ps),_)) => ps
-                          | _ => []
+          val grabHand = fn (Frame (_,_,(Dominant ps),_)) => Vector.fromList(ps)
+                          | _ => Vector.fromList([])
           val allHands = map grabHand frames
         in
-          allHands
-        end
+          ListPair.zip(nums, allHands)
+        end)
 
       (*
        * Functions to create glosses
@@ -164,7 +167,7 @@ local
          * they need to be sorted *)
       fun getSortedCandidates dir =
         let
-          val files = getFiles dir
+          val files = getJpgFiles dir
           val lessThan = fn ((_,l),(_,t)) => l < t
           val getFrameNum = fn file =>
             Option.valOf(Int.fromString(List.nth(String.tokens (fn c=> c = #"_") file, 2)))

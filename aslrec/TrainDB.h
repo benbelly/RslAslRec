@@ -6,6 +6,7 @@
 #include "SignSeq.h"
 #include "FeatureFrame.h"
 #include "boost/shared_ptr.hpp"
+#include "TrainingData.h"
 
 #include<map>
 #include<string>
@@ -17,6 +18,8 @@ class TrainDB {
         TrainDB();
         virtual ~TrainDB();
 
+        cv::PCA Pca() const { return data->GetPCA(); }
+        cv::Mat Covariance() const { return data->GetCovariance(); }
         double Distance( std::string word, int start, int end );
 
         int NumGlosses() const { return trainedSigns.size(); }
@@ -47,6 +50,8 @@ class TrainDB {
         std::map<int, boost::shared_ptr<FeatureFrame> > features;
 
         GlossMap::iterator GlossIter( std::string );
+
+        std::auto_ptr<TrainingData> data;
 };
 
 #endif

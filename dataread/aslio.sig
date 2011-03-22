@@ -32,7 +32,7 @@ sig
         (* Take a root, returns a list of image tuples (dom, weak) *)
     val imagesForRoot : root -> (int list * int list) list
         (* Take a dirname, return a list of point lists [x0,y0,x1,y1,x2,y2] *)
-    val handsForDir : string -> int list list
+    val handsForDir : string -> (int * int vector) list
 
         (* The directory contents are returned in random order,
          * so they need to be sorted *)
