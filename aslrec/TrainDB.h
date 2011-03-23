@@ -18,8 +18,8 @@ class TrainDB {
         TrainDB();
         virtual ~TrainDB();
 
-        cv::PCA Pca() const { return data->GetPCA(); }
-        cv::Mat Covariance() const { return data->GetCovariance(); }
+        cv::PCA Pca() const { return Data().GetPCA(); }
+        cv::Mat Covariance() const { return Data().GetCovariance(); }
         double Distance( std::string word, int start, int end );
 
         int NumGlosses() const { return trainedSigns.size(); }
@@ -51,7 +51,10 @@ class TrainDB {
 
         GlossMap::iterator GlossIter( std::string );
 
-        std::auto_ptr<TrainingData> data;
+        mutable std::auto_ptr<TrainingData> data;
+        TrainingData &Data() const
+        { if(!data.get()) data.reset(new TrainingData( GlossPtrs() ) );
+          return *data.get(); }
 };
 
 #endif

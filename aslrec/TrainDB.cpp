@@ -18,8 +18,7 @@ TrainDB::~TrainDB() {
 }
 
 double TrainDB::Distance( std::string word, int start, int end ) {
-    if( !data.get() ) data.reset( new TrainingData( GlossPtrs() ) );
-    return trainedSigns[word]->Distance( data->GetPCA(), data->GetCovariance(),
+    return trainedSigns[word]->Distance( Data().GetPCA(), Data().GetCovariance(),
                                          start, end );
 }
 

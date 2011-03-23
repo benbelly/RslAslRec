@@ -115,6 +115,15 @@ ContourSet getCompactAndSmallContours( const cv::Mat &img ) {
     return csc;
 }
 
+ContourSet getContours( const cv::Mat &img ) {
+    cv::Mat src = cv::Mat::zeros( img.size(), img.type() );
+    img.copyTo( src );
+    ContourSet contours;
+    cv::findContours( src, contours,
+                      CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE );
+    return contours;
+}
+
 std::pair<Frame, ContourSet> getBoundaryImage( Frame f ) {
     Frame clean( f.id, f.size(), f.type() );
     ContourSet contours( getCompactAndSmallContours( f.mat ) );
@@ -125,7 +134,7 @@ std::pair<Frame, ContourSet> getBoundaryImage( Frame f ) {
 
 ContourSet getHands( const cv::Mat &img ) {
     cv::Mat dst( img.size(), img.type() );
-    ContourSet contours( getCompactAndSmallContours( dst ) );
+    ContourSet contours( getContours( dst ) );
     return contours;
 }
 

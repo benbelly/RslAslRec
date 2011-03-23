@@ -340,15 +340,19 @@ void distancesC( Pointer mDistances,
     cv::PCA pca = TDB->Pca();
     cv::Mat train = makeHandFromPointList( width, height, trainNum, trainPts );
     Histogram trainHist = generateHandHistogram( train.size(), getBoundary( train ) );
-    cv::Mat trainProj = pca.project( trainHist );
+    Histogram trainFlat = flattenHistogram( trainHist );
+    cv::Mat trainProj = pca.project( trainFlat );
 
     cv::Mat icovar = TDB->Covariance();
 
     cv::Mat testSrc = makeMat( testImg, width, height, type );
     ContourSet testHands = getHands( testSrc );
     HistogramSet hs = generateHandHistograms( testSrc.size(), testHands );
+    HistogramSet flats; flats.reserve( hs.size() );
+    std::transform( hs.begin(), hs.end(), std::back_inserter( flats ),
+                    boost::bind( flattenHistogram, _1 ) );
     ProjectionSet ps; ps.reserve( testHands.size() );
-    std::transform( hs.begin(), hs.end(), std::back_inserter( ps ),
+    std::transform( flats.begin(), flats.end(), std::back_inserter( ps ),
                     boost::bind( &cv::PCA::project, pca, _1 ) );
     std::transform( ps.begin(), ps.end(), (double *)mDistances,
                     boost::bind( cv::Mahalanobis, _1, trainProj, icovar ) );

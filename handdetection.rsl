@@ -111,6 +111,31 @@ hfn report() {
     print: sPrintDiffAccuracy
     reject
 
+    hadd ["SkinmaskDiff"]
+    print "Number of frames: "
+    print all: sNumFramesMsg
+    print: sPrintDiffAccuracy
+    reject
+
+    hadd ["EdgeAndMask"]
+    print "Number of frames: "
+    print all: sNumFramesMsg
+    print: sPrintDiffAccuracy
+    reject
+
+    hadd ["RemoveSmallComponents"]
+    print "Number of frames: "
+    print all: sNumFramesMsg
+    print: sPrintDiffAccuracy
+    reject
+
+    hadd ["BoundaryImage"]
+    print "Number of frames: "
+    print all: sNumFramesMsg
+    print: sPrintDiffAccuracy
+    reject
+
+    (*
     hadd ["GetFrames"]
     print "Number of original frames:"
     print all: sNumFramesMsg
@@ -133,4 +158,5 @@ hfn report() {
     hadd [ "Unique" ]
     print "Number of unqiue frames for diff images (2 locs):"
     print all: sNumFramesMsg
+    *)
 }

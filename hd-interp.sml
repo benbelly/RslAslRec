@@ -152,9 +152,9 @@ fun sPrintDiffAccuracy (i : Interp.r) =
   let
     val { frameId, truehand, diff = (diffImg, w, h, t), ... } = i
     val frameStr = Int.toString frameId
-    val mDistances = distances truehand diffImg w h t
-    val sorted = mergesort Real.< (Vector.foldl op:: [] mDistances)
-    val realStr = String.concatWith ", " (List.map Real.toString sorted)
+    val mDistances = Vector.foldl op:: [] (distances truehand diffImg w h t)
+    val sorted = mergesort Real.< mDistances
+    val realStr = String.concatWith ", " (List.map Real.toString mDistances)
   in
     TextIO.print( "Mahalanobis Distances for " ^ frameStr ^ "\n" );
     TextIO.print( "[" ^ realStr ^ "]\n" );
