@@ -326,7 +326,8 @@ void addHandsToSeqC( Pointer seqPtr,
  */
 int numHandsC( int w, int h, int type, Pointer imgArr ) {
     cv::Mat img = makeMat( imgArr, w, h, type );
-    return getHands( img ).size();
+    int count = getHands( img ).size();
+    return count;
 }
 
 /*
@@ -363,14 +364,25 @@ void distancesC( Pointer mDistances,
  */
 float getX( CenterPoint &p ) { return p.x; }
 float getY( CenterPoint &p ) { return p.y; }
-void centersC( Pointer xs, Pointer ys,
-               int w, int h, int type,
-               Pointer imgArr ) {
-    cv::Mat img = makeMat( imgArr, w, h, type );
+
+void centersC( double *xs, double *ys,
+               int w, int h,
+               int trainNum, int *trainPts,
+               int type, char *imgArr ) {
+
+    cv::Mat train = makeHandFromPointList( w, h, trainNum, (Pointer)trainPts );
+    Contour boundary = getBoundary( train );
+    CenterPoint trainCenter = boundary.empty() ? CenterPoint(0,0) :
+                                                 center( getBoundary( train ) );
+    *((double*)xs) = trainCenter.x; *((double*)ys) = trainCenter.y;
+
+    type = image_types::gray;
+    cv::Mat img = makeMat( (Pointer)imgArr, w, h, type );
     ContourSet contours = getHands( img );
     CenterSet cs = centers( contours );
-    std::transform( cs.begin(), cs.end(), (float *)xs,
+
+    std::transform( cs.begin(), cs.end(), ((float *)xs) + 1,
                     boost::bind( getX, _1 ) );
-    std::transform( cs.begin(), cs.end(), (float *)ys,
+    std::transform( cs.begin(), cs.end(), ((float *)ys) + 1,
                     boost::bind( getY, _1 ) );
 }

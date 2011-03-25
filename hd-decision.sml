@@ -28,6 +28,10 @@ local
   val numHandsC         = _import "numHandsC" : int * int * int * char vector -> int;
   val distancesC        = _import "distancesC" : real array * int * int * int * int vector *
                                                  int * char vector -> unit;
+  val centersC          = _import "centersC" : real array * real array *
+                                               int * int *
+                                               int * int vector *
+                                               int * char vector -> unit;
 in
 
   fun init (frames, sizes, nums, numnums) =
@@ -99,6 +103,8 @@ in
       Cvsl.getImage 4 frameId
     end
 
+  fun handCount diff w h t = numHandsC( w, h, t, diff )
+
   fun distances truth diff w h t =
     let
       val handCount = numHandsC( w, h, t, diff )
@@ -106,5 +112,32 @@ in
       val _ = distancesC( dArray, w, h, Vector.length truth, truth, t, diff )
     in
       Array.vector dArray
+    end
+
+  fun dist ((xl,yl),(xr, yr)) =
+    let 
+      val a2 = (xr - xl) * (xr - xl)
+      val b2 = (yr - yl) * (yr - yl)
+    in
+      Math.sqrt(a2 + b2)
+    end
+
+  fun distancesAndCenters truth diff w h t =
+    let
+      val handCount = numHandsC( w, h, t, diff )
+      val dArray = Array.array(handCount, ~1.0)
+      val xArray = Array.array(handCount + 1, 0.0)
+      val yArray = Array.array(handCount + 1, 0.0)
+      val _ = distancesC( dArray, w, h, Vector.length truth, truth, t, diff )
+      val _ = centersC( xArray, yArray, w, h, Vector.length truth, truth, t, diff )
+      val xs = Vector.foldl op:: [] (Array.vector xArray)
+      val ys = Vector.foldl op:: [] (Array.vector yArray)
+      val xys = ListPair.zip(xs,ys)
+      val trainXY = hd xys
+      val testXY = tl xys
+      val dists = List.map (fn xy => dist(trainXY, xy)) testXY
+      val ds = Vector.foldl op:: [] (Array.vector dArray)
+    in
+      ListPair.zip(ds,dists)
     end
 end

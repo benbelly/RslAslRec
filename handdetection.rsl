@@ -14,12 +14,7 @@ interp:
     frame : char vector * int * int * int
     gray : char vector * int * int * int
     skin : char vector * int * int * int
-    diff : char vector * int * int * int
-    boundary : char vector * int * int * int
-
-(*ML*)
-    val printSDs = fn _ => let val _ = Cvsl.saveAllImages "cvsl_out/sd" "png" 3 in "" end
-(*ML*)
+    handImage : char vector * int * int * int
 
 fn fShowFrames() {
     print "Displaying frames (press any key to advance)"
@@ -30,13 +25,7 @@ fn fShowFrames() {
 fn fShowDifferences() {
     print "Displaying difference images (press any key to advance)"
     print all: sNumFramesMsg
-    write all observing diff to "/dev/null": sDisplayDifferences
-}
-
-fn fShowBoundaries() {
-    print "Displaying boundary images (press any key to advance)"
-    print all: sNumFramesMsg
-    write all observing boundary to "/dev/null": sDisplayBoundaries
+    write all observing handImage to "/dev/null": sDisplayDifferences
 }
 
 fn fShowUnique() {
@@ -47,7 +36,6 @@ fn fShowUnique() {
             print "Unique frames:"
             print all: sNumFramesMsg
 
-            (* fShowDifferences() *)
             reject
         } 
         {     
@@ -57,24 +45,30 @@ fn fShowUnique() {
 
 fn getHandContours() {
 
+    print "Making DiffImage\n"
     (* Section 4.1, step 2.a *)
-    [DiffImage] update all diff
+    [DiffImage] update all handImage
                 observing keyframe, frameId, gray: initialDiffImages
     
+    print "Skin Masking\n"
     (* Section 4.1, step 2.b part 1 *)
-    [SkinmaskDiff] update diff observing frameId, skin: skinmaskDiffs
+    [SkinmaskDiff] update handImage
+                   observing frameId, skin: skinmaskDiffs
 
+    print "EdgeAndMask\n"
     (* Section 4.1, steps c and d *)
-    [EdgeAndMask] update diff observing frameId: edgeAndMaskDiffs
+    [EdgeAndMask] update handImage
+                  observing frameId: edgeAndMaskDiffs
 
+    print "Remove\n"
     (* Section 4.1, step e *)
-    [RemoveSmallComponents] update diff observing frameId: removeSmallComponents
+    [RemoveSmallComponents] update handImage
+                            observing frameId: removeSmallComponents
 
+    print "BoundaryImage\n"
     (* Section 4.1, step f *)
-    [BoundaryImage] update boundary observing frameId, diff: extractBoundary
-
-    (*fShowBoundaries()*)
-
+    [BoundaryImage] update handImage
+                    observing frameId: extractBoundary
 }
 
 fn main(test, train, minMaxPixelComponentSize) {
@@ -90,7 +84,7 @@ fn main(test, train, minMaxPixelComponentSize) {
     update srcDir: loadDir( test, train )
 
     [GetFrames] update frameId, frame, truehand: getFramesImages(test)
-    print "Loading images\n"
+    (* print "Loading images\n"*)
 
     (* Get the skin, grayscale, and key frames used by other steps *)
     [GetSkinMask] update skin observing frameId: skinMasks
@@ -103,35 +97,29 @@ fn main(test, train, minMaxPixelComponentSize) {
 
 hfn report() {
     reject
-    print "QUERYING:"
 
     hadd ["DiffImage"]
-    print "Number of frames: "
-    print all: sNumFramesMsg
+    print "\n\nDiffImage\n"
     print: sPrintDiffAccuracy
     reject
 
     hadd ["SkinmaskDiff"]
-    print "Number of frames: "
-    print all: sNumFramesMsg
+    print "\n\nSkinmaskDiff\n"
     print: sPrintDiffAccuracy
     reject
 
     hadd ["EdgeAndMask"]
-    print "Number of frames: "
-    print all: sNumFramesMsg
+    print "\n\nEdgeAndMask\n"
     print: sPrintDiffAccuracy
     reject
 
     hadd ["RemoveSmallComponents"]
-    print "Number of frames: "
-    print all: sNumFramesMsg
+    print "\n\nRemoveSmallComponents\n"
     print: sPrintDiffAccuracy
     reject
 
     hadd ["BoundaryImage"]
-    print "Number of frames: "
-    print all: sNumFramesMsg
+    print "\n\nBoundaryImage\n"
     print: sPrintDiffAccuracy
     reject
 

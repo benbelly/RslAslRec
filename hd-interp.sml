@@ -24,9 +24,8 @@ fun initInterp _ =
   (NONE, [(NONE, Interp.rhcons( { srcDir = "", frameId = ~1,
                                   frame = defaultFrame,
                                   truehand = Vector.fromList( [] : int list ),
-                                  diff = defaultFrame, skin = defaultFrame,
-                                  gray = defaultFrame, boundary = defaultFrame,
-                                  keyframe = false } ))] )
+                                  handImage = defaultFrame, skin = defaultFrame,
+                                  gray = defaultFrame, keyframe = false } ))] )
 
 fun loadDir (testDir, trainDir) = fn _ =>
   let
@@ -56,7 +55,6 @@ fun getFramesImages testDir = fn (_) =>
     val frames = Vector.foldl op:: [] (Cvsl.getIds 0)
     val trues = AslIO.handsForDir testDir
     val ids = List.map Int.toString (List.map (fn (i,_) => i) trues)
-    val _ = print ("["^ (String.concatWith ", " ids ) ^ "]\n")
     val interps = map (fn f =>
       let
         val (_, trHand) = valOf(List.find (fn (id, _) => f = id) trues)
@@ -87,10 +85,10 @@ fun keyframes t1 = fn  _ =>
 
 fun initialDiffImages is =
   let
-    val toId = fn {keyframe, frameId, gray, diff} => frameId
-    val toSize = fn {keyframe, frameId, gray = (_, w, h, t), diff } => (w, h, t)
-    val toGray = fn {keyframe, frameId, gray = (gImg, _, _, _), diff} => gImg
-    val isKey = fn {keyframe, frameId, gray, diff} => keyframe
+    val toId = fn {keyframe, frameId, gray, handImage} => frameId
+    val toSize = fn {keyframe, frameId, gray = (_, w, h, t), handImage } => (w, h, t)
+    val toGray = fn {keyframe, frameId, gray = (gImg, _, _, _), handImage} => gImg
+    val isKey = fn {keyframe, frameId, gray, handImage} => keyframe
     val grays = List.map toGray is
     val ids = List.map toId is
     val keys = List.map toGray (List.filter isKey is)
@@ -98,48 +96,49 @@ fun initialDiffImages is =
     val (w,h,t) = toSize (hd(is))
     val _ = makeInitSDs ids grays keyIds keys w h t
   in
-    (NONE, fn({keyframe, frameId, gray, diff}) =>
-                (NONE, [(NONE, {diff = Cvsl.getImage 3 frameId})]))
+    (NONE, fn({keyframe, frameId, gray, handImage}) =>
+                (NONE, [(NONE, {handImage = Cvsl.getImage 3 frameId})]))
   end
 
 fun dDifferenceImages _ =
   let
     val _ = findHands()
   in
-    (NONE, fn ({diff, frameId}) =>
-                (NONE, [(NONE, {diff = Cvsl.getImage 3 frameId })]))
+    (NONE, fn ({handImage, frameId}) =>
+                (NONE, [(NONE, {handImage = Cvsl.getImage 3 frameId })]))
   end
 
-    (*[SkinmaskDiff] update diff observing frameId, skin: skinmaskDiffs*)
+    (*[SkinmaskDiff] update handImage observing frameId, skin: skinmaskDiffs*)
 fun skinmaskDiffs i =
   let
-    val { frameId, diff = (sd, w, h, t), skin = (sk, _, _, _) } = i
+    val { frameId, handImage = (sd, w, h, t), skin = (sk, _, _, _) } = i
   in
-    (NONE, [(NONE, { diff = skinmaskSD frameId sd sk w h t })])
+    (NONE, [(NONE, { handImage = skinmaskSD frameId sd sk w h t })])
   end
 
-    (*[EdgeAndMask] update diff observing frameId: edgeAndMaskDiffs*)
+    (*[EdgeAndMask] update handImage observing frameId: edgeAndMaskDiffs*)
 fun edgeAndMaskDiffs i =
   let
-    val { frameId, diff = (sd, w, h, t) } = i
+    val { frameId, handImage = (sd, w, h, t) } = i
   in
-    (NONE, [(NONE, { diff = edgeAndMaskSD frameId sd w h t })])
+    (NONE, [(NONE, { handImage = edgeAndMaskSD frameId sd w h t })])
   end
 
-    (*[RemoveSmallComponents] update diff observing frameId: removeSmallComponents*)
+    (*[RemoveSmallComponents] update handImage observing frameId: removeSmallComponents*)
 fun removeSmallComponents i =
   let
-    val { frameId, diff = (sd, w, h, t) } = i
+    val { frameId, handImage = (sd, w, h, t) } = i
   in
-    (NONE, [(NONE, { diff = removeSmallsFromSD frameId sd w h t })])
+    (NONE, [(NONE, { handImage = removeSmallsFromSD frameId sd w h t })])
   end
 
-    (*[BoundaryImage] update boundary observing frameId, diff: extractBoundary*)
+    (*[BoundaryImage] update boundary observing frameId, handImage: extractBoundary*)
 fun extractBoundary i =
   let
-    val { frameId, diff = (sd, w, h, t), boundary } = i
+    val { frameId, handImage = (sd, w, h, t) } = i
+    val result = extractBoundaryImage frameId sd w h t
   in 
-    (NONE, [(NONE, { boundary = extractBoundaryImage frameId sd w h t })])
+    (NONE, [(NONE, { handImage = result })])
   end
 
 (*
@@ -150,14 +149,27 @@ fun extractBoundary i =
  *)
 fun sPrintDiffAccuracy (i : Interp.r) =
   let
-    val { frameId, truehand, diff = (diffImg, w, h, t), ... } = i
+    val { frameId, truehand, handImage = (diffImg, w, h, t), ... } = i
     val frameStr = Int.toString frameId
-    val mDistances = Vector.foldl op:: [] (distances truehand diffImg w h t)
-    val sorted = mergesort Real.< mDistances
-    val realStr = String.concatWith ", " (List.map Real.toString mDistances)
+    val mDistances = distancesAndCenters truehand diffImg w h t
+    val best = hd (mergesort (fn ((dl,_),(dr,_)) => Real.<(dl,dr)) mDistances)
+    val (bestMDist, bestCenter) = best
+    val mdStr = Real.toString bestMDist
+    val cenStr = Real.toString bestCenter
+    val cnt = (Int.toString (handCount diffImg w h t)) ^ "\n"
   in
-    TextIO.print( "Mahalanobis Distances for " ^ frameStr ^ "\n" );
-    TextIO.print( "[" ^ realStr ^ "]\n" );
+    (*TextIO.print( frameStr ^ ", " ^ cnt );*)
+    TextIO.print (frameStr ^ "," ^ mdStr ^ "," ^ cenStr ^ "\n");
+    ""
+  end
+
+fun printNumHands (i : Interp.r) =
+  let
+    val { frameId, truehand, handImage = (diffImg, w, h, t), ... } = i
+    val frameStr = Int.toString frameId
+    val cnt = (Int.toString (handCount diffImg w h t)) ^ "\n"
+  in
+    TextIO.print( frameStr ^ ", " ^ cnt );
     ""
   end
 
@@ -168,20 +180,19 @@ fun bIsKeyFrame {keyframe} = (NONE, keyframe)
 
 fun uniqueImage (i : Interp.r) = 
   let
-    val {frame, srcDir, diff, skin, gray, boundary, ... } = i
+    val {frame, srcDir, handImage, skin, gray, ... } = i
   in
     (NONE, [ (NONE, { srcDir = srcDir, frameId = ~1, frame = frame,
-                      diff = diff, skin = skin, gray = gray,
-                      boundary = boundary,
+                      handImage = handImage, skin = skin, gray = gray,
                       keyframe = false }) ])
   end
 
 fun uniqueDiffImage (i : Interp.r) = 
   let
-    val {frame, frameId, srcDir, diff, skin, boundary, gray, ... } = i
+    val {frame, frameId, srcDir, handImage, skin, gray, ... } = i
   in
     (NONE, [ (SOME(FrameId(frameId)), { srcDir = srcDir, frameId = ~1, frame = defaultFrame,
-                      diff = diff, skin = defaultFrame, boundary = defaultFrame,
+                      handImage = handImage, skin = defaultFrame,
                       truehand = Vector.fromList( [] : int list ),
                       gray = defaultFrame, keyframe = false }) ])
   end
@@ -226,8 +237,8 @@ fun sDisplayFrames is =
 
 fun sDiffDisplay i =
   let
-    val {diff} = i
-    val _ = Cvsl.showImage diff
+    val {handImage} = i
+    val _ = Cvsl.showImage handImage
   in
     ()
   end
@@ -235,21 +246,6 @@ fun sDiffDisplay i =
 fun sDisplayDifferences is =
   let
     val _ = List.app sDiffDisplay is
-  in
-    ""
-  end
-
-fun sBoundaryDisplay i =
-  let
-    val {boundary} = i
-    val _ = Cvsl.showImage boundary
-  in
-    ()
-  end
-
-fun sDisplayBoundaries is =
-  let
-    val _ = List.app sBoundaryDisplay is
   in
     ""
   end
@@ -304,9 +300,9 @@ val hprintTraceTable = fn (is, ah, trace) =>
     let
       val _ = TextIO.print("---------------------------------------\n")
       val _ = TextIO.print(" Attribute Table ")
+      val it = Trace.getInterpEdgeTable (trace)
       val _ = TextIO.print("size: " ^ Int.toString((HashTable.tablesize ah)) ^
       "\n")
-      val it = Trace.getInterpEdgeTable (trace)
        val _ = TextIO.print(" Trace edge table size: " ^
          (Int.toString(HashTable.tablesize(it))) ^ "\n")  
       val _ = TextIO.print(" Passed Interpretations: " ^ (Int.toString(List.length is))

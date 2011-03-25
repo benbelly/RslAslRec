@@ -115,9 +115,11 @@ extern "C" {
     /*
      * Return the x,y coordinate of each hand candidate's center
      */
-    void centersC( Pointer xs, Pointer ys,
-                   int w, int h, int type,
-                   Pointer img );
+    void centersC( double *xs, double *ys,
+                   int w, int h,
+                   int trainNum, int *trainPts,
+                   int type, char *img );
+
 }
 
 #endif
