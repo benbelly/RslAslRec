@@ -58,18 +58,13 @@ fun root2grammar root =
     List.foldl entryInsert entries pairs
   end
 
-fun validPredecessor _ ME _ = true
-  | validPredecessor _ _ ME = true
+fun validPredecessor _ ME ME = false
+  | validPredecessor _ ME _  = true
+  | validPredecessor _ _ ME  = true
   | validPredecessor grammar item pred =
   let 
     val ss = predecessors grammar item
     val valid = Option.isSome (List.find (fn p => p = pred) ss)
-    (*
-     *val iword = sItemToString item
-     *val pword = sItemToString pred
-     *val is = if valid then " is " else " is not "
-     *val _ = print (pword ^ is ^ "a valid predecessor of " ^ iword ^ "\n")
-     *)
   in
     valid
   end

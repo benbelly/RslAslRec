@@ -374,15 +374,15 @@ void centersC( double *xs, double *ys,
     Contour boundary = getBoundary( train );
     CenterPoint trainCenter = boundary.empty() ? CenterPoint(0,0) :
                                                  center( getBoundary( train ) );
-    *((double*)xs) = trainCenter.x; *((double*)ys) = trainCenter.y;
+    *xs = trainCenter.x; *ys = trainCenter.y;
 
     type = image_types::gray;
     cv::Mat img = makeMat( (Pointer)imgArr, w, h, type );
     ContourSet contours = getHands( img );
     CenterSet cs = centers( contours );
 
-    std::transform( cs.begin(), cs.end(), ((float *)xs) + 1,
+    std::transform( cs.begin(), cs.end(), xs + 1,
                     boost::bind( getX, _1 ) );
-    std::transform( cs.begin(), cs.end(), ((float *)ys) + 1,
+    std::transform( cs.begin(), cs.end(), ys + 1,
                     boost::bind( getY, _1 ) );
 }

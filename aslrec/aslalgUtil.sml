@@ -83,7 +83,7 @@ fun findDistance _ _ Start = 0.0
   | findDistance _ _ End = 0.0
   | findDistance b e ME =
       let
-        val alpha = 0.35 (* value of 'nullscore' in original *)
+        val alpha = 0.1 (* value of 'nullscore' in original *)
         val distance = Real.fromInt ((e - b) + 1) (* minimum distance of 1 *)
       in
         alpha * distance (* Equation (5) in paper *)

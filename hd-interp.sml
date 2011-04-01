@@ -55,6 +55,7 @@ fun getFramesImages testDir = fn (_) =>
     val frames = Vector.foldl op:: [] (Cvsl.getIds 0)
     val trues = AslIO.handsForDir testDir
     val ids = List.map Int.toString (List.map (fn (i,_) => i) trues)
+    (*val _ = print ("["^ (String.concatWith ", " ids ) ^ "]\n")*)
     val interps = map (fn f =>
       let
         val (_, trHand) = valOf(List.find (fn (id, _) => f = id) trues)
@@ -75,11 +76,12 @@ fun keyframes t1 = fn  _ =>
   let
     val diffArray = keyframeDiffs t1
     val keyIds = keyframeIds()
+    val annotation = SOME (FrameDiffs diffArray)
   in
-    (SOME (FrameDiffs diffArray),
+    (annotation,
      fn ({keyframe, frameId}) =>
-      (NONE,
-       [(NONE,
+      (annotation,
+       [(annotation,
          { keyframe = (Vector.exists (fn i => i = frameId) keyIds) } )] ))
   end
 
@@ -160,16 +162,6 @@ fun sPrintDiffAccuracy (i : Interp.r) =
   in
     (*TextIO.print( frameStr ^ ", " ^ cnt );*)
     TextIO.print (frameStr ^ "," ^ mdStr ^ "," ^ cenStr ^ "\n");
-    ""
-  end
-
-fun printNumHands (i : Interp.r) =
-  let
-    val { frameId, truehand, handImage = (diffImg, w, h, t), ... } = i
-    val frameStr = Int.toString frameId
-    val cnt = (Int.toString (handCount diffImg w h t)) ^ "\n"
-  in
-    TextIO.print( frameStr ^ ", " ^ cnt );
     ""
   end
 
@@ -273,6 +265,26 @@ val interpEdgeToString = fn t =>
     in
       istring ^ estring
     end
+
+fun noteStr elist =
+  let
+    val toNote = fn(_,n : note option ,_) => n
+    val notes = List.map toNote elist
+    val toStr = fn (SOME (FrameDiffs diffs)) => "Something"
+                      (*String.concatWith "," (map Real.toString (Vector.foldl op:: [] diffs))*)
+                 | _ => "Nothing"
+    val strs = map toStr notes
+  in
+    TextIO.print ((String.concatWith "\n" strs) ^ "\n");
+    ""
+  end
+
+fun sHprintDiffs (is, ah, trace) =
+  let
+    val _ = HashTable.map noteStr ah
+  in
+    ""
+  end
 
 val tableEntryToString = fn (i, elist) =>
     let

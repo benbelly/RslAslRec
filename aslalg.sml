@@ -33,6 +33,8 @@ fun highestReachedLevel (is) =
 fun belowMaxLevel (max) = fn(is) =>
   let
     val reached = highestReachedLevel(is)
+    val _ = print ("\t" ^ (Int.toString reached ) ^ " < " ^ (Int.toString max) ^
+                   " = " ^ (Bool.toString(Int.<(reached,max))) ^ "\n")
   in
     (NONE, fn _ => (NONE, Int.<(reached,max)))
   end
@@ -69,7 +71,6 @@ fun len (is) = (Int.toString(List.length(is)) ^ "\n")
 fun prlevel (is) =
   let
     val level = highestReachedLevel is
-    val _ = if level = 3 then Posix.Process.exit(Word8.fromInt(1)) else 0
   in
     ("Level " ^ (Int.toString level) ^ "\n")
   end
@@ -107,28 +108,30 @@ fun badGrammar (itemMap, grammar, depth) = fn (i) =>
     (NONE, not (validSequence grammar prevItems depth))
   end
 
-  (* TODO: Fix this to only find the best for each word/end once *)
-fun notBestForEnd(is) =
+fun endOfTestFrames(e, testFrames ) =
+  e = (Vector.sub(testFrames,(Vector.length testFrames) - 1))
+
+fun notBest(is) =
   let
-    val wordInterps = fn w => List.filter (fn {word, interval, prevs} => word = w) is
-    val intervalsForWord = fn(w,i)=> List.filter (fn {word, interval, prevs} => i = interval)
-                                                 (wordInterps w)
-    val best = fn(w,i) =>
+    val rec tryInsert = fn (tbl, i as {word, interval = (_,e), prevs}, NONE) =>
+                                                WordScoreTable.insert(tbl, (word, e), i)
+                     | (tbl, i as {word, interval, prevs = (_,newScr)},
+                        SOME {word = ow, interval = oi, prevs = (_, oldScr)}) =>
+                                if newScr < oldScr then tryInsert(tbl, i, NONE) else tbl
+
+    val addInterp = fn(i as {word, interval = (b,e), prevs = (_,scr)}, tbl) =>
         let
-          val iws = intervalsForWord(w,i)
+          val existing = WordScoreTable.find(tbl, (word, e))
         in
-          List.foldl (fn (li, ri) =>
-                let
-                  val {word = lw, interval = lint, prevs = (_, lscore)} = li
-                  val {word = rw, interval = rint, prevs = (_, rscore)} = ri
-                in
-                  if Real.<(lscore,rscore) then li else ri
-                end) (hd iws) (tl iws)
+          tryInsert(tbl, i, existing)
         end
+    val scoreTable = List.foldl addInterp WordScoreTable.empty is
+    val best = fn(w,(_,e)) => valOf( WordScoreTable.find(scoreTable, (w, e) ))
   in
-    (NONE, fn i as {word, interval, prevs = (lst, scr)} =>
+    (NONE, fn i as {word, interval = interval as (b,e), prevs = (lst, scr)} =>
               let
-                val {word = bw, interval = bi, prevs = (blst, bscr)} = best(word, interval)
+                val {word = bw, interval = bi,
+                     prevs = (blst, bscr)} = best(word, interval)
                 val isbest = word = bw andalso interval = bi andalso lst = blst andalso
                              Real.==(scr, bscr)
               in
@@ -136,8 +139,7 @@ fun notBestForEnd(is) =
               end)
   end
 
-fun atEnd({interval = (b,e), testFrames}) =
-  (NONE, e = (Vector.sub(testFrames,(Vector.length testFrames) - 1)))
+fun atEnd({interval = (b,e), testFrames}) = (NONE, endOfTestFrames( e, testFrames))
 
 fun levelZero(itemMap) = fn(i) =>
   let

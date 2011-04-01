@@ -10,4 +10,5 @@ in
   $(GRAMMAR_DIR)/grammar.mlb
   $(ASLREC_DIR)/aslalgLevel.sml
   $(ASLREC_DIR)/aslalgUtil.sml
+  $(DICTIONARY_DIR)/wordscoretable.mlb
 end

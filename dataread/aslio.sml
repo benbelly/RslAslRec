@@ -5,8 +5,9 @@ local
 	
     fun getDatFiles dirName : string list =
 	List.filter (fn f => String.isSuffix ".dat" f) (getFiles dirName);
-    fun getJpgFiles dirName : string list =
-	List.filter (fn f => String.isSuffix ".jpg" f) (getFiles dirName);
+    fun getImgFiles dirName : string list =
+	List.filter (fn f => (String.isSuffix ".jpg" f) orelse
+                         (String.isSuffix ".bmp" f)) (getFiles dirName);
     fun getSignSubDirs dirName : string list =
 	List.filter (fn d => String.isPrefix "sign" d) (getSubDirs dirName);
     fun getSentenceSubDirs dirName : string list =
@@ -167,7 +168,7 @@ local
          * they need to be sorted *)
       fun getSortedCandidates dir =
         let
-          val files = getJpgFiles dir
+          val files = getImgFiles dir
           val lessThan = fn ((_,l),(_,t)) => l < t
           val getFrameNum = fn file =>
             Option.valOf(Int.fromString(List.nth(String.tokens (fn c=> c = #"_") file, 2)))

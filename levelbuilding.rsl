@@ -16,30 +16,21 @@ interp:
     prevs : int list * real
 
 fn grammarCheck(itemMap, grammar) {
-    print "Checking grammar "
-    print all observing level: len
+    print "Checking grammar\n"
     [KillBadGrammar] if observing word, prevs badGrammar(itemMap, grammar, 3) {
         print "Rejecting:\n"
         (* print: i2s(itemMap) *)
         reject
     }
-    print "Grammar checked "
-    print all observing level: len
+    print "Grammar checked\n"
 }
 
 fn makeLevel(itemMap, grammar) {
-    print "Leveling up "
-    print all observing level: len
+    print "Leveling up\n"
     [NextLevel] munge: levelUpMunge(itemMap)
-    print all observing level: prlevel
-                    (*
-                    [NextLevel] update all level
-                                observing testFrames, word, interval: levelUp(itemMap)
-                    *)
     (* LevelUp just created a set of interps at new highest level, so 
        only look at those *)
-    print "Getting atMax "
-    print all observing level: len
+    print "Getting atMax\n"
     [InternalLevelCheck] if all observing level atMax {
         print "Scoring "
         print all observing level: len
@@ -48,17 +39,12 @@ fn makeLevel(itemMap, grammar) {
             print "Killing score-out\n"
             reject
         }
-        print: i2s(itemMap)
     }
-    print "Getting prevs "
-    print all observing level: len
+    print "Getting prevs\n "
     [GetPrevs] update all prevs observing score, interval, level, word: updatePrevs
     grammarCheck(itemMap, grammar)
     [InternalLevelCheck] if all observing level atMax {
-        [TrimToBest] if all observing word, interval, prevs
-                     notBestForEnd {
-            print "Not best "
-            print all observing level: len
+        [TrimToBest] if all observing word, interval, prevs notBest {
             reject
          }
     }
@@ -75,11 +61,32 @@ fn finish(itemMap, grammar) {
     grammarCheck(itemMap, grammar)
 }
 
-fn main ( testDir ) {
+fn levelbuildingLoop( itemMap, grammar ) {
+    (*
+    [LevelCheck] while all observing level belowMaxLevel( numLevels ) {
+    *)
+        print all observing level: prlevel
+        print all observing level: len
+        [OnlyHighestLevel] if all observing level atMax {
+            makeLevel(itemMap, grammar)
+        }
+        (* print: i2s(itemMap)*)
+        print "Dropping old incomplete\n"
+        [DropOldLevels] if all observing level, interval, testFrames
+                        oldIncompleteLevel {
+            reject
+        }
+    (*
+    }
+    *)
+}
+
+fn main ( testDir, levels ) {
     test = testDir (* "/home/bholm/USF-ASL-Data-Set-v2/Sentence 12.5 why" *)
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     t1 = 300
     (*ML*)
+        val numLevels = valOf(Int.fromString(levels))
         val grammar = aslalgLoad t1 train test
         val itemMap = itemIndexMap()
     (*ML*)
@@ -87,33 +94,21 @@ fn main ( testDir ) {
     [Init] munge: init
     [LoadVideo] update testFrames: getIds
     print "Trained and loaded\n"
-    print all observing level: len
 
     [LevelZero] update level, word, interval, score, prevs
                 observing testFrames: levelZero(itemMap)
     print "Level zero intervals created\n"
-    print all observing level: len
 
-    [LevelCheck] while all observing level belowMaxLevel( 20 ) {
-        print all observing level: prlevel
-        print all observing level: len
-        [OnlyHighestLevel] if all observing level atMax {
-            print "Making level "
-            print all observing level: len
-            makeLevel(itemMap, grammar)
-        }
-        print "Dropping old incomplete "
-        print all observing level: len
-        [DropOldLevels] if all observing level, interval, testFrames
-                        oldIncompleteLevel {
-            reject
-        }
-    }
+    levelbuildingLoop( itemMap, grammar )
+    levelbuildingLoop( itemMap, grammar )
+    levelbuildingLoop( itemMap, grammar )
 
     print "Done leveling\n"
 
     finish( itemMap, grammar )
 
-    print ifile
+    print: i2s(itemMap)
+
+    print "DONE DONE DONE\n"
 }
 

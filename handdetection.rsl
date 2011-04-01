@@ -45,27 +45,22 @@ fn fShowUnique() {
 
 fn getHandContours() {
 
-    print "Making DiffImage\n"
     (* Section 4.1, step 2.a *)
     [DiffImage] update all handImage
                 observing keyframe, frameId, gray: initialDiffImages
     
-    print "Skin Masking\n"
     (* Section 4.1, step 2.b part 1 *)
     [SkinmaskDiff] update handImage
                    observing frameId, skin: skinmaskDiffs
 
-    print "EdgeAndMask\n"
     (* Section 4.1, steps c and d *)
     [EdgeAndMask] update handImage
                   observing frameId: edgeAndMaskDiffs
 
-    print "Remove\n"
     (* Section 4.1, step e *)
     [RemoveSmallComponents] update handImage
                             observing frameId: removeSmallComponents
 
-    print "BoundaryImage\n"
     (* Section 4.1, step f *)
     [BoundaryImage] update handImage
                     observing frameId: extractBoundary
@@ -73,23 +68,29 @@ fn getHandContours() {
 
 fn main(test, train, minMaxPixelComponentSize) {
     t1 = valOf(Int.fromString(minMaxPixelComponentSize))
+    (*
     print "Input file:"
     print test
     print "\nT1:"
     print minMaxPixelComponentSize
     print "\n"
+    *)
 
     (* Create initial interpretation, attach directory for frame images *)
     munge: initInterp
     update srcDir: loadDir( test, train )
 
     [GetFrames] update frameId, frame, truehand: getFramesImages(test)
-    (* print "Loading images\n"*)
+    (* print "Loading images\n" *)
 
     (* Get the skin, grayscale, and key frames used by other steps *)
     [GetSkinMask] update skin observing frameId: skinMasks
     [GetGrayScale] update gray observing frameId: grayScales
     [FindKeyFrames] update all keyframe observing frameId: keyframes(t1)
+    if observing keyframe bIsKeyFrame {
+        print "Keyframe count: "
+        print all: sNumFramesMsg
+    }
 
     getHandContours()
 
@@ -98,6 +99,7 @@ fn main(test, train, minMaxPixelComponentSize) {
 hfn report() {
     reject
 
+    (*
     hadd ["DiffImage"]
     print "\n\nDiffImage\n"
     print: sPrintDiffAccuracy
@@ -122,6 +124,11 @@ hfn report() {
     print "\n\nBoundaryImage\n"
     print: sPrintDiffAccuracy
     reject
+    *)
+
+    hadd ["FindKeyFrames"]
+    hprint: sHprintDiffs
+    reject
 
     (*
     hadd ["GetFrames"]
@@ -130,11 +137,6 @@ hfn report() {
     hprint all: sHprintUserTable
     reject
 
-    hadd all
-    print "Number of Frames Produced In Total:"
-    print all:sNumFramesMsg
-    hprint all: sHprintUserTable
-    reject
 
     hadd ["Skinmask","Diff"]
     print "Number of unique frames at Skinmask... and Diff...:"

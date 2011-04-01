@@ -51,6 +51,16 @@ GRAMMAR_SMLS = $(GRAMMAR_DIR)/grammar.mlb $(GRAMMAR_DIR)/grammar.sml
 
 ###############################
 #
+# Dictionary files
+#
+###############################
+DICTIONARY_DIR = $(SRC_BASE)/dictionary
+DICTIONARY_SMLS = $(addprefix $(DICTIONARY_DIR)/, wordscoretable.mlb wordscoretable.sml \
+				  								  binary-map-fn.sml lib-base.sml ord-map-sig.sml \
+												  lib-base-sig.sml ord-key-sig.sml )
+
+###############################
+#
 # RSL files
 #
 ###############################
@@ -83,6 +93,7 @@ SMLS = $(ASLREC_SMLS) \
 	   $(CVSL_SMLS) \
 	   $(DATAREAD_SMLS) \
 	   $(GRAMMAR_SMLS) \
+	   $(DICTIONARY_SMLS) \
 	   aslalg.sml aslalg.mlb 
 
 OPENCV_PATH=/home/bholm/raid/OpenCV
@@ -91,8 +102,8 @@ OPENCV_PATH=/home/bholm/raid/OpenCV
 ## C++ variables
 ##
 CC=g++
-DEBUG=-g
-#OPT=-O3
+#DEBUG=-g
+OPT=-O3
 INCLUDE=-I. -I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
 		-I/usr/lib/mlton/include
 CFLAGS=-Werror -Wall -Wextra -c $(INCLUDE) $(DEBUG) $(OPT)
@@ -104,7 +115,8 @@ ML = mlton
 ML_PATHS = -mlb-path-var "CVSL_DIR $(CVSL_DIR)" \
 		   -mlb-path-var "ASLREC_DIR $(ASLREC_DIR)" \
 		   -mlb-path-var "DATAREAD_DIR $(DATAREAD_DIR)" \
-		   -mlb-path-var "GRAMMAR_DIR $(GRAMMAR_DIR)"
+		   -mlb-path-var "GRAMMAR_DIR $(GRAMMAR_DIR)" \
+		   -mlb-path-var "DICTIONARY_DIR $(DICTIONARY_DIR)"
 ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt "-L$(OPENCV_PATH)/lib" \
 		  -link-opt '-lopencv_core -lopencv_highgui -lopencv_ml' \
@@ -114,8 +126,8 @@ ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt '-lcsironn -lqhull -lqsastime -lfreetype'
 ML_FFI = -default-ann 'allowFFI true'
 ML_DEBUG = -const 'Exn.keepHistory true' -debug true -debug-runtime true
-#ML_OPT = -codegen native # -profile time
-MLTON_FLAGS = $(ML_PATHS) $(ML_LIBS) $(ML_FFI) $(ML_DEBUG) $(ML_OPT)
+#ML_PERF = -profile time
+MLTON_FLAGS = $(ML_PATHS) $(ML_LIBS) $(ML_FFI) $(ML_DEBUG) $(ML_PERF)
 
 ##
 ## RSL variables

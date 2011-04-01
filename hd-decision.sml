@@ -118,8 +118,9 @@ in
     let 
       val a2 = (xr - xl) * (xr - xl)
       val b2 = (yr - yl) * (yr - yl)
+      val c = Math.sqrt(a2 + b2)
     in
-      Math.sqrt(a2 + b2)
+      c
     end
 
   fun distancesAndCenters truth diff w h t =
@@ -137,6 +138,12 @@ in
       val testXY = tl xys
       val dists = List.map (fn xy => dist(trainXY, xy)) testXY
       val ds = Vector.foldl op:: [] (Array.vector dArray)
+      val tx = hd xs
+      val ty = hd ys
+      (*
+       *val _ = print ("(" ^ (Real.toString(tx)) ^ "," ^ (Real.toString ty) ^ ") " ^
+       *               (String.concatWith ", " (List.map Real.toString dists)) ^ "\n")
+       *)
     in
       ListPair.zip(ds,dists)
     end

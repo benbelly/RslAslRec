@@ -9,7 +9,7 @@ const static unsigned int T3 = 4000;
 
 const static int SMALLCOMPONENT = 100;
 
-const static double SINGLE_HAND_PENALTY = 0.5;
+const static double SINGLE_HAND_PENALTY = 0.04;
 const static double NOT_ENOUGH_HANDS = 1000000;
 
 const static int maxComponents = 7;
