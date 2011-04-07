@@ -373,7 +373,7 @@ void centersC( double *xs, double *ys,
     cv::Mat train = makeHandFromPointList( w, h, trainNum, (Pointer)trainPts );
     Contour boundary = getBoundary( train );
     CenterPoint trainCenter = boundary.empty() ? CenterPoint(0,0) :
-                                                 center( getBoundary( train ) );
+                                                 center( boundary );
     *xs = trainCenter.x; *ys = trainCenter.y;
 
     type = image_types::gray;

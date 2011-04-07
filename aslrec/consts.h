@@ -1,6 +1,7 @@
 #ifndef CONSTS_H__
 #define CONSTS_H__
 
+const static int MAX_SIGN_LEN = 100;
 
 const static unsigned int T0 = 100;
 const static unsigned int T0_SQR = T0 * T0;

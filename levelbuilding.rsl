@@ -15,11 +15,10 @@ interp:
     interval : int * int
     prevs : int list * real
 
+(* Reject any sequences that are illegal *)
 fn grammarCheck(itemMap, grammar) {
     print "Checking grammar\n"
     [KillBadGrammar] if observing word, prevs badGrammar(itemMap, grammar, 3) {
-        print "Rejecting:\n"
-        (* print: i2s(itemMap) *)
         reject
     }
     print "Grammar checked\n"
@@ -30,30 +29,27 @@ fn makeLevel(itemMap, grammar) {
     [NextLevel] munge: levelUpMunge(itemMap)
     (* LevelUp just created a set of interps at new highest level, so 
        only look at those *)
-    print "Getting atMax\n"
     [InternalLevelCheck] if all observing level atMax {
         print "Scoring "
         print all observing level: len
         [ScoreLevel] update score observing interval, level, word: scoreLevel(itemMap)
         [KillHighScores] if observing score scoredOut {
-            print "Killing score-out\n"
             reject
         }
-    }
-    print "Getting prevs\n "
-    [GetPrevs] update all prevs observing score, interval, level, word: updatePrevs
-    grammarCheck(itemMap, grammar)
-    [InternalLevelCheck] if all observing level atMax {
+        print "Getting prevs\n"
+        [GetPrevs] update all prevs observing score, interval, level, word: updatePrevs
+
+        grammarCheck(itemMap, grammar)
+
         [TrimToBest] if all observing word, interval, prevs notBest {
             reject
-         }
+        }
     }
 }
 
 fn finish(itemMap, grammar) {
     [GetAtEnd] if observing interval, testFrames atEnd {
-        [AddEnd] update word, prevs
-                 observing score: addEnd(itemMap)
+        [AddEnd] update word, prevs, score: addEnd(itemMap)
     }
     else {
         reject
@@ -69,12 +65,12 @@ fn levelbuildingLoop( itemMap, grammar ) {
         print all observing level: len
         [OnlyHighestLevel] if all observing level atMax {
             makeLevel(itemMap, grammar)
-        }
-        (* print: i2s(itemMap)*)
-        print "Dropping old incomplete\n"
-        [DropOldLevels] if all observing level, interval, testFrames
-                        oldIncompleteLevel {
-            reject
+            (* makeLevel() made a new, higher level. Drop the old one *)
+            print "Dropping old incomplete\n"
+            [DropOldLevels] if all observing level, interval, testFrames
+                            oldIncompleteLevel {
+                reject
+            }
         }
     (*
     }
@@ -82,18 +78,20 @@ fn levelbuildingLoop( itemMap, grammar ) {
 }
 
 fn main ( testDir, levels ) {
-    test = testDir (* "/home/bholm/USF-ASL-Data-Set-v2/Sentence 12.5 why" *)
+    test = testDir
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     t1 = 300
     (*ML*)
         val numLevels = valOf(Int.fromString(levels))
         val grammar = aslalgLoad t1 train test
         val itemMap = itemIndexMap()
+        val scoreFile = (testDir ^ "/allMahalanobisScore.scores")
     (*ML*)
 
     [Init] munge: init
     [LoadVideo] update testFrames: getIds
     print "Trained and loaded\n"
+    print all: loadScores( scoreFile )
 
     [LevelZero] update level, word, interval, score, prevs
                 observing testFrames: levelZero(itemMap)

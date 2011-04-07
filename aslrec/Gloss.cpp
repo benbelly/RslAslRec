@@ -4,6 +4,7 @@
 #include<functional>
 #include<limits>
 #include "Gloss.h"
+#include "consts.h"
 #include "boost/bind.hpp"
 #include "boost/mem_fn.hpp"
 
@@ -25,6 +26,7 @@ void Gloss::AppendHistograms( std::list<Histogram> *hists ) const {
 
 double Gloss::Distance( const cv::PCA &pca, const cv::Mat &covar,
                         int start, int end ) {
+    if( (end - start) > MAX_SIGN_LEN ) return std::numeric_limits<double>::max();
     std::vector<double> distances = GetScores( pca, covar, std::make_pair( start, end ) );
     std::vector<double>::iterator min = std::min_element( distances.begin(), distances.end() );
     if( min == distances.end() )

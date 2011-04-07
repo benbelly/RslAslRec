@@ -100,53 +100,42 @@ hfn report() {
     reject
 
     (*
+    diffAccuracy("DiffImage")
+    diffAccuracy("SkinmaskDiff")
+    diffAccuracy("EdgeAndMask")
+    diffAccuracy("RemoveSmallComponents")
+    diffAccuracy("BoundaryImage")
+    *)
+
     hadd ["DiffImage"]
-    print "\n\nDiffImage\n"
-    print: sPrintDiffAccuracy
+    print "\n\nStep 2a\n"
+    print: sPrintCenterAccuracy
     reject
 
     hadd ["SkinmaskDiff"]
-    print "\n\nSkinmaskDiff\n"
-    print: sPrintDiffAccuracy
+    print "\n\nStep 2b\n"
+    print: sPrintCenterAccuracy
     reject
 
     hadd ["EdgeAndMask"]
-    print "\n\nEdgeAndMask\n"
-    print: sPrintDiffAccuracy
+    print "\n\nStep 2c and 2d\n"
+    print: sPrintCenterAccuracy
     reject
 
     hadd ["RemoveSmallComponents"]
-    print "\n\nRemoveSmallComponents\n"
-    print: sPrintDiffAccuracy
+    print "\n\nStep 2e\n"
+    print: sPrintCenterAccuracy
     reject
 
     hadd ["BoundaryImage"]
-    print "\n\nBoundaryImage\n"
-    print: sPrintDiffAccuracy
-    reject
-    *)
-
-    hadd ["FindKeyFrames"]
-    hprint: sHprintDiffs
+    print "\n\nStep 2f\n"
+    print: sPrintCenterAccuracy
     reject
 
     (*
-    hadd ["GetFrames"]
-    print "Number of original frames:"
-    print all: sNumFramesMsg
-    hprint all: sHprintUserTable
+    hadd ["FindKeyFrames"]
+    hprint: sHprintDiffs
     reject
-
-
-    hadd ["Skinmask","Diff"]
-    print "Number of unique frames at Skinmask... and Diff...:"
-    print all: sNumFramesMsg
-    hprint all: sHprintUserTable
-    fShowUnique()
-    reject
-
-    hadd [ "Unique" ]
-    print "Number of unqiue frames for diff images (2 locs):"
-    print all: sNumFramesMsg
     *)
+
 }

@@ -12,7 +12,9 @@ extern "C" {
     int getSignLengthC( int i );
     void getSignC( int i, Pointer dst );
 
+    void loadScoresC( Pointer fname, int fnameLen );
     double distanceC( Pointer word, int wordLen, int start, int end );
+    void dumpScoresC( Pointer fname, int fnameLen );
 }
 
 #endif

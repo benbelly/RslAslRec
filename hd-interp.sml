@@ -165,6 +165,22 @@ fun sPrintDiffAccuracy (i : Interp.r) =
     ""
   end
 
+fun sPrintCenterAccuracy (i : Interp.r) =
+  let
+    val { frameId, truehand, handImage = (diffImg, w, h, t), ... } = i
+    val frameStr = Int.toString frameId
+    val mDistances = distancesAndCenters truehand diffImg w h t
+    val best = hd (mergesort (fn ((_,dl),(_,dr)) => Real.<(dl,dr)) mDistances)
+    val (bestMDist, bestCenter) = best
+    val mdStr = Real.toString bestMDist
+    val cenStr = Real.toString bestCenter
+    val cnt = (Int.toString (handCount diffImg w h t)) ^ "\n"
+  in
+    (*TextIO.print( frameStr ^ ", " ^ cnt );*)
+    TextIO.print (frameStr ^ "," ^ mdStr ^ "," ^ cenStr ^ "\n");
+    ""
+  end
+
 (* RZ: ICCV addition *)
 fun sNumFramesMsg is = "  Number of Frames: " ^ Int.toString(List.length is) ^ "\n"
  

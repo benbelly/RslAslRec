@@ -85,21 +85,17 @@ void SignSeq::GeneratorScoresForModel( SignSeqScores &scores,
                                        std::pair<int, int> interval,
                                        int modelIndex, const cv::PCA &pca,
                                        const cv::Mat &covar ) {
-    for( int j = interval.first; j <= interval.second; ++j )
+    for( int j = interval.first; j <= interval.second; ++j ) {
         GenerateScoresForTestFrame( scores, interval, modelIndex,
                                     j - interval.first, pca, covar );
+    }
 }
-
-/* Helpers for GenerateScoresForTestFrame */
-bool validPredecessor( std::pair<int, int> interval, SignSeqScores::Index &pre,
-                       SignSeqScores::Index &cur );
-bool bestPredecessor( SignSeqScores &scores,
-                      SignSeqScores::Index l, SignSeqScores::Index r );
 
 void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
                                           std::pair<int, int> interval,
                                           int modelIndex, int testIndex,
                                           const cv::PCA &pca, const cv::Mat &covar ) {
+
     ProjectionSet handCands = FDB->projections( interval.first + testIndex, pca );
     std::vector<HandPair> pairs = makePairs( handCands );
 
@@ -110,12 +106,24 @@ void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
     }
 }
 
+/* Helpers for GenerateScoresForTestFrame */
+bool validPredecessor( std::pair<int, int> interval, SignSeqScores::Index &pre,
+                       SignSeqScores::Index &cur );
+bool bestPredecessor( SignSeqScores &scores,
+                      SignSeqScores::Index l, SignSeqScores::Index r );
+
 void SignSeq::Cost( SignSeqScores &scores,
                     std::pair<int, int> interval,
                     int modelIndex, int testIndex, int handIndex,
                     const SignSeq::HandPair &handPair,
                     const cv::PCA &pca, const cv::Mat &covar ) {
 
+    // Short-circuit long intervals
+    if( testIndex - interval.first > MAX_SIGN_LEN ) {
+        scores.setDistance( modelIndex, testIndex, (int)handIndex,
+                            std::numeric_limits<double>::max() );
+        return;
+    }
 
     if( modelIndex == 0 && testIndex == 0 ) {
         double distance = DistanceForPair( frames[modelIndex], handPair, pca, covar );
@@ -125,7 +133,7 @@ void SignSeq::Cost( SignSeqScores &scores,
     else {
         std::vector<SignSeqScores::Index> predecessors = scores.legalPredecessors(
                     modelIndex, testIndex, handIndex,
-                    boost::bind( validPredecessor, interval, _1, _1 ) );
+                    boost::bind( validPredecessor, interval, _1, _2 ) );
 
         if( predecessors.empty() == false ) {
             SignSeqScores::Index bestPred = *( std::min_element( predecessors.begin(),

@@ -51,7 +51,7 @@ local
       fun getFrameNum filename : int =
           let val tokens = String.tokens (fn c => c = #"_") filename
           in
-          Option.valOf (Int.fromString (List.nth(tokens, 2)))
+            Option.valOf (Int.fromString (List.nth(tokens, 2)))
           end;
 
       fun inFrame ("FACE:"::ns) (Frame(num, Missing, dominant, weak)) : frame =
@@ -105,13 +105,15 @@ local
           inDir dirName (fn () => Gloss(dirName, signGloss dirName,
                                         map frameFromFile (getDatFiles ".")));
 
+      fun isHyphen c = c = #"-"
+
       (*
        * Functions to create sentences
-       * Sentence directories look like Sentence 1.1 lipread can i
+       * Sentence directories look like Sentence-1.1-lipread-can-i
        *)
       fun sentenceNumberForDir dirName : int =
           let
-          val nums = List.nth((String.tokens Char.isSpace dirName), 1)
+          val nums = List.nth((String.tokens isHyphen dirName), 1)
           val firstNum = hd (String.tokens (fn c => c = #".") nums)
           in		     
           Option.valOf (Int.fromString firstNum)
@@ -122,7 +124,7 @@ local
 
       fun sentenceInstanceForDir dirName : int =
           let
-            val nums = List.nth((String.tokens Char.isSpace dirName), 1)
+            val nums = List.nth((String.tokens isHyphen dirName), 1)
             val secondNum = List.nth(String.tokens (fn c => c = #".") nums, 1)
           in
           Option.valOf (Int.fromString secondNum)
@@ -133,7 +135,7 @@ local
 
 
       fun sentenceGlosses dirName : string = 
-          String.concatWith " " (List.drop(String.tokens Char.isSpace dirName, 2));
+          String.concatWith " " (List.drop(String.tokens isHyphen dirName, 2));
 
       fun sentenceForDir dirName : sentence =
           inDir dirName (fn () => Sentence( dirName, sentenceGlosses dirName,

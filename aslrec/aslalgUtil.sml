@@ -25,13 +25,7 @@ fun aslalgLoad t1 trainDir testDir =
   in
     findKeyframesC( t1, diffs );
     findHandsC();
-    (*
-    Cvsl.saveAllImages "cvsl_out/orig" "png" 0;
-    Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
-    Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
-    Cvsl.saveAllImages "cvsl_out/sd" "png" 3;
-    *)
-    Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;
+    (*Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;*)
     trainForRoot trainingS;
     root2grammar root
   end

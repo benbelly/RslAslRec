@@ -71,8 +71,10 @@ fun validPredecessor _ ME ME = false
 
 fun validSequence grammar seq depth =
   let
-    val toTake = Int.min(depth, List.length seq)
-    val pairs = pairWithNext (List.take(seq, toTake))
+    val noMEs = List.filter (fn ME => false | _ => true) seq
+    val toTake = Int.min(depth, List.length noMEs)
+    (* ME can lead / follow anything, so just leave it out *)
+    val pairs = pairWithNext (List.take(noMEs, toTake))
   in
     List.all (fn (item, pred) => validPredecessor grammar item pred) pairs
   end

@@ -82,7 +82,8 @@ CMLB = $(COUNT).mlb
 CRSLS = $(CRSL) $(COUNT)funs.sml $(COUNT)help.sml
 COUNT_GENED = $(COUNT) $(COUNT).i $(COUNT)-types.sml $(COUNT).data $(COUNT)-labels.lrsl $(COUNT).tab $(COUNT).dot $(COUNT).mlb $(COUNT).sml
 
-
+SCORE = storeScores
+SRSL = $(SCORE).rsl
 
 ###
 # Compiling
@@ -123,9 +124,10 @@ ML_LIBS = -link-opt -lstdc++ \
 		  -link-opt '-lopencv_imgproc' \
 		  -link-opt '-lplplotcxxd -lplplotd' \
 		  -link-opt '-lltdl -ldl -lm -lcsirocsa' \
-		  -link-opt '-lcsironn -lqhull -lqsastime -lfreetype'
+		  -link-opt '-lcsironn -lqhull -lqsastime -lfreetype' \
+		  -link-opt '-lboost_filesystem'
 ML_FFI = -default-ann 'allowFFI true'
-ML_DEBUG = -const 'Exn.keepHistory true' -debug true -debug-runtime true
+ML_DEBUG = -const 'Exn.keepHistory true' #-debug true -debug-runtime true
 #ML_PERF = -profile time
 MLTON_FLAGS = $(ML_PATHS) $(ML_LIBS) $(ML_FFI) $(ML_DEBUG) $(ML_PERF)
 
@@ -148,6 +150,11 @@ all: $(OBJS) $(EXEC)
 $(EXEC): $(OBJS) $(SMLS) $(RSLS)
 		@echo "\nMaking executable:"
 		$(RSLC) $(RSL) $(MLTON_FLAGS) $(OBJS)
+		@echo "    executable $@ built."
+
+$(SCORE): $(OBJS) $(SMLS) $(SRSL)
+		@echo "\nMaking executable:"
+		$(RSLC) $(SRSL) $(MLTON_FLAGS) $(OBJS)
 		@echo "    executable $@ built."
 
 $(HANDS): $(OBJS) $(SMLS) $(HRSLS)

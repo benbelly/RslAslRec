@@ -2,10 +2,12 @@
 #include "Databases.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/mem_fn.hpp"
+#include "boost/filesystem.hpp"
 #include<utility>
 #include<string>
 #include<limits>
 #include<iostream>
+#include<fstream>
 #include "aslalgLevel.h" // This must go last - ml-types.h defines macros that cause trouble
 
 using std::cout;
@@ -40,12 +42,30 @@ void getSignC( int i, Pointer dst ) {
 typedef std::pair<int, int> Interval;
 typedef std::pair<std::string, Interval> Key;
 typedef std::map<Key, double> DistanceMemoMap;
+static DistanceMemoMap &memos = *(new DistanceMemoMap());
+
+void loadScoresC( Pointer fname, int fnameLen ) {
+    std::string infilename( (char *)fname, fnameLen );
+    // If there is no file, warn and continue
+    if( boost::filesystem::exists( infilename ) == false ) {
+        std::cerr << "WARNING - No score file " << infilename << std::endl;
+        return;
+    }
+    std::ifstream infile( infilename.c_str() );
+    while( !infile.eof() ) {
+        Key k;
+        double score;
+        infile >> k.first >> k.second.first >> k.second.second >> score;
+        memos[k]=score;
+    }
+}
 
 double distanceC( Pointer word, int wordLen, int start, int end ) {
+
     std::string gloss( (char *)word, wordLen );
     
     // Memoize results or this will take F.O.R.E.V.E.R.
-    static DistanceMemoMap &memos = *(new DistanceMemoMap());
+    //static DistanceMemoMap &memos = *(new DistanceMemoMap());
     Key k = std::make_pair( gloss, std::make_pair( start, end ) );
     double distance = std::numeric_limits<double>::max();
     DistanceMemoMap::iterator i = memos.find( k );
@@ -57,4 +77,17 @@ double distanceC( Pointer word, int wordLen, int start, int end ) {
         distance = memos[k];
     }
     return distance;
+}
+
+void dumpScoresC( Pointer fname, int fnameLen ) {
+    std::string outfileName( (char *)fname, fnameLen );
+    std::ofstream out( outfileName.c_str() );
+    DistanceMemoMap::iterator i = memos.begin(), end = memos.end();
+    while( i != end ) {
+        Key k = i->first;
+        double score = i->second;
+        out << k.first << " " << k.second.first << " "
+            << k.second.second << " " << score << endl;
+        ++i;
+    }
 }
