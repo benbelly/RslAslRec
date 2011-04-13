@@ -261,15 +261,21 @@ void getFrameC( int id, int type, Pointer img ) {
 
 /*
  * Helper function for creating images from the training data
- * The input data skips scan lines and does weird things
+ * The input data skips lines and does unexpected things
  * This tries to correct for _most_ of it.
+ * 
+ * img    : a cv::Mat preallocated to the needed size and set to zeros
+ * numPts : the length of the data array (number of coordinates * 2)
+ * pts    : an array of integers: [x1, y1, x2, y2, ..., xn, yn]
+ *
  */
 void makeImageFromData( cv::Mat &img, int numPts, int *pts ) {
     int i = 0, x = pts[i++], y = pts[i++];
+    int actualY = y, lastX, lastY = y;
     // Since y jumps around, track the jump and increment actualY
     // Sometimes Y changes (incorrectly) in the middle of scanlines,
-    // so track X position as well, and only increment y when both change
-    int actualY = y, lastX, lastY = y;
+    // so track X position as well, and only increment actualY when
+    // both change
     while( i < numPts ) {
         img.at<unsigned char>( actualY, x ) = 255;
         lastX = x;
