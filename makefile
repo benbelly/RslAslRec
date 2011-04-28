@@ -32,6 +32,14 @@ ASLREC_SMLS = $(addprefix $(ASLREC_DIR)/, aslalgLevel.sml aslalgUtil.sml )
 
 ###############################
 #
+# Levenshtein Distance
+#
+###############################
+LEVENSHTEIN_DIR = $(SRC_BASE)/levenshtein
+LEVENSHTEIN_OBJS = $(addprefix $(LEVENSHTEIN_DIR)/, levenshtein.o)
+
+###############################
+#
 # ASL Data reading files
 #
 ###############################
@@ -67,7 +75,7 @@ DICTIONARY_SMLS = $(addprefix $(DICTIONARY_DIR)/, wordscoretable.mlb wordscoreta
 EXEC = levelbuilding
 RSL = $(EXEC).rsl
 MLB = $(EXEC).mlb
-RSLS = $(RSL) $(EXEC)-external.sml
+RSLS = $(RSL) $(EXEC)-external.sml lb-report.sml
 RSL_GENED = $(EXEC) $(EXEC).i $(EXEC)-types.sml $(EXEC).data $(EXEC)-labels.lrsl $(EXEC).tab $(EXEC).dot $(EXEC).mlb $(EXEC).sml
 
 HANDS = handdetection
@@ -88,7 +96,7 @@ SRSL = $(SCORE).rsl
 ###
 # Compiling
 ###
-OBJS = $(CVSL_OBJS) $(ASLREC_OBJS)
+OBJS = $(CVSL_OBJS) $(ASLREC_OBJS) $(LEVENSHTEIN_OBJS)
 
 SMLS = $(ASLREC_SMLS) \
 	   $(CVSL_SMLS) \
@@ -172,6 +180,7 @@ clean: out
 		@echo "\nCleaning up..."
 		-rm -f *.o *.bak $(CVSL_DIR)/*.o \
 			   $(ASLREC_DIR)/*.o $(RSL_GENED) \
+			   $(LEVENSHTEIN_DIR)/*.o \
 			   $(HAND_GENED)
 
 		@echo "    finished."

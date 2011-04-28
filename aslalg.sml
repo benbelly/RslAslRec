@@ -55,6 +55,13 @@ fun atMax (is) =
     (NONE, (fn ({level}) => (makeNote level, level = reached)))
   end
 
+fun notBestScore (is) =
+  let
+    val bestScore = List.foldl (fn ({score}, best) => Real.min(score, best)) Real.maxFinite is
+  in
+    (NONE, fn {score} => (NONE, Real.>(score, bestScore)))
+  end
+
 fun oldIncompleteLevel (is) =
   let
     val levels = List.map (fn ({level, interval, testFrames}) => {level = level}) is
@@ -72,7 +79,8 @@ fun prlevel (is) =
   let
     val level = highestReachedLevel is
   in
-    ("Level " ^ (Int.toString level) ^ "\n")
+    ("Level " ^ (Int.toString level) ^ " with " ^ (Int.toString(List.length(is))) ^
+     " interpretations\n")
   end
 
 fun dumpScores(destFile) = fn ( _ ) =>
@@ -100,13 +108,13 @@ fun prInterval (i) =
     (intervalScore b e score) ^ "\n"
   end
 
-fun scoreLevel (itemMap) = fn(i) =>
+fun scoreLevel (alpha, itemMap) = fn(i) =>
   let
     (*val _ = print "Scoring - "*)
     val { score, interval, level, word } = i
     val (b, e) = interval
     val item = itemOf itemMap word
-    val distance = findDistance b e item
+    val distance = findDistance alpha b e item
     (*
      *val _ = print ("word: " ^ (sItemToString item) ^ ", begin: " ^ (Int.toString b) ^
      *               ", end: " ^ (Int.toString e) ^ ", distance: " ^ (Real.toString distance)
@@ -114,14 +122,6 @@ fun scoreLevel (itemMap) = fn(i) =>
      *)
   in
     (NONE, [(NONE, { score = distance } )] )
-  end
-
-fun badGrammar (itemMap, grammar, depth) = fn (i) =>
-  let
-    val { word, prevs = (prevs, _) } = i
-    val prevItems = List.map (itemOf itemMap) (word::prevs)
-  in
-    (NONE, not (validSequence grammar prevItems depth))
   end
 
 fun endOfTestFrames(e, testFrames ) =
@@ -215,30 +215,55 @@ fun levelUp(itemMap) = fn(is) =>
 
 fun addEnd(itemMap) = fn(i) =>
   let
-    val {word, prevs = ( ps, pscr : real ), score : real } = i
+    val {word, prevs = ( ps, pscr : real ), score : real, interval = (b,e) } = i
     val newScore = score + pscr
     val endIdx = indexOf itemMap End
   in
     (NONE, [(NONE, { word = endIdx, score = newScore,
-                     prevs = (word::ps, newScore ) })])
+                     prevs = ((word, b, e)::ps, newScore ) })])
   end
 
-fun updatePrevs(is) =
-  (NONE, fn({prevs, score, interval, level, word}) =>
-           let
-             val (myStart, _) = interval
-             (* No double words allowed right now. Grammar doesn't have any and this
-              * eliminates the ME->ME problem *)
-             val targetPrev = fn {prevs, interval=(_,ie), score, level=lvl, word=w} =>
-                                  lvl = (level-1) andalso ie = (myStart-1) andalso
-                                  w <> word
-             val validPrevs = List.filter targetPrev is
-             val interps = List.map (fn ({prevs = (plist, pscr : real),
-                                          score = scr, interval = _,
-                                          level = lvl, word = wrd }) =>
-                                        (NONE, { prevs = ( wrd :: plist, scr + pscr ) } ) )
-                                    validPrevs
-           in
-             (NONE, interps)
-           end)
+fun badGrammar (itemMap, grammar, depth) = fn (i) =>
+  let
+    val { word, prevs = (prevs, _) } = i
+    val words = List.map (fn (w,_,_) => w) prevs
+    val prevItems = List.map (itemOf itemMap) (word::words)
+  in
+    (NONE, not (validSequence grammar prevItems depth))
+  end
+
+fun updatePrevs (itemMap, grammar, depth) = fn(is) =>
+  let
+    val maxLevel = highestReachedLevel
+            (List.map (fn{prevs, score, interval, level, word} => {level = level}) is)
+  in
+    (* If this is not the last level, just return the interpretation untouched *)
+    (NONE, fn({level, prevs, score, interval, word}) =>
+           if level < maxLevel then (NONE, [(NONE,{ prevs = prevs })]) else
+             let
+               val (myStart, _) = interval
+               (* No double words allowed right now. Grammar doesn't have any and this
+                * eliminates the ME->ME problem *)
+               val targetPrev = fn {prevs, interval=(_,ie), score, level=lvl, word=w} =>
+                                    lvl = (level-1) andalso ie = (myStart-1) andalso
+                                    w <> word
+               val grammarOk = fn {level, prevs = (ws, _), score, interval, word} =>
+                        let
+                          val words = List.map (fn (w,_,_) => w) ws
+                          val prevItems = List.map (itemOf itemMap) (word::words)
+                        in
+                          validSequence grammar prevItems depth
+                        end
+               val lastLevels = List.filter targetPrev is
+               val goodInterps = List.filter grammarOk lastLevels 
+               val interps = List.map (fn ({prevs = (plist, pscr : real),
+                                            score = scr, interval = (pstrt, pend),
+                                            level = lvl, word = wrd }) =>
+                                          (NONE, { prevs = ( (wrd, pstrt, pend) :: plist,
+                                                             scr + pscr ) } ) )
+                                      goodInterps
+             in
+               (NONE, interps)
+             end)
+  end
 

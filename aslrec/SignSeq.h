@@ -57,9 +57,12 @@ class SignSeq {
 
         double GetBestScoreForEnd( SignSeqScores &scores, int end );
 
+        std::vector<HandPair> &GetHandPairs( int index, const cv::PCA &pca );
         std::vector<HandPair> makePairs( ProjectionSet &hands );
-        double DistanceForPair( FramePtr, const HandPair &pair,
+        double DistanceForPair( int modelIndex, int testIndex, int handIndex,
+                                FramePtr, const HandPair &pair,
                                 const cv::PCA &pca, const cv::Mat &covar );
+
 };
 
 #endif

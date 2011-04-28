@@ -17,6 +17,11 @@ fun sItemToString Start = "**START**"
   | sItemToString ME = "**ME**"
   | sItemToString (Gloss word) = word
 
+fun stringTosItem "**START**" = Start
+  | stringTosItem "**END**" = End
+  | stringTosItem "**ME**" = ME
+  | stringTosItem word = Gloss word
+
 type entry = sentenceItem * sentenceItem list;
 
 exception BadMatch of string

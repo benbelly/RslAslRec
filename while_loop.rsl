@@ -1,0 +1,76 @@
+
+interp:
+    field : int
+
+fn main() {
+
+  (*ML*)
+    fun isBelow n = fn({field}) => (NONE, field < n)
+
+    fun allBelow n = fn(is) =>
+        let
+            val reached = List.foldl Int.max 0 (List.map (fn {field} => field) is)
+            val _ = print ("Reached = " ^ (Int.toString reached) ^ "\n")
+        in
+            (NONE, fn _ => (NONE, reached < n))
+        end
+
+    fun init (_) = (NONE, [(NONE, Interp.rhcons({field = 0}))])
+
+    fun atMax (is) =
+        let
+            val max = List.foldl (fn ({field}, a) => Int.max(field, a)) 0 is
+        in
+            (NONE, (fn ({field}) => (NONE, field = max)))
+        end
+
+    fun bumpReplace is =
+        let
+            val ilist = InterpSet.rvalue is
+            val maxLev = List.foldl (fn({field},a) => Int.max(field, a)) 0 ilist
+        in
+            (NONE, [(NONE, Interp.rhcons({field = maxLev + 1}))])
+        end
+
+    fun bump is =
+        let
+            val ilist = InterpSet.rvalue is
+            val maxLev = List.foldl (fn({field},a) => Int.max(field, a)) 0 ilist
+            val orig = InterpSet.fold (fn (i,l) => (NONE, i)::l) [] is
+        in
+            (NONE, orig @ [(NONE, Interp.rhcons({field = maxLev + 1}))])
+        end
+    
+    fun prField {field} = ((Int.toString field) ^ "\n")
+  (*ML*)
+
+  [Init] munge: init
+  [FieldCheck] while observing field isBelow(3) {
+    [Bump] munge: bumpReplace
+    print: prField
+  }
+
+  print "While done. Trying While all\n"
+
+  [ReInit] munge: init
+  [AllFieldCheck] while all observing field allBelow(3) {
+      [Bump] munge: bump
+      print: prField
+  }
+  print "While All done. Trying If all\n"
+  [ReInit] munge: init
+  [IfAllFieldCheck] while all observing field allBelow(10) {
+      if all observing field atMax {
+          [Bump] munge: bump
+          print: prField
+      }
+  }
+
+  [ReInit] munge: init
+  [Bump1] munge: bump
+  [Bump2] munge: bump
+  [Bump3] munge: bump
+  if all observing field atMax {
+    print: prField
+  }
+}

@@ -81,7 +81,7 @@ void SignSeq::GenerateScoresForModelFrames( SignSeqScores &scores,
         GeneratorScoresForModel( scores, interval, i, pca, covar );
 }
 
-void SignSeq::GeneratorScoresForModel( SignSeqScores &scores,
+inline void SignSeq::GeneratorScoresForModel( SignSeqScores &scores,
                                        std::pair<int, int> interval,
                                        int modelIndex, const cv::PCA &pca,
                                        const cv::Mat &covar ) {
@@ -91,13 +91,12 @@ void SignSeq::GeneratorScoresForModel( SignSeqScores &scores,
     }
 }
 
-void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
+inline void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
                                           std::pair<int, int> interval,
                                           int modelIndex, int testIndex,
                                           const cv::PCA &pca, const cv::Mat &covar ) {
 
-    ProjectionSet handCands = FDB->projections( interval.first + testIndex, pca );
-    std::vector<HandPair> pairs = makePairs( handCands );
+    std::vector<HandPair> &pairs = GetHandPairs( interval.first + testIndex, pca );
 
     for( unsigned int k = 0; k < pairs.size(); ++k ) {
         HandPair handPair = pairs[k];
@@ -120,14 +119,15 @@ void SignSeq::Cost( SignSeqScores &scores,
 
     // Short-circuit long intervals
     if( testIndex - interval.first > MAX_SIGN_LEN ) {
-        scores.setDistance( modelIndex, testIndex, (int)handIndex,
-                            std::numeric_limits<double>::max() );
+        scores.setDistance( modelIndex, testIndex, handIndex,
+                            scores.maxDistance() );
         return;
     }
 
     if( modelIndex == 0 && testIndex == 0 ) {
-        double distance = DistanceForPair( frames[modelIndex], handPair, pca, covar );
-        scores.setDistance( modelIndex, testIndex, (int)handIndex, distance );
+        double distance = DistanceForPair( modelIndex, testIndex, handIndex,
+                                           frames[modelIndex], handPair, pca, covar );
+        scores.setDistance( modelIndex, testIndex, handIndex, distance );
     }
 
     else {
@@ -139,7 +139,8 @@ void SignSeq::Cost( SignSeqScores &scores,
             SignSeqScores::Index bestPred = *( std::min_element( predecessors.begin(),
                         predecessors.end(), boost::bind( bestPredecessor, scores, _1, _2 ) ) );
             if( scores.getDistance( bestPred ) < scores.maxDistance() ) {
-                double distance = DistanceForPair( frames[modelIndex],
+                double distance = DistanceForPair( modelIndex, testIndex, handIndex,
+                                                   frames[modelIndex],
                                                    handPair, pca, covar );
                 scores.setDistance( modelIndex, testIndex, handIndex,
                                     bestPred, distance );
@@ -148,19 +149,52 @@ void SignSeq::Cost( SignSeqScores &scores,
     }
 }
 
-double SignSeq::DistanceForPair( SignSeq::FramePtr frame, const SignSeq::HandPair &handpair,
+struct Index {
+   int model, test, hand;
+};
+
+inline bool operator<( const Index &l, const Index &r ) {
+    return l.model < r.model ||
+           ( l.model == r.model && l.test < r.test ) ||
+           ( l.model == r.model && l.test == r.test && l.hand < r.hand );
+}
+
+inline double SignSeq::DistanceForPair( int model, int test, int hand,
+                                 SignSeq::FramePtr frame, const SignSeq::HandPair &handpair,
                                  const cv::PCA &pca, const cv::Mat &covar ) {
+    typedef std::map<Index, double> ScoreHistory;
+    static ScoreHistory scoreHistory;
+    Index i; i.model = model; i.test = test; i.hand = hand;
+    ScoreHistory::iterator scoreIter = scoreHistory.find( i );
+    if( scoreIter != scoreHistory.end() ) return scoreIter->second;
+
+    double score = -1.0L;
     if( handpair.second.get() )
-        return frame->distance( handpair.first, *(handpair.second.get()), pca, covar );
+        score = frame->distance( handpair.first, *(handpair.second.get()), pca, covar );
     else
-        return frame->distance( handpair.first, pca, covar );
+        score = frame->distance( handpair.first, pca, covar );
+    scoreHistory[i] = score;
+    return score;
 }
 
 double SignSeq::GetBestScoreForEnd( SignSeqScores &scores, int end ) {
     return scores.bestScoreForEndFrame( end );
 }
 
-std::vector<SignSeq::HandPair> SignSeq::makePairs( ProjectionSet &hands ) {
+inline std::vector<SignSeq::HandPair> &SignSeq::GetHandPairs( int index, const cv::PCA &pca ) {
+    typedef std::map<int, boost::shared_ptr<std::vector<HandPair> > > HandPairMap;
+    static HandPairMap pairsForIndex;
+    HandPairMap::iterator pairsIter = pairsForIndex.find( index );
+    if( pairsIter != pairsForIndex.end() ) return *(pairsIter->second.get());
+
+    ProjectionSet handCands = FDB->projections( index, pca );
+    boost::shared_ptr<std::vector<HandPair> > pairs(
+                    new std::vector<HandPair>( makePairs( handCands ) ) );
+    pairsForIndex[index] = pairs;
+    return *(pairs.get());
+}
+
+inline std::vector<SignSeq::HandPair> SignSeq::makePairs( ProjectionSet &hands ) {
     int size = hands.size();
     std::vector<HandPair> pairs; pairs.reserve( size * size );
     for( int dom = 0; dom < size; ++dom )

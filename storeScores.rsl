@@ -1,0 +1,64 @@
+inc "aslalg.mlb"
+inc "aslalg.sml"
+inc "levelbuilding-external.sml"
+
+(*
+  The interpretation is an interval (start frame to end frame) for a word
+  with the distance for that word and the score of a predecessor. The
+  total distance of the sentence is predecessor distance + interval distance
+*)
+interp:
+    testFrames: int vector
+    level : int
+    word : int
+    score : real
+    interval : int * int
+    prevs : int list * real
+
+(* Reject any sequences that are illegal *)
+fn makeLevel( itemMap ) {
+    [NextLevel] munge: levelUpMunge(itemMap)
+    [InternalLevelCheck] if all observing level atMax {
+        print "Scoring "
+        print all observing level: len
+        [ScoreLevel] update score observing interval, level, word: scoreLevel( 0.1, itemMap)
+    }
+}
+
+fn finish( destFile ) {
+    print all: dumpScores(destFile)
+}
+
+fn levelAndScore( itemMap ) {
+    print all observing level: prlevel
+    print all observing level: len
+    [OnlyHighestLevel] if all observing level atMax {
+        makeLevel( itemMap )
+    }
+}
+
+fn main ( testDir ) {
+    test = testDir
+    train = "/home/bholm/USF-ASL-Data-Set-v2"
+    t1 = 300
+    (*ML*)
+        val _ = aslalgLoad t1 train test
+        val itemMap = itemIndexMap()
+        val dumpFile = (testDir ^ "/allMahalanobisScore.scores")
+    (*ML*)
+
+    [Init] munge: init
+    [LoadVideo] update testFrames: getIds
+    print "Trained and loaded\n"
+
+    [LevelZero] update level, word, interval, score, prevs
+                observing testFrames: levelZero(itemMap)
+    print "Level zero intervals created\n"
+
+    levelAndScore( itemMap )
+    print "Done scoring\n"
+
+    finish( dumpFile )
+    print "DONE DONE DONE\n"
+}
+

@@ -73,16 +73,15 @@ fun itemOf iMap index =
 fun items iMap indexList = map (itemOf iMap) indexList
 fun indices iMap itemList = map (indexOf iMap) itemList
 
-fun findDistance _ _ Start = 0.0
-  | findDistance _ _ End = 0.0
-  | findDistance b e ME =
+fun findDistance _ _ _ Start = 0.0
+  | findDistance _ _ _ End = 0.0
+  | findDistance alpha b e ME =
       let
-        val alpha = 0.1 (* value of 'nullscore' in original *)
         val distance = Real.fromInt ((e - b) + 1) (* minimum distance of 1 *)
       in
         alpha * distance (* Equation (5) in paper *)
       end
-  | findDistance b e (Gloss(word)) =
+  | findDistance _ b e (Gloss(word)) =
       let
         val distance = distanceC( word, String.size word, b, e )
       in

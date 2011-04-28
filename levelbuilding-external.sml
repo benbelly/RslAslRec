@@ -21,7 +21,8 @@ let
  *)
   val { testFrames, level,
         word, score,
-        interval, prevs } = i
+        interval, prevs = (ps, pscr) } = i
+  val prevWords = List.map (fn (w,_,_) => w) ps
   val wordStr = fn wordIdx => sItemToString (itemOf itemMap wordIdx)
   val prevStr = fn (ps, s) => "[ " ^ (commaList (List.map wordStr ps)) ^ " ] @" ^
                               (realStr s) ^ "\n"
@@ -30,5 +31,5 @@ let
    "Word: " ^ (wordStr word) ^ "\n" ^
    "Score: " ^ (realStr score) ^ "\n" ^
    "Interval: " ^ (intervalStr interval) ^ "\n" ^
-   "Prevs: " ^ (prevStr prevs) ^ "\n"
+   "Prevs: " ^ (prevStr (prevWords, pscr)) ^ "\n"
 end

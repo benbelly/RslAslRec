@@ -1,6 +1,7 @@
 inc "aslalg.mlb"
 inc "aslalg.sml"
 inc "levelbuilding-external.sml"
+inc "lb-report.sml"
 
 (*
   The interpretation is an interval (start frame to end frame) for a word
@@ -13,34 +14,23 @@ interp:
     word : int
     score : real
     interval : int * int
-    prevs : int list * real
+    prevs : (int * int * int) list * real
 
-(* Reject any sequences that are illegal *)
-fn grammarCheck(itemMap, grammar) {
-    print "Checking grammar\n"
-    [KillBadGrammar] if observing word, prevs badGrammar(itemMap, grammar, 3) {
-        reject
-    }
-    print "Grammar checked\n"
-}
-
-fn makeLevel(itemMap, grammar) {
-    print "Leveling up\n"
+fn makeLevel(alpha, itemMap, grammar) {
     [NextLevel] munge: levelUpMunge(itemMap)
     (* LevelUp just created a set of interps at new highest level, so 
        only look at those *)
     [InternalLevelCheck] if all observing level atMax {
-        print "Scoring "
-        print all observing level: len
-        [ScoreLevel] update score observing interval, level, word: scoreLevel(itemMap)
+        [ScoreLevel] update score observing interval, level, word: scoreLevel(alpha, itemMap)
         [KillHighScores] if observing score scoredOut {
             reject
         }
-        print "Getting prevs\n"
-        [GetPrevs] update all prevs observing score, interval, level, word: updatePrevs
+    }
 
-        grammarCheck(itemMap, grammar)
+    [GetPrevs] update all prevs
+               observing score, interval, level, word: updatePrevs( itemMap, grammar, 3 )
 
+    [InternalLevelCheck] if all observing level atMax {
         [TrimToBest] if all observing word, interval, prevs notBest {
             reject
         }
@@ -49,22 +39,22 @@ fn makeLevel(itemMap, grammar) {
 
 fn finish(itemMap, grammar) {
     [GetAtEnd] if observing interval, testFrames atEnd {
-        [AddEnd] update word, prevs, score: addEnd(itemMap)
+        [AddEnd] update word, prevs, score
+                 observing interval: addEnd(itemMap)
     }
     else {
         reject
     }
-    grammarCheck(itemMap, grammar)
+    [KillBadGrammar] if observing word, prevs badGrammar(itemMap, grammar, 3) {
+        reject
+    }
 }
 
-fn levelbuildingLoop( itemMap, grammar ) {
-    (*
+fn levelbuildingLoop( alpha, numLevels, itemMap, grammar ) {
     [LevelCheck] while all observing level belowMaxLevel( numLevels ) {
-    *)
         print all observing level: prlevel
-        print all observing level: len
         [OnlyHighestLevel] if all observing level atMax {
-            makeLevel(itemMap, grammar)
+            makeLevel(alpha, itemMap, grammar)
             (* makeLevel() made a new, higher level. Drop the old one *)
             print "Dropping old incomplete\n"
             [DropOldLevels] if all observing level, interval, testFrames
@@ -72,34 +62,30 @@ fn levelbuildingLoop( itemMap, grammar ) {
                 reject
             }
         }
-    (*
     }
-    *)
 }
 
-fn main ( testDir, levels ) {
+fn main ( alphaStr, levels, truthString, testDir ) {
     test = testDir
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     t1 = 300
     (*ML*)
+        val alpha = valOf(Real.fromString alphaStr)
         val numLevels = valOf(Int.fromString(levels))
         val grammar = aslalgLoad t1 train test
         val itemMap = itemIndexMap()
         val scoreFile = (testDir ^ "/allMahalanobisScore.scores")
+        val _ = loadScores( scoreFile )
     (*ML*)
 
     [Init] munge: init
     [LoadVideo] update testFrames: getIds
     print "Trained and loaded\n"
-    print all: loadScores( scoreFile )
 
     [LevelZero] update level, word, interval, score, prevs
                 observing testFrames: levelZero(itemMap)
-    print "Level zero intervals created\n"
 
-    levelbuildingLoop( itemMap, grammar )
-    levelbuildingLoop( itemMap, grammar )
-    levelbuildingLoop( itemMap, grammar )
+    levelbuildingLoop( alpha, numLevels, itemMap, grammar )
 
     print "Done leveling\n"
 
@@ -107,6 +93,27 @@ fn main ( testDir, levels ) {
 
     print: i2s(itemMap)
 
+    [GetBest] if all observing score notBestScore {
+        reject
+    }
+
+    [OnlyBest] accept
+    print "The best interpretation:\n"
+    print: i2s(itemMap)
+
     print "DONE DONE DONE\n"
 }
 
+hfn report ( alpha, levels, truthString, testDir ) {
+    test = testDir
+    train = "/home/bholm/USF-ASL-Data-Set-v2"
+    t1 = 300
+    (*ML*)
+        val alpha = valOf(Real.fromString alphaStr)
+        val numLevels = valOf(Int.fromString(levels))
+        val grammar = aslalgLoad t1 train test
+        val itemMap = itemIndexMap()
+    (*ML*)
+    hadd ["OnlyBest"]
+    print: sPrintLevenshteinDistance(itemMap, truthString)
+}
