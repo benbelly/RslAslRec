@@ -107,6 +107,7 @@ hfn report() {
     diffAccuracy("BoundaryImage")
     *)
 
+    (*
     hadd ["DiffImage"]
     print "\n\nStep 2a\n"
     print: sPrintCenterAccuracy
@@ -131,11 +132,10 @@ hfn report() {
     print "\n\nStep 2f\n"
     print: sPrintCenterAccuracy
     reject
-
-    (*
-    hadd ["FindKeyFrames"]
-    hprint: sHprintDiffs
-    reject
     *)
+
+    hadd ["FindKeyFrames"]
+    hprint all: sHprintDiffs
+    reject
 
 }
