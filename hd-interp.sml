@@ -78,9 +78,9 @@ fun keyframes t1 = fn  _ =>
     val keyIds = keyframeIds()
     val annotation = SOME (FrameDiffs diffArray)
   in
-    (annotation,
+    (NONE,
      fn ({keyframe, frameId}) =>
-      (NONE, [(NONE, { keyframe = (Vector.exists (fn i => i = frameId) keyIds) } )] ))
+      (NONE, [(annotation, { keyframe = (Vector.exists (fn i => i = frameId) keyIds) } )] ))
   end
 
 fun initialDiffImages is =
@@ -257,13 +257,15 @@ fun sDisplayDifferences is =
   end
 
 (* Output attributes *)
+fun noteToString (FrameDiffs ds) = (String.concatWith ","
+                                    (List.map Real.toString (Vector.foldl op:: [] ds))) ^ "\n"
+  | noteToString (FrameId id) = ("FrameId: " ^ (Int.toString id) ^ "\n")
+  | noteToString _ = "Unexpected Note Value\n"
+
 fun sHprintDiffs (is, ah, trace) =
   let
     val notesList = List.map (fn i => getar(Interp.rhcons i, ah, trace)) is
-    val prFun = fn ns => List.app (fn (_,FrameDiffs ds,_) =>
-                           print ( (String.concatWith", " (List.map Real.toString
-                                                           (Vector.foldl op:: [] ds))) ^ "\n")
-                                    | (_,_,_) => print "Unexpected Note value\n") ns
+    val prFun = fn ns => List.app (fn (_,note,_) => print (noteToString note)) ns
     val _ = List.map prFun notesList
   in
     ""
