@@ -20,10 +20,13 @@ fun idsForTruth itemMap truthWords =
 
 fun truthStringToWords truthString = String.tokens Char.isSpace truthString
 
+fun intervalToString (b,e) = "(" ^ (Int.toString b) ^ ", " ^ (Int.toString e) ^ ")"
+
 fun sPrintLevenshteinDistance(itemMap, truth) = fn (i : Interp.r) =>
   let
     val { prevs = (ps, _), word, ... } = i
-    val sentence = word::(List.map (fn (w,_,_) => w) (rev ps))
+    val sentence = (List.map (fn (w,_,_) => w) (rev ps))@[word]
+    val intervalStrings = List.map (fn (_,b,e) => intervalToString (b,e)) (rev ps)
     val sentenceLen = (length sentence)
     val truthSentence = idsForTruth itemMap (truthStringToWords truth)
     val distance = levenshtein sentence truthSentence
@@ -33,7 +36,8 @@ fun sPrintLevenshteinDistance(itemMap, truth) = fn (i : Interp.r) =>
     val _ = print ("Truth: " ^ truth ^ "\n" ^
                    "Interp: " ^ sentenceString ^ "\n" ^
                    "Distance: " ^ (Int.toString distance) ^ "\n" ^
-                   "Percent change: " ^ (Real.toString pct) ^ "\n")
+                   "Percent change: " ^ (Real.toString pct) ^ "\n" ^
+                   (String.concatWith " " intervalStrings) ^ "\n")
   in
     ""
   end
