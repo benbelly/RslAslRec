@@ -29,7 +29,7 @@ CommandLineFile = "LevelBuildingCommands"
 
 def commandLineToFile(dir,file)
     Alphas.each { |alpha|
-        file.puts "#{Command} #{alpha} #{numlevels} #{truthstring} #{dir} > #{logfile(dir,alpha)} < empty"
+        file.puts "#{Command} #{alpha} #{numlevels} #{truthstring} #{dir} > #{logfile(dir,alpha)} < #{dir}/empty"
     }
 end
 

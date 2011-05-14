@@ -206,19 +206,22 @@ inline std::vector<SignSeq::HandPair> SignSeq::makePairs( ProjectionSet &hands )
     return pairs;
 }
 
-bool validPredecessor( std::pair<int, int> interval,
+bool validPredecessor( std::pair<int, int>, // interval,
                        SignSeqScores::Index &pre, SignSeqScores::Index &cur ) {
     if( cur.test < 0 || pre.model < 0 || pre.test < 0 ) return false; // no illegal predecessors
-    int firstFrame = interval.first;
-    CenterSet curSet = FDB->handCenters( firstFrame + cur.test ),
-              preSet = FDB->handCenters( firstFrame + pre.test );
-    if( curSet.empty() || preSet.empty() ) return true;
-    CenterPoint curCen = curSet[cur.hand], preCen = preSet[pre.hand];
-    int xD = curCen.x - preCen.x,
-        yD = curCen.y - preCen.y;
-    unsigned int xSqr = xD * xD,
-                 ySqr = yD * yD;
-    return (xSqr + ySqr) < T0_SQR;
+    return true; // Used the wrong hand set - d'oh. Just say OK - there aren't many pairs
+    /*
+     *int firstFrame = interval.first;
+     *CenterSet curSet = FDB->handCenters( firstFrame + cur.test ),
+     *          preSet = FDB->handCenters( firstFrame + pre.test );
+     *if( curSet.empty() || preSet.empty() ) return true;
+     *CenterPoint curCen = curSet[cur.hand], preCen = preSet[pre.hand];
+     *int xD = curCen.x - preCen.x,
+     *    yD = curCen.y - preCen.y;
+     *unsigned int xSqr = xD * xD,
+     *             ySqr = yD * yD;
+     *return (xSqr + ySqr) < T0_SQR;
+     */
 }
 
 bool bestPredecessor( SignSeqScores &scores,

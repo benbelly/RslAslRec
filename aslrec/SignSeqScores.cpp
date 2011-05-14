@@ -37,12 +37,14 @@ void SignSeqScores::setDistance( int model, int test, int hand, Index last,
 
 double SignSeqScores::bestScoreForEndFrame( int end ) {
     double best = std::numeric_limits<double>::max();
-    for( int i = 0; i < trainSize; ++i ) {
+    // Set i to be the last mode frame:
+    int i = trainSize - 1;
+    //for( int i = 0; i < trainSize; ++i ) {
         // j = end!
         for( int k = 0; k < maxnumberHands; ++k ) {
             double thisScore = scores[i][end][k];
             if( thisScore < best ) best = thisScore;
         }
-    }
+    //}
     return best;
 }
