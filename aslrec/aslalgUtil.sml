@@ -8,7 +8,7 @@ val findHandsC        = _import "findHandsC" : unit -> unit;
 val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
 val getSignLengthC    = _import "getSignLengthC" : int -> int;
 val getSignC          = _import "getSignC" : int * char array -> unit;
-val distanceC         = _import "distanceC" : string * int * int * int -> real;
+val distanceC         = _import "distanceC" : real * string * int * int * int -> real;
 
 fun aslalgLoad t1 trainDir testDir =
   let
@@ -81,9 +81,9 @@ fun findDistance _ _ _ Start = 0.0
       in
         alpha * distance (* Equation (5) in paper *)
       end
-  | findDistance _ b e (Gloss(word)) =
+  | findDistance alpha b e (Gloss(word)) =
       let
-        val distance = distanceC( word, String.size word, b, e )
+        val distance = distanceC( alpha, word, String.size word, b, e )
       in
         distance
       end

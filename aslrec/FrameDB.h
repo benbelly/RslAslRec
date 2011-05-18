@@ -1,15 +1,16 @@
 #ifndef FRAMEDB_H__
 #define FRAMEDB_H__
 
+#include "histograms.h"
+#include "frame.h"
+#include "HandPairCollection.h"
+
 #include <map>
 #include <iterator>
 #include <functional>
 #include <string>
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
-
-#include "histograms.h"
-#include "frame.h"
 
 class FrameDB {
     public:
@@ -66,6 +67,7 @@ class FrameDB {
         Frame histogramImg( int i );
         ContourSet hands( int i )        { return db[i].hands; }
         CenterSet handCenters( int i )   { return db[i].handCenters; }
+        HandPairCollection handPairs( int i, const cv::PCA &pca );
 
 
         int size() { return db.size(); }

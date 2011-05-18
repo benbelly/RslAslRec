@@ -1,5 +1,3 @@
-
-
 //#include "logging.h"
 
 #include "keyframeselect.h"
@@ -185,6 +183,10 @@ ProjectionSet FrameDB::projections( int i, const cv::PCA &pca ) {
 Frame FrameDB::histogramImg( int i ) {
     cv::Mat img = h2i( db[i].gray, db[i].histograms );
     return Frame( i, img );
+}
+
+HandPairCollection FrameDB::handPairs( int i, const cv::PCA &pca ) {
+    return HandPairCollection( projections( i, pca ), hands( i ) );
 }
 
 bool handSizeCompare( std::pair<int, FrameDB::FrameData> l,

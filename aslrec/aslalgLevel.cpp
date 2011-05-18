@@ -1,5 +1,6 @@
 
 #include "Databases.h"
+#include "consts.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/mem_fn.hpp"
 #include "boost/filesystem.hpp"
@@ -60,7 +61,13 @@ void loadScoresC( Pointer fname, int fnameLen ) {
     }
 }
 
-double distanceC( Pointer word, int wordLen, int start, int end ) {
+double distanceC( double alpha, Pointer word, int wordLen, int start, int end ) {
+
+/*
+ *static double ALPHA_SCALE_FACTOR = 0.4;
+ *static double SINGLE_HAND_PENALTY = 0.04;
+ */
+    SINGLE_HAND_PENALTY = alpha * ALPHA_SCALE_FACTOR;
 
     std::string gloss( (char *)word, wordLen );
     

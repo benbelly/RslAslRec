@@ -26,7 +26,7 @@ ASLREC_OBJS = $(addprefix $(ASLREC_DIR)/, aslalg.o \
 										  Databases.o FrameDB.o TrainDB.o \
 										  aslalgLevel.o TrainingData.o \
 										  differenceImageFunctions.o \
-										  writer.o)
+										  writer.o HandPairCollection.o)
 ASLREC_SMLS = $(addprefix $(ASLREC_DIR)/, aslalgLevel.sml aslalgUtil.sml )
 
 
@@ -111,8 +111,8 @@ OPENCV_PATH=/home/bholm/raid/OpenCV
 ## C++ variables
 ##
 CC=g++
-DEBUG=-g
-#OPT=-O3
+#DEBUG=-g
+OPT=-O3
 INCLUDE=-I. -I$(OPENCV_PATH)/include -I$(OPENCV_PATH)/include/opencv \
 		-I/usr/lib/mlton/include
 CFLAGS=-Werror -Wall -Wextra -c $(INCLUDE) $(DEBUG) $(OPT)

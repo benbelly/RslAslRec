@@ -115,11 +115,6 @@ fun scoreLevel (alpha, itemMap) = fn(i) =>
     val (b, e) = interval
     val item = itemOf itemMap word
     val distance = findDistance alpha b e item
-    (*
-     *val _ = print ("word: " ^ (sItemToString item) ^ ", begin: " ^ (Int.toString b) ^
-     *               ", end: " ^ (Int.toString e) ^ ", distance: " ^ (Real.toString distance)
-     *               ^ "\n" )
-     *)
   in
     (NONE, [(NONE, { score = distance } )] )
   end

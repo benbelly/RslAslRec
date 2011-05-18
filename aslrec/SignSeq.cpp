@@ -8,6 +8,14 @@
 #include "boost/shared_ptr.hpp"
 #include <limits>
 
+HandPairCollection &GetHandPairs( int index, const cv::PCA &pca );
+bool validPredecessor( std::pair<int, int> interval,
+                       const cv::PCA &pca,
+                       SignSeqScores::Index &pre,
+                       SignSeqScores::Index &cur );
+bool bestPredecessor( SignSeqScores &scores,
+                      SignSeqScores::Index l, SignSeqScores::Index r );
+
 int factorial( int n ) {
     return (n == 0 || n == 1) ? 1 : factorial( n - 1 ) * n;
 }
@@ -96,25 +104,19 @@ inline void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
                                           int modelIndex, int testIndex,
                                           const cv::PCA &pca, const cv::Mat &covar ) {
 
-    std::vector<HandPair> &pairs = GetHandPairs( interval.first + testIndex, pca );
+    HandPairCollection &pairs = GetHandPairs( interval.first + testIndex, pca );
 
-    for( unsigned int k = 0; k < pairs.size(); ++k ) {
-        HandPair handPair = pairs[k];
-        Cost( scores, interval, modelIndex, testIndex, (int)k,
+    for( int k = 0; k < pairs.size(); ++k ) {
+        HandPairCollection::HandPair handPair = pairs.pair( k );
+        Cost( scores, interval, modelIndex, testIndex, k,
               handPair, pca, covar );
     }
 }
 
-/* Helpers for GenerateScoresForTestFrame */
-bool validPredecessor( std::pair<int, int> interval, SignSeqScores::Index &pre,
-                       SignSeqScores::Index &cur );
-bool bestPredecessor( SignSeqScores &scores,
-                      SignSeqScores::Index l, SignSeqScores::Index r );
-
 void SignSeq::Cost( SignSeqScores &scores,
                     std::pair<int, int> interval,
                     int modelIndex, int testIndex, int handIndex,
-                    const SignSeq::HandPair &handPair,
+                    const HandPairCollection::HandPair &handPair,
                     const cv::PCA &pca, const cv::Mat &covar ) {
 
     // Short-circuit long intervals
@@ -133,7 +135,7 @@ void SignSeq::Cost( SignSeqScores &scores,
     else {
         std::vector<SignSeqScores::Index> predecessors = scores.legalPredecessors(
                     modelIndex, testIndex, handIndex,
-                    boost::bind( validPredecessor, interval, _1, _2 ) );
+                    boost::bind( validPredecessor, interval, pca, _1, _2 ) );
 
         if( predecessors.empty() == false ) {
             SignSeqScores::Index bestPred = *( std::min_element( predecessors.begin(),
@@ -160,8 +162,9 @@ inline bool operator<( const Index &l, const Index &r ) {
 }
 
 inline double SignSeq::DistanceForPair( int model, int test, int hand,
-                                 SignSeq::FramePtr frame, const SignSeq::HandPair &handpair,
-                                 const cv::PCA &pca, const cv::Mat &covar ) {
+                                        SignSeq::FramePtr frame,
+                                        const HandPairCollection::HandPair &handpair,
+                                        const cv::PCA &pca, const cv::Mat &covar ) {
     typedef std::map<Index, double> ScoreHistory;
     static ScoreHistory scoreHistory;
     Index i; i.model = model; i.test = test; i.hand = hand;
@@ -181,46 +184,52 @@ double SignSeq::GetBestScoreForEnd( SignSeqScores &scores, int end ) {
     return scores.bestScoreForEndFrame( end );
 }
 
-inline std::vector<SignSeq::HandPair> &SignSeq::GetHandPairs( int index, const cv::PCA &pca ) {
-    typedef std::map<int, boost::shared_ptr<std::vector<HandPair> > > HandPairMap;
+inline HandPairCollection &GetHandPairs( int index, const cv::PCA &pca ) {
+    typedef std::map<int, boost::shared_ptr<HandPairCollection> > HandPairMap;
     static HandPairMap pairsForIndex;
     HandPairMap::iterator pairsIter = pairsForIndex.find( index );
     if( pairsIter != pairsForIndex.end() ) return *(pairsIter->second.get());
 
-    ProjectionSet handCands = FDB->projections( index, pca );
-    boost::shared_ptr<std::vector<HandPair> > pairs(
-                    new std::vector<HandPair>( makePairs( handCands ) ) );
+    boost::shared_ptr<HandPairCollection> pairs(
+                    new HandPairCollection( FDB->handPairs( index, pca ) ) );
     pairsForIndex[index] = pairs;
     return *(pairs.get());
 }
 
-inline std::vector<SignSeq::HandPair> SignSeq::makePairs( ProjectionSet &hands ) {
-    int size = hands.size();
-    std::vector<HandPair> pairs; pairs.reserve( size * size );
-    for( int dom = 0; dom < size; ++dom )
-        for( int weak = 0; weak < size; ++weak ) {
-            if( weak != dom ) pairs.push_back( std::make_pair( hands[dom],
-                                                               new Histogram( hands[weak] ) ) );
-            else pairs.push_back( std::make_pair( hands[dom], (Histogram *)0 ) );
-        }
-    return pairs;
-}
-
-bool validPredecessor( std::pair<int, int>, // interval,
+bool validPredecessor( std::pair<int, int> /*interval*/, const cv::PCA &/*pca*/,
                        SignSeqScores::Index &pre, SignSeqScores::Index &cur ) {
     if( cur.test < 0 || pre.model < 0 || pre.test < 0 ) return false; // no illegal predecessors
-    return true; // Used the wrong hand set - d'oh. Just say OK - there aren't many pairs
+    // The following code does not work - the algorithm was not described, so I made it up.
+    // There may be a logic error, or it may be a bad algorithm. Since this is just a
+    // performance step, and not a correctness step, short-circuit to check results.
+    // Complete, correct, . . .
+    return true;
     /*
      *int firstFrame = interval.first;
-     *CenterSet curSet = FDB->handCenters( firstFrame + cur.test ),
-     *          preSet = FDB->handCenters( firstFrame + pre.test );
-     *if( curSet.empty() || preSet.empty() ) return true;
-     *CenterPoint curCen = curSet[cur.hand], preCen = preSet[pre.hand];
-     *int xD = curCen.x - preCen.x,
-     *    yD = curCen.y - preCen.y;
+     *HandPairCollection curPair = GetHandPairs( firstFrame + cur.test, pca ),
+     *                   prePair = GetHandPairs( firstFrame + pre.test, pca );
+     *if( curPair.size() <= cur.hand || prePair.size() <= pre.hand ) return false;
+     *HandPairCollection::CenterPair
+     *            curCen = curPair.center( cur.hand ),
+     *            preCen = prePair.center( pre.hand );
+     * // First Hand
+     *int xD = curCen.first.x - preCen.first.x,
+     *    yD = curCen.first.y - preCen.first.y;
      *unsigned int xSqr = xD * xD,
      *             ySqr = yD * yD;
-     *return (xSqr + ySqr) < T0_SQR;
+     *bool firstHandClose = (xSqr + ySqr) < T0_SQR;
+     * // Second Hand
+     *boost::shared_ptr<CenterPoint> curSec = curCen.second,
+     *                               preSec = preCen.second;
+     *bool secondMatch = ( curSec.get() && preSec.get() ) || ( !curSec.get() && !preSec.get() );
+     *bool secondClose = secondMatch;
+     *if( secondMatch && curSec.get() ) {
+     *    xD = curSec->x - preSec->x;
+     *    yD = curSec->y - preSec->y;
+     *    xSqr = xD * xD; ySqr = yD * yD;
+     *    secondClose = (xSqr + ySqr) < T0_SQR;
+     *}
+     *return firstHandClose && secondClose;
      */
 }
 

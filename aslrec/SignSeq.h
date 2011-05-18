@@ -6,6 +6,7 @@
 #include "edgedetection.h"
 #include "FeatureFrame.h"
 #include "histograms.h"
+#include "HandPairCollection.h"
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 #include<vector>
@@ -49,18 +50,15 @@ class SignSeq {
                                          int modelIndex, int testIndex, const cv::PCA &pca,
                                          const cv::Mat &covar );
 
-        typedef std::pair<cv::Mat, boost::shared_ptr<cv::Mat> > HandPair;
         void Cost( SignSeqScores &scores, std::pair<int, int> interval,
                    int modelIndex, int testIndex, int handIndex,
-                   const HandPair &handPair,
+                   const HandPairCollection::HandPair &handPair,
                    const cv::PCA &pca, const cv::Mat &covar );
 
         double GetBestScoreForEnd( SignSeqScores &scores, int end );
 
-        std::vector<HandPair> &GetHandPairs( int index, const cv::PCA &pca );
-        std::vector<HandPair> makePairs( ProjectionSet &hands );
         double DistanceForPair( int modelIndex, int testIndex, int handIndex,
-                                FramePtr, const HandPair &pair,
+                                FramePtr, const HandPairCollection::HandPair &pair,
                                 const cv::PCA &pca, const cv::Mat &covar );
 
 };
