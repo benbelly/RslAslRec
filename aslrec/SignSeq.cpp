@@ -8,7 +8,7 @@
 #include "boost/shared_ptr.hpp"
 #include <limits>
 
-HandPairCollection &GetHandPairs( int index, const cv::PCA &pca );
+HandPairCollection GetHandPairs( int index, const cv::PCA &pca );
 bool validPredecessor( std::pair<int, int> interval,
                        const cv::PCA &pca,
                        SignSeqScores::Index &pre,
@@ -104,7 +104,7 @@ inline void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
                                           int modelIndex, int testIndex,
                                           const cv::PCA &pca, const cv::Mat &covar ) {
 
-    HandPairCollection &pairs = GetHandPairs( interval.first + testIndex, pca );
+    HandPairCollection pairs = GetHandPairs( interval.first + testIndex, pca );
 
     for( int k = 0; k < pairs.size(); ++k ) {
         HandPairCollection::HandPair handPair = pairs.pair( k );
@@ -151,23 +151,11 @@ void SignSeq::Cost( SignSeqScores &scores,
     }
 }
 
-struct Index {
-   int model, test, hand;
-};
-
-inline bool operator<( const Index &l, const Index &r ) {
-    return l.model < r.model ||
-           ( l.model == r.model && l.test < r.test ) ||
-           ( l.model == r.model && l.test == r.test && l.hand < r.hand );
-}
-
 inline double SignSeq::DistanceForPair( int model, int test, int hand,
                                         SignSeq::FramePtr frame,
                                         const HandPairCollection::HandPair &handpair,
                                         const cv::PCA &pca, const cv::Mat &covar ) {
-    typedef std::map<Index, double> ScoreHistory;
-    static ScoreHistory scoreHistory;
-    Index i; i.model = model; i.test = test; i.hand = hand;
+    MemoIndex i; i.model = model; i.test = test; i.hand = hand;
     ScoreHistory::iterator scoreIter = scoreHistory.find( i );
     if( scoreIter != scoreHistory.end() ) return scoreIter->second;
 
@@ -184,16 +172,8 @@ double SignSeq::GetBestScoreForEnd( SignSeqScores &scores, int end ) {
     return scores.bestScoreForEndFrame( end );
 }
 
-inline HandPairCollection &GetHandPairs( int index, const cv::PCA &pca ) {
-    typedef std::map<int, boost::shared_ptr<HandPairCollection> > HandPairMap;
-    static HandPairMap pairsForIndex;
-    HandPairMap::iterator pairsIter = pairsForIndex.find( index );
-    if( pairsIter != pairsForIndex.end() ) return *(pairsIter->second.get());
-
-    boost::shared_ptr<HandPairCollection> pairs(
-                    new HandPairCollection( FDB->handPairs( index, pca ) ) );
-    pairsForIndex[index] = pairs;
-    return *(pairs.get());
+inline HandPairCollection GetHandPairs( int index, const cv::PCA &pca ) {
+    return FDB->handPairs( index, pca );
 }
 
 bool validPredecessor( std::pair<int, int> /*interval*/, const cv::PCA &/*pca*/,

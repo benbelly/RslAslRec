@@ -23,7 +23,7 @@ end
 
 Command = "/home/bholm/epenthesis/levelbuilding"
 Dirs = IO.readlines("TruthDirList")
-Alphas = ["0.025", "0.030", "0.035", "0.040", "0.060", "0.075", "0.090", "0.100", "0.150"]
+Alphas = [ "0.075", "0.090", "0.10", "0.5", "0.75", "0.90" ]
 
 CommandLineFile = "LevelBuildingCommands"
 

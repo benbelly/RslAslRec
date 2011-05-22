@@ -74,7 +74,7 @@ fn main ( alphaStr, levels, truthString, testDir ) {
         val numLevels = valOf(Int.fromString(levels))
         val grammar = aslalgLoad t1 train test
         val itemMap = itemIndexMap()
-        val scoreFile = (testDir ^ "/allMahalanobisScore.scores")
+        val scoreFile = (testDir ^ "/allMahalanobisScore." ^ alphaStr ^ ".scores")
         val _ = loadScores( scoreFile )
     (*ML*)
 

@@ -16,6 +16,17 @@
 
 class SignSeqScores;
 
+// Memoization helpers
+struct MemoIndex {
+   int model, test, hand;
+};
+inline bool operator<( const MemoIndex &l, const MemoIndex &r ) {
+    return l.model < r.model ||
+           ( l.model == r.model && l.test < r.test ) ||
+           ( l.model == r.model && l.test == r.test && l.hand < r.hand );
+}
+typedef std::map<MemoIndex, double> ScoreHistory;
+
 class SignSeq {
     public:
         SignSeq();
@@ -60,7 +71,7 @@ class SignSeq {
         double DistanceForPair( int modelIndex, int testIndex, int handIndex,
                                 FramePtr, const HandPairCollection::HandPair &pair,
                                 const cv::PCA &pca, const cv::Mat &covar );
-
+        ScoreHistory scoreHistory;
 };
 
 #endif
