@@ -127,8 +127,7 @@ void SignSeq::Cost( SignSeqScores &scores,
     }
 
     if( modelIndex == 0 && testIndex == 0 ) {
-        double distance = DistanceForPair( modelIndex, testIndex, handIndex,
-                                           frames[modelIndex], handPair, pca, covar );
+        double distance = DistanceForPair( frames[modelIndex], handPair, pca, covar );
         scores.setDistance( modelIndex, testIndex, handIndex, distance );
     }
 
@@ -141,8 +140,7 @@ void SignSeq::Cost( SignSeqScores &scores,
             SignSeqScores::Index bestPred = *( std::min_element( predecessors.begin(),
                         predecessors.end(), boost::bind( bestPredecessor, scores, _1, _2 ) ) );
             if( scores.getDistance( bestPred ) < scores.maxDistance() ) {
-                double distance = DistanceForPair( modelIndex, testIndex, handIndex,
-                                                   frames[modelIndex],
+                double distance = DistanceForPair( frames[modelIndex],
                                                    handPair, pca, covar );
                 scores.setDistance( modelIndex, testIndex, handIndex,
                                     bestPred, distance );
@@ -151,20 +149,14 @@ void SignSeq::Cost( SignSeqScores &scores,
     }
 }
 
-inline double SignSeq::DistanceForPair( int model, int test, int hand,
-                                        SignSeq::FramePtr frame,
+inline double SignSeq::DistanceForPair( SignSeq::FramePtr frame,
                                         const HandPairCollection::HandPair &handpair,
                                         const cv::PCA &pca, const cv::Mat &covar ) {
-    MemoIndex i; i.model = model; i.test = test; i.hand = hand;
-    ScoreHistory::iterator scoreIter = scoreHistory.find( i );
-    if( scoreIter != scoreHistory.end() ) return scoreIter->second;
-
     double score = -1.0L;
     if( handpair.second.get() )
         score = frame->distance( handpair.first, *(handpair.second.get()), pca, covar );
     else
         score = frame->distance( handpair.first, pca, covar );
-    scoreHistory[i] = score;
     return score;
 }
 

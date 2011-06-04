@@ -1,11 +1,3 @@
-fun pairWithNext is =
-  let
-    val rec prs = fn (acc, []) => List.rev acc
-                   | (acc, _::[]) => List.rev acc
-                   | (acc, a::(rst as b::_)) => prs ((a,b)::acc, rst)
-  in
-    prs ([], is)
-  end
 
 datatype sentenceItem = Start
                       | End
@@ -22,17 +14,37 @@ fun stringTosItem "**START**" = Start
   | stringTosItem "**ME**" = ME
   | stringTosItem word = Gloss word
 
-type entry = sentenceItem * sentenceItem list;
+type entry = sentenceItem * (sentenceItem * sentenceItem) list;
+
+fun pairWithNextTwo is =
+  let
+    val rec prs = fn (acc, []) => List.rev acc
+                   | (acc, _::[]) => List.rev acc
+                   | (acc, a::b::[]) => List.rev ((a,b,ME)::acc)
+                   | (acc, a::(rst as b::c::_)) => prs ((a,b,c)::acc, rst)
+  in
+    prs ([], is)
+  end
+
+fun pairWithNext is =
+  let
+    val rec prs = fn (acc, []) => List.rev acc
+                   | (acc, _::[]) => List.rev acc
+                   | (acc, a::(rst as b::_)) => prs ((a,b)::acc, rst)
+  in
+    prs ([], is)
+  end
 
 exception BadMatch of string
-fun entryInsert (((item : sentenceItem),succ),(entries : entry list)) =
+fun entryInsert (((item : sentenceItem),succ1,succ2),(entries : entry list)) =
   let
     val iMatch = fn (i,_) => item = i
     val (matches, nots) = List.partition iMatch entries
-    val toE = fn [] => (item, [succ])
-               | (_, ss)::[] => (item, if (List.exists (fn s => s = succ) ss)
-                                       then ss
-                                       else succ::ss)
+    val toE = fn [] => (item, [(succ1,succ2)])
+               | (_, ss)::[] => (item,
+                                 if (List.exists (fn (s1,s2) => s1 = succ1 andalso s2 = succ2) ss)
+                                 then ss
+                                 else (succ1,succ2)::ss)
                | _ => raise BadMatch "too many matches"
   in
     (toE matches)::nots
@@ -49,7 +61,9 @@ fun r2items (AslIO.Root(_,ss)) = map s2items ss
 
 fun predecessors grammar item =
   let
-    val (_, ss) = valOf (List.find (fn (i, _) => i = item) grammar)
+    val getVal = fn NONE => let val _ = print ("No match for " ^ (sItemToString item) ^ "\n") in (item, []) end
+                  | SOME pair => pair
+    val (_, ss) = getVal (List.find (fn (i, _) => i = item) grammar)
   in
     ss
   end
@@ -57,29 +71,37 @@ fun predecessors grammar item =
 fun root2grammar root =
   let
     val ss = List.map List.rev (r2items root)
-    val pairs = List.foldl op@ [] (List.map pairWithNext ss)
+    val pairs = List.foldl op@ [] (List.map pairWithNextTwo ss)
     val entries = []
   in
     List.foldl entryInsert entries pairs
   end
 
-fun validPredecessor _ ME ME = false
-  | validPredecessor _ ME _  = true
-  | validPredecessor _ _ ME  = true
-  | validPredecessor grammar item pred =
-  let 
+fun validPredecessor1 grammar item pred =
+  let
     val ss = predecessors grammar item
-    val valid = Option.isSome (List.find (fn p => p = pred) ss)
+    val valid = Option.isSome (List.find (fn (p, _) => p = pred) ss)
   in
     valid
   end
 
-fun validSequence grammar seq depth =
-  let
-    val noMEs = List.filter (fn ME => false | _ => true) seq
-    val toTake = Int.min(depth, List.length noMEs)
-    (* ME can lead / follow anything, so just leave it out *)
-    val pairs = pairWithNext (List.take(noMEs, toTake))
+fun validPredecessor grammar item pred1 pred2 =
+  let 
+    val ss = predecessors grammar item
+    val valid = Option.isSome (List.find (fn (p1,p2) => p1 = pred1 andalso p2 = pred2) ss)
   in
-    List.all (fn (item, pred) => validPredecessor grammar item pred) pairs
+    valid
+  end
+
+fun validSequence grammar seq =
+  let
+    (*val _ = print ( "Checking: " ^ (String.concatWith " " (List.map sItemToString seq)) ^ "\n")*)
+    val noMEs = List.filter (fn ME => false | _ => true) seq
+    (* ME can lead / follow anything, so just leave it out *)
+    val pairs = pairWithNext noMEs
+    val twopairs = pairWithNextTwo noMEs
+  in
+    (List.all (fn (item, pred) => validPredecessor1 grammar item pred) pairs)
+    andalso
+    (List.all (fn (item, pred1, pred2) => validPredecessor grammar item pred1 pred2) twopairs)
   end

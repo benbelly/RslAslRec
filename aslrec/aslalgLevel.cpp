@@ -68,6 +68,7 @@ double distanceC( double alpha, Pointer word, int wordLen, int start, int end ) 
  *static double SINGLE_HAND_PENALTY = 0.04;
  */
     SINGLE_HAND_PENALTY = alpha * ALPHA_SCALE_FACTOR;
+    SINGLE_HAND_PENALTY = 0.0;
 
     std::string gloss( (char *)word, wordLen );
     

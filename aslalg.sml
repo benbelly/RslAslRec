@@ -34,8 +34,9 @@ fun highestReachedLevel (is) =
 fun belowMaxLevel (max) = fn(is) =>
   let
     val reached = highestReachedLevel(is)
+    val below = Int.<(reached, max)
   in
-    (NONE, fn _ => (NONE, Int.<(reached,max)))
+    (NONE, fn _ => (NONE, below))
   end
 
 fun scoredOut (i) =
@@ -66,10 +67,10 @@ fun oldIncompleteLevel (is) =
   let
     val levels = List.map (fn ({level, interval, testFrames}) => {level = level}) is
     val reached = highestReachedLevel(levels)
-    val {level, interval, testFrames} = hd is
+    val {level = _, interval = _, testFrames} = hd is
     val lastIdx = Vector.sub(testFrames, (Vector.length testFrames) - 1)
   in
-    (NONE, (fn ({level, interval=(b,e), testFrames}) => 
+    (NONE, (fn ({level, interval=(_,e), testFrames = _}) => 
                (NONE, level < reached andalso e <> lastIdx)))
   end
 
@@ -111,12 +112,13 @@ fun prInterval (i) =
 fun scoreLevel (alpha, itemMap) = fn(i) =>
   let
     (*val _ = print "Scoring - "*)
-    val { score, interval, level, word } = i
+    val { score, interval, word } = i
     val (b, e) = interval
     val item = itemOf itemMap word
     val distance = findDistance alpha b e item
   in
-    (NONE, [(NONE, { score = distance } )] )
+    (SOME (Note (sItemToString item)),
+     [(NONE, { score = distance } )] )
   end
 
 fun endOfTestFrames(e, testFrames ) =
@@ -124,12 +126,14 @@ fun endOfTestFrames(e, testFrames ) =
 
 fun notBest(is) =
   let
-    val rec tryInsert = fn (tbl, i as {word, interval = (_,e), prevs}, NONE) =>
+    val rec tryInsert = fn (tbl, i as {word, score, interval = (_,e), prevs}, NONE) =>
                                                 WordScoreTable.insert(tbl, (word, e), i)
-                         | (tbl, i as {word, interval, prevs = (_,newScr)},
-                             SOME {word = ow, interval = oi, prevs = (_, oldScr)}) =>
-                                     if newScr < oldScr then tryInsert(tbl, i, NONE) else tbl
-    val addInterp = fn(i as {word, interval = (b,e), prevs = (_,scr)}, tbl) =>
+                         | (tbl, i as {word, score=nscr, interval, prevs = (_,newScr)},
+                             SOME {word = ow, score=oscr, interval = oi, prevs = (_, oldScr)}) =>
+                                     if (nscr + newScr) < (oscr + oldScr)
+                                     then tryInsert(tbl, i, NONE)
+                                     else tbl
+    val addInterp = fn(i as {word, score, interval = (_,e), prevs = _}, tbl) =>
         let
           val existing = WordScoreTable.find(tbl, (word, e))
         in
@@ -138,12 +142,11 @@ fun notBest(is) =
     val scoreTable = List.foldl addInterp WordScoreTable.empty is
     val best = fn(w,(_,e)) => valOf( WordScoreTable.find(scoreTable, (w, e) ))
   in
-    (NONE, fn i as {word, interval = interval as (b,e), prevs = (lst, scr)} =>
+    (NONE, fn i as {word, score, interval, prevs = (lst, _ : real)} =>
               let
-                val {word = bw, interval = bi,
-                     prevs = (blst, bscr)} = best(word, interval)
-                val isbest = word = bw andalso interval = bi andalso lst = blst andalso
-                             Real.==(scr, bscr)
+                val {word = bw, score = _, interval = bi,
+                     prevs = (blst, _ : real)} = best(word, interval)
+                val isbest = interval = bi andalso lst = blst
               in
                 (NONE, not( isbest ))
               end)
@@ -170,8 +173,8 @@ fun levelZero(itemMap) = fn(i) =>
 fun levelUpMunge itemMap  = fn(is) =>
   let
     val ilist = InterpSet.rvalue is
-    val { testFrames, level, word,
-          interval, score, prevs } = hd ilist
+    val { testFrames, level, word = _,
+          interval = _, score = _, prevs = _ } = hd ilist
     val nextlvl = level + 1
     val wordsForInterval = fn (b,e) => map (fn wrd =>
                                                  { testFrames = testFrames,
@@ -185,27 +188,7 @@ fun levelUpMunge itemMap  = fn(is) =>
     val consed = List.map (fn i => (NONE, Interp.rhcons(i))) interpList
     val orig = InterpSet.fold (fn (i,l) => (NONE, i)::l) [] is
   in
-    (NONE, orig @ consed )
-  end
-
-fun levelUp(itemMap) = fn(is) =>
-  let
-    val firstI = hd is
-    val { level, word, interval, testFrames } = firstI
-    val nextlvl = level + 1
-    val startIdx = indexOf itemMap Start
-    val endIdx = indexOf itemMap End
-    val intervals = makeIntervals nextlvl testFrames
-    val (wordIdxs, _) = ListPair.unzip itemMap
-    val goodWords = List.filter (fn idx => idx <> startIdx andalso idx <> endIdx) wordIdxs
-    val wordsForInterval = fn (b,e) => map (fn wrd =>
-                                                (NONE, { level = nextlvl, word = wrd,
-                                                         interval = (b,e) } ))
-                                           goodWords
-    val interpList = List.foldl op@ [] (Vector.foldl op:: []
-                                                     (Vector.map wordsForInterval intervals))
-  in
-    (NONE, fn (i) => (NONE, if i = firstI then interpList else [] ))
+    (SOME (Note (intervalsToString intervals)), orig @ consed )
   end
 
 fun addEnd(itemMap) = fn(i) =>
@@ -214,20 +197,20 @@ fun addEnd(itemMap) = fn(i) =>
     val newScore = score + pscr
     val endIdx = indexOf itemMap End
   in
-    (NONE, [(NONE, { word = endIdx, score = newScore,
+    (NONE, [(NONE, { word = endIdx, interval = (e+1,e+1), score = newScore,
                      prevs = ((word, b, e)::ps, newScore ) })])
   end
 
-fun badGrammar (itemMap, grammar, depth) = fn (i) =>
+fun badGrammar (itemMap, grammar) = fn (i) =>
   let
     val { word, prevs = (prevs, _) } = i
     val words = List.map (fn (w,_,_) => w) prevs
     val prevItems = List.map (itemOf itemMap) (word::words)
   in
-    (NONE, not (validSequence grammar prevItems depth))
+    (NONE, not (validSequence grammar prevItems))
   end
 
-fun updatePrevs (itemMap, grammar, depth) = fn(is) =>
+fun updatePrevs (itemMap, grammar) = fn(is) =>
   let
     val maxLevel = highestReachedLevel
             (List.map (fn{prevs, score, interval, level, word} => {level = level}) is)
@@ -247,7 +230,7 @@ fun updatePrevs (itemMap, grammar, depth) = fn(is) =>
                           val words = List.map (fn (w,_,_) => w) ws
                           val prevItems = List.map (itemOf itemMap) (word::words)
                         in
-                          validSequence grammar prevItems depth
+                          validSequence grammar prevItems
                         end
                val lastLevels = List.filter targetPrev is
                val goodInterps = List.filter grammarOk lastLevels 

@@ -21,7 +21,7 @@ fn makeLevel( alpha, itemMap ) {
     [InternalLevelCheck] if all observing level atMax {
         print "Scoring "
         print all observing level: len
-        [ScoreLevel] update score observing interval, level, word: scoreLevel( alpha, itemMap)
+        [ScoreLevel] update score observing interval, word: scoreLevel(alpha, itemMap)
     }
 }
 
@@ -45,7 +45,7 @@ fn main ( alphaStr, testDir ) {
         val alpha = valOf(Real.fromString alphaStr)
         val _ = aslalgLoad t1 train test
         val itemMap = itemIndexMap()
-        val dumpFile = (testDir ^ "/allMahalanobisScore." ^ alphaStr ^ ".scores")
+        val dumpFile = (testDir ^ "/allMahalanobisScore." ^ ".scores")
     (*ML*)
 
     [Init] munge: init

@@ -6,6 +6,15 @@ val distanceC = _import "distanceC" : int ref * int * int -> real;
 val getMaxScoreC = _import "getMaxScoreC" : unit -> real;
 in
 
+  fun intervalsToString intervals =
+    let
+      val i2s = fn (b,e) => "(" ^ (Int.toString b) ^ ", " ^ (Int.toString e) ^ ")"
+      val istrs = Vector.map i2s intervals
+      val istrsList = Vector.foldl op:: [] istrs
+    in
+      String.concatWith " " istrsList
+    end
+
   (* start is the starting index, testFrames is a vector of frameIds *)
   fun makeIntervals start testFrames =
     let
@@ -18,10 +27,6 @@ in
                                                        (slice(frames,bIdx,mi))
       val pairVec = VectorSlice.mapi matchSlice frames
       val result = Vector.concat (Vector.foldr op:: [] pairVec)
-      (*
-       *val _ = print ("length: " ^ (Int.toString len) ^
-       *               ", pairCount: " ^ (Int.toString (Vector.length result)) ^"\n")
-       *)
     in
       result
     end

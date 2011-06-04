@@ -68,8 +68,7 @@ class SignSeq {
 
         double GetBestScoreForEnd( SignSeqScores &scores, int end );
 
-        double DistanceForPair( int modelIndex, int testIndex, int handIndex,
-                                FramePtr, const HandPairCollection::HandPair &pair,
+        double DistanceForPair( FramePtr, const HandPairCollection::HandPair &pair,
                                 const cv::PCA &pca, const cv::Mat &covar );
         ScoreHistory scoreHistory;
 };

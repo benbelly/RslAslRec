@@ -21,17 +21,17 @@ fn makeLevel(alpha, itemMap, grammar) {
     (* LevelUp just created a set of interps at new highest level, so 
        only look at those *)
     [InternalLevelCheck] if all observing level atMax {
-        [ScoreLevel] update score observing interval, level, word: scoreLevel(alpha, itemMap)
+        [ScoreLevel] update score observing interval, word: scoreLevel(alpha, itemMap)
         [KillHighScores] if observing score scoredOut {
             reject
         }
     }
 
     [GetPrevs] update all prevs
-               observing score, interval, level, word: updatePrevs( itemMap, grammar, 3 )
+               observing score, interval, level, word: updatePrevs( itemMap, grammar)
 
     [InternalLevelCheck] if all observing level atMax {
-        [TrimToBest] if all observing word, interval, prevs notBest {
+        [TrimToBest] if all observing word, score, interval, prevs notBest {
             reject
         }
     }
@@ -39,13 +39,12 @@ fn makeLevel(alpha, itemMap, grammar) {
 
 fn finish(itemMap, grammar) {
     [GetAtEnd] if observing interval, testFrames atEnd {
-        [AddEnd] update word, prevs, score
-                 observing interval: addEnd(itemMap)
+        [AddEnd] update word, prevs, score, interval: addEnd(itemMap)
     }
     else {
         reject
     }
-    [KillBadGrammar] if observing word, prevs badGrammar(itemMap, grammar, 3) {
+    [KillBadGrammar] if observing word, prevs badGrammar(itemMap, grammar) {
         reject
     }
 }
@@ -56,7 +55,6 @@ fn levelbuildingLoop( alpha, numLevels, itemMap, grammar ) {
         [OnlyHighestLevel] if all observing level atMax {
             makeLevel(alpha, itemMap, grammar)
             (* makeLevel() made a new, higher level. Drop the old one *)
-            print "Dropping old incomplete\n"
             [DropOldLevels] if all observing level, interval, testFrames
                             oldIncompleteLevel {
                 reject
@@ -65,7 +63,7 @@ fn levelbuildingLoop( alpha, numLevels, itemMap, grammar ) {
     }
 }
 
-fn main ( alphaStr, levels, truthString, testDir ) {
+fn main ( alphaStr, levels, testDir ) {
     test = testDir
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     t1 = 300
@@ -74,7 +72,7 @@ fn main ( alphaStr, levels, truthString, testDir ) {
         val numLevels = valOf(Int.fromString(levels))
         val grammar = aslalgLoad t1 train test
         val itemMap = itemIndexMap()
-        val scoreFile = (testDir ^ "/allMahalanobisScore." ^ alphaStr ^ ".scores")
+        val scoreFile = (testDir ^ "/allMahalanobisScore." ^ ".scores")
         val _ = loadScores( scoreFile )
     (*ML*)
 
@@ -104,7 +102,7 @@ fn main ( alphaStr, levels, truthString, testDir ) {
     print "DONE DONE DONE\n"
 }
 
-hfn report ( alpha, levels, truthString, testDir ) {
+hfn report ( alpha, levels, testDir ) {
     test = testDir
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     t1 = 300
@@ -115,5 +113,5 @@ hfn report ( alpha, levels, truthString, testDir ) {
         val itemMap = itemIndexMap()
     (*ML*)
     hadd ["OnlyBest"]
-    print: sPrintLevenshteinDistance(itemMap, truthString)
+    print: sPrintLevenshteinDistance(itemMap, testDir)
 }
