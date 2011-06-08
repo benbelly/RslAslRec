@@ -38,6 +38,10 @@ class TrainDB {
 
         std::vector<int> ids();
 
+        TrainingData &Data() const
+        { if(!data.get()) data.reset(new TrainingData( GlossPtrs() ) );
+          return *data.get(); }
+
     private:
         typedef boost::shared_ptr<Gloss> GlossPtr;
         typedef std::map<std::string, GlossPtr> GlossMap;
@@ -52,9 +56,6 @@ class TrainDB {
         GlossMap::iterator GlossIter( std::string );
 
         mutable std::auto_ptr<TrainingData> data;
-        TrainingData &Data() const
-        { if(!data.get()) data.reset(new TrainingData( GlossPtrs() ) );
-          return *data.get(); }
 };
 
 #endif

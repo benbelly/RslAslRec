@@ -9,10 +9,11 @@
 
 class HandPairCollection {
     public:
-        typedef std::pair<cv::Mat, boost::shared_ptr<cv::Mat> > HandPair;
+        typedef Projection HandPair;
         typedef std::pair<CenterPoint, boost::shared_ptr<CenterPoint> > CenterPair;
 
-        HandPairCollection( const ProjectionSet &projections, const ContourSet &hands );
+        HandPairCollection() {}
+        HandPairCollection( const cv::PCA &pca, const ContourSet &hands );
 
         int size() const { return hands.size(); }
         HandPair pair( int i ) const { return hands[i]; }
@@ -21,6 +22,6 @@ class HandPairCollection {
     private:
         std::vector<HandPair> hands;
         std::vector<CenterPair> centers;
-        void makePairs( const ProjectionSet &projections, const ContourSet &singles );
+        void makePairs( const cv::PCA &pca, const ContourSet &singles );
 };
 #endif

@@ -8,13 +8,37 @@ val findHandsC        = _import "findHandsC" : unit -> unit;
 val getNumberOfSignsC = _import "getNumberOfSignsC" : unit -> int;
 val getSignLengthC    = _import "getSignLengthC" : int -> int;
 val getSignC          = _import "getSignC" : int * char array -> unit;
-val distanceC         = _import "distanceC" : real * string * int * int * int -> real;
+val distanceC         = _import "distanceC" : string * int * int * int -> real;
+val addTruthTestC     = _import "AddTruthTestC" : int * int * int vector *
+                                                        int * int vector -> unit;
+
+fun aslalgLoadForTruth t1 trainDir testDir =
+  let
+    val (candidateFrames, nums) = AslIO.getSortedCandidates testDir
+    val root = AslIO.rootForDir trainDir
+    val skipSentences = [18, 19]
+    val candidate = 4 (* Test sentence instance 5 *)
+    val cleaned = cleanedRoot root skipSentences
+    val (trainingS, _) = splitSentences cleaned candidate
+    val _ = init( candidateFrames, Vector.map size candidateFrames, nums,
+                  Vector.length candidateFrames );
+    val numFrames = numFramesC( 0 )
+    val diffs = Array.array( numFrames, ~1.0 )
+    val emptyVec = Vector.fromList []
+    val dirHands = AslIO.handsForDir testDir
+  in
+    (*Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;*)
+    trainForRoot trainingS;
+    app (fn (fnum, domHand) => addTruthTestC( fnum, Vector.length domHand, domHand,
+                                              0, emptyVec )) dirHands;
+    root2grammar root
+  end
 
 fun aslalgLoad t1 trainDir testDir =
   let
     val (candidateFrames, nums) = AslIO.getSortedCandidates testDir
     val root = AslIO.rootForDir trainDir
-    val skipSentences = [1, 18, 19, 25]
+    val skipSentences = [18, 19]
     val candidate = 5 (* Test sentence instance 5 *)
     val cleaned = cleanedRoot root skipSentences
     val (trainingS, _) = splitSentences cleaned candidate
@@ -81,9 +105,9 @@ fun findDistance _ _ _ Start = 0.0
       in
         alpha * distance (* Equation (5) in paper *)
       end
-  | findDistance alpha b e (Gloss(word)) =
+  | findDistance _ b e (Gloss(word)) =
       let
-        val distance = distanceC( alpha, word, String.size word, b, e )
+        val distance = distanceC( word, String.size word, b, e )
       in
         distance
       end

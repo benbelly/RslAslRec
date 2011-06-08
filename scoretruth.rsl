@@ -16,12 +16,12 @@ interp:
     prevs : int list * real
 
 (* Reject any sequences that are illegal *)
-fn makeLevel( itemMap ) {
+fn makeLevel( alpha, itemMap ) {
     [NextLevel] munge: levelUpMunge(itemMap)
     [InternalLevelCheck] if all observing level atMax {
         print "Scoring "
         print all observing level: len
-        [ScoreLevel] update score observing interval, word: scoreLevel(0.0, itemMap)
+        [ScoreLevel] update score observing interval, word: scoreLevel(alpha, itemMap)
     }
 }
 
@@ -29,20 +29,21 @@ fn finish( destFile ) {
     print all: dumpScores(destFile)
 }
 
-fn levelAndScore( itemMap ) {
+fn levelAndScore( alpha, itemMap ) {
     print all observing level: prlevel
     print all observing level: len
     [OnlyHighestLevel] if all observing level atMax {
-        makeLevel( itemMap )
+        makeLevel( alpha, itemMap )
     }
 }
 
-fn main ( testDir ) {
+fn main ( alphaStr, testDir ) {
     test = testDir
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     t1 = 300
     (*ML*)
-        val _ = aslalgLoad t1 train test
+        val alpha = valOf(Real.fromString alphaStr)
+        val _ = aslalgLoadForTruth t1 train test
         val itemMap = itemIndexMap()
         val dumpFile = (testDir ^ "/allMahalanobisScore." ^ ".scores")
     (*ML*)
@@ -55,7 +56,7 @@ fn main ( testDir ) {
                 observing testFrames: levelZero(itemMap)
     print "Level zero intervals created\n"
 
-    levelAndScore( itemMap )
+    levelAndScore( alpha, itemMap )
     print "Done scoring\n"
 
     finish( dumpFile )

@@ -159,7 +159,7 @@ void FrameDB::makeSDs() {
         db[i->first.id].boundary = i->first;
         db[i->first.id].hands = i->second;
         db[i->first.id].handCenters = centers( i->second );
-        HistogramSet histograms = generateHandHistograms( (i->first).size(), i->second );
+        HistogramSet histograms = generateHandHistograms( i->second );
         db[i->first.id].histograms = histograms;
     }
 }
@@ -186,7 +186,10 @@ Frame FrameDB::histogramImg( int i ) {
 }
 
 HandPairCollection FrameDB::handPairs( int i, const cv::PCA &pca ) {
-    return HandPairCollection( projections( i, pca ), hands( i ) );
+    if( !(db[i].handPairs.get()) ) {
+        db[i].handPairs.reset( new HandPairCollection( pca, hands( i ) ) );
+    }
+    return *(db[i].handPairs.get());
 }
 
 bool handSizeCompare( std::pair<int, FrameDB::FrameData> l,

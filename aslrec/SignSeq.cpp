@@ -8,6 +8,7 @@
 #include "boost/shared_ptr.hpp"
 #include <limits>
 
+extern HandPairCollection handPairs( int i, const cv::PCA &pca );
 HandPairCollection GetHandPairs( int index, const cv::PCA &pca );
 bool validPredecessor( std::pair<int, int> interval,
                        const cv::PCA &pca,
@@ -35,7 +36,7 @@ SignSeq::~SignSeq() {
 }
 
 int SignSeq::AddHands( cv::Point tl, cv::Point br,
-                        const cv::Mat &dom, boost::shared_ptr<cv::Mat> weak ) {
+                        const Contour &dom, boost::shared_ptr<Contour> weak ) {
     boost::shared_ptr<FeatureFrame> framePtr( new FeatureFrame( tl, br, dom, weak ) );
     frames.push_back( boost::shared_ptr<FeatureFrame>( framePtr ) );
     return TDB->AddHandToList( framePtr );
@@ -46,8 +47,6 @@ void SignSeq::AppendHistograms( std::list<Histogram> *hists ) const {
     while( begin != end ) {
         const FramePtr frame = *begin;
         hists->push_back( frame->domHist );
-        if( frame->weakHist.get() )
-            hists->push_back( *(frame->weakHist.get()) );
         ++begin;
     }
 }
@@ -104,7 +103,7 @@ inline void SignSeq::GenerateScoresForTestFrame( SignSeqScores &scores,
                                           int modelIndex, int testIndex,
                                           const cv::PCA &pca, const cv::Mat &covar ) {
 
-    HandPairCollection pairs = GetHandPairs( interval.first + testIndex, pca );
+    HandPairCollection pairs = handPairs( interval.first + testIndex, pca );
 
     for( int k = 0; k < pairs.size(); ++k ) {
         HandPairCollection::HandPair handPair = pairs.pair( k );
@@ -152,11 +151,7 @@ void SignSeq::Cost( SignSeqScores &scores,
 inline double SignSeq::DistanceForPair( SignSeq::FramePtr frame,
                                         const HandPairCollection::HandPair &handpair,
                                         const cv::PCA &pca, const cv::Mat &covar ) {
-    double score = -1.0L;
-    if( handpair.second.get() )
-        score = frame->distance( handpair.first, *(handpair.second.get()), pca, covar );
-    else
-        score = frame->distance( handpair.first, pca, covar );
+    double score = frame->distance( handpair, pca, covar );
     return score;
 }
 
@@ -165,7 +160,7 @@ double SignSeq::GetBestScoreForEnd( SignSeqScores &scores, int end ) {
 }
 
 inline HandPairCollection GetHandPairs( int index, const cv::PCA &pca ) {
-    return FDB->handPairs( index, pca );
+    return handPairs( index, pca );
 }
 
 bool validPredecessor( std::pair<int, int> /*interval*/, const cv::PCA &/*pca*/,

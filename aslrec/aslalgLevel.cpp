@@ -61,14 +61,7 @@ void loadScoresC( Pointer fname, int fnameLen ) {
     }
 }
 
-double distanceC( double alpha, Pointer word, int wordLen, int start, int end ) {
-
-/*
- *static double ALPHA_SCALE_FACTOR = 0.4;
- *static double SINGLE_HAND_PENALTY = 0.04;
- */
-    SINGLE_HAND_PENALTY = alpha * ALPHA_SCALE_FACTOR;
-    SINGLE_HAND_PENALTY = 0.0;
+double distanceC( Pointer word, int wordLen, int start, int end ) {
 
     std::string gloss( (char *)word, wordLen );
     

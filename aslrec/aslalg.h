@@ -29,6 +29,9 @@ extern "C" {
      */
     void InitAslAlgC( char **files, int *filelens, int *frameIds, int numFiles );
 
+    void AddTruthTestC( int fnum, int h1NumPts, Pointer h1Pts,
+                                  int h2NumPts, Pointer h2Pts );
+
     /*
      * Find the keyframes using threshold T1
      * report back on the differences between frames

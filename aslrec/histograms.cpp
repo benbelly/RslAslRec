@@ -2,17 +2,19 @@
 #include <algorithm>
 #include <functional>
 #include <stdlib.h>
+#include <boost/bind.hpp>
 #include "FrameDB.h"
 #include "histograms.h"
+#include "consts.h"
 
 inline void NormalizeHistogram( Histogram &hist, double total );
 
 static const int histSize = 32;
 
-HistogramSet generateHandHistograms( cv::Size size, ContourSet cs ) {
+HistogramSet generateHandHistograms( const ContourSet cs ) {
     HistogramSet hs; hs.reserve( cs.size() );
     std::transform( cs.begin(), cs.end(), std::back_inserter( hs ),
-                    std::bind1st( std::ptr_fun( generateHandHistogram ), size ) );
+                    boost::bind( generateHandHistogram, _1, (Contour *)0 ) );
     return hs;
 }
 
@@ -53,18 +55,23 @@ struct CountPoint {
     }
 };
 
-void CountPoints( Contour::iterator end, Histogram &hist, double &total,
-                  int xSize, int ySize, Contour::iterator point ) {
+void CountPoints( Contour::const_iterator end, Histogram &hist, double &total,
+                  int xSize, int ySize, Contour::const_iterator point ) {
     std::for_each( point, end, CountPoint( *point, hist, total, xSize, ySize ) );
 }
 
-Histogram generateHandHistogram( cv::Size size, Contour c ) {
+Histogram generateHandHistogram( const Contour hand1, const Contour *hand2 ) {
     Histogram hist = Histogram::zeros( histSize, histSize );
-    int w = size.width, h = size.height;
+    int w = WIDTH, h = HEIGHT;
     double total = 0.0;
-    Contour::iterator cbegin = c.begin(), cend = c.end();
+    Contour::const_iterator cbegin = hand1.begin(), cend = hand1.end();
     while( cbegin != cend )
         CountPoints( cend, hist, total, w, h, cbegin++ );
+    if( hand2 ) {
+        cbegin = hand2->begin(), cend = hand2->end();
+        while( cbegin != cend )
+            CountPoints( cend, hist, total, w, h, cbegin++ );
+    }
     NormalizeHistogram( hist, total );
     return hist;
 }

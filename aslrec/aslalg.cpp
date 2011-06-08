@@ -15,9 +15,22 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-// Special database of training images
-typedef std::map<int, cv::Mat> TrainingImageMap;
-static TrainingImageMap trainingImages;
+Contour makeImageFromData( int numPts, int *pts );
+
+typedef std::map<int, HandPairCollection> TruthHands;
+TruthHands truthHands;
+bool testTruth;
+
+int truthId( std::pair<int, HandPairCollection> p ) { return p.first; }
+
+cv::Mat matFromContour( Contour &c ) {
+    cv::Mat dom( 480, 640, image_types::gray );
+    for(Contour::iterator i = c.begin(); i != c.end(); ++i) {
+        dom.at<unsigned char>( i->y, i->x ) = 255;
+    }
+    return dom;
+}
+
 
 /*
  * Initialize the FrameDatabase and the TrainingDatabase. The FrameDatabase will need 
@@ -32,6 +45,26 @@ void InitAslAlgC( char **files, int *filelens, int *frameIds, int numFiles ) {
     FrameSet vidFrames = loadFromFiles( frameFiles );
     new FrameDB( vidFrames );
     new TrainDB();
+    testTruth = false;
+}
+
+HandPairCollection handPairs( int i, const cv::PCA &pca ) {
+    if( testTruth ) return truthHands[i];
+    return FDB->handPairs( i, pca );
+}
+
+void AddTruthTestC( int fnum, int h1NumPts, Pointer h1Pts,
+                              int h2NumPts, Pointer h2Pts ) {
+    testTruth = true;
+    ContourSet cs;
+    Contour contour = makeImageFromData( h1NumPts, (int *)h1Pts );
+    cs.push_back( contour );
+    if( h2NumPts ) {
+        Contour contour2 = makeImageFromData( h2NumPts, (int *)h2Pts );
+        cs.push_back( contour2 );
+    }
+    cv::PCA pca = TDB->Data().GetPCA();
+    truthHands[fnum] = HandPairCollection( pca, cs );
 }
 
 /*
@@ -146,9 +179,6 @@ int numFramesC( int type ) {
     }
 }
 
-// std::map doesn't have a 'keys' method so I use std::transform
-// and this helper
-int toKey( TrainingImageMap::value_type p ) { return p.first; }
 /*
  * Get the ids associated with frames of a particular type
  * InitAslAlg must be called first
@@ -162,8 +192,14 @@ void getFrameIdsC( int type, Pointer ids ) {
         }
         default:
         {
-            std::vector<int> dbIds( FDB->ids() );
-            std::copy( dbIds.begin(), dbIds.end(), (int*)ids );
+            if( testTruth ) {
+                std::transform( truthHands.begin(), truthHands.end(), (int*) ids,
+                                boost::bind( truthId, _1 ) );
+            }
+            else {
+                std::vector<int> dbIds( FDB->ids() );
+                std::copy( dbIds.begin(), dbIds.end(), (int*)ids );
+            }
         }
     }
 }
@@ -192,7 +228,7 @@ void getFrameInfoC( int type, Pointer width, Pointer height,
         case frame_types::training:
             {
                 id = TDB->ids()[0];
-                toCheck = TDB->GetFeatureFrame( id )->dom;
+                toCheck = matFromContour( TDB->GetFeatureFrame( id )->dom );
                 break;
             }
         default:
@@ -234,7 +270,10 @@ Frame getFrame( int id, int type ) {
         case frame_types::histogram:
             return FDB->histogramImg( id );
         case frame_types::training:
-            return Frame( id, TDB->GetFeatureFrame( id )->dom );
+        {
+            cv::Mat mat( matFromContour( TDB->GetFeatureFrame( id )->dom ) );
+            return Frame( id, mat );
+        }
     }
     return Frame();
 }
@@ -269,7 +308,8 @@ void getFrameC( int id, int type, Pointer img ) {
  * pts    : an array of integers: [x1, y1, x2, y2, ..., xn, yn]
  *
  */
-void makeImageFromData( cv::Mat &img, int numPts, int *pts ) {
+Contour makeImageFromData( int numPts, int *pts ) {
+    Contour contour; contour.reserve( numPts );
     int i = 0, x = pts[i++], y = pts[i++];
     int actualY = y, lastX, lastY = y;
     // Since y jumps around, track the jump and increment actualY
@@ -277,7 +317,7 @@ void makeImageFromData( cv::Mat &img, int numPts, int *pts ) {
     // so track X position as well, and only increment actualY when
     // both change
     while( i < numPts ) {
-        img.at<unsigned char>( actualY, x ) = 255;
+        contour.push_back( cv::Point( x, actualY ) );
         lastX = x;
         x = pts[i++]; y = pts[i++];
         if( y != lastY &&
@@ -285,6 +325,7 @@ void makeImageFromData( cv::Mat &img, int numPts, int *pts ) {
             lastY = y; ++actualY;
         }
     }
+    return contour;
 }
 
 /*
@@ -296,30 +337,20 @@ Pointer seqForGlossC( int glossLen, Pointer glossPtr ) {
     return (Pointer) TDB->NextSequenceForGloss( gloss );
 }
 
-/* Create a hand from the list of points */
-cv::Mat makeHandFromPointList( int width, int height,
-                               int numPts, Pointer pts ) {
-    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
-    makeImageFromData( hand, numPts, (int *)pts );
-    return hand;
-}
-                            
 /*
  * Add hands and face to the provided sign sequence
  * InitAslAlg() must be called first, and seqPtr should
  * be provided by seqForGlossC()
  */
 void addHandsToSeqC( Pointer seqPtr,
-                     int width, int height,
+                     int /*width*/, int /*height*/,
                      Pointer faceCorners,
                      int h1NumPts, Pointer h1Pts,
                      int h2NumPts, Pointer h2Pts ) {
-    cv::Mat hand = cv::Mat::zeros( height, width, image_types::gray );
-    boost::shared_ptr<cv::Mat> weak( (cv::Mat *)0 );
-    makeImageFromData( hand, h1NumPts, (int *)h1Pts );
+    Contour hand = makeImageFromData( h1NumPts, (int *)h1Pts );
+    boost::shared_ptr<Contour> weak( (Contour *)0 );
     if( h2NumPts ) {
-        weak.reset( new cv::Mat( cv::Mat::zeros( height, width, image_types::gray ) ) );
-        makeImageFromData( *(weak.get()), h2NumPts, (int *)h2Pts );
+        weak.reset( new Contour( makeImageFromData( h2NumPts, (int *)h2Pts ) ) );
     }
     int *facePts = (int *)faceCorners;
     cv::Point topLeft( facePts[0], facePts[1] ), bottomRight( facePts[2], facePts[3] );
@@ -345,8 +376,8 @@ void distancesC( Pointer mDistances,
                  int trainNum, Pointer trainPts,
                  int type, Pointer testImg ) {
     cv::PCA pca = TDB->Pca();
-    cv::Mat train = makeHandFromPointList( width, height, trainNum, trainPts );
-    Histogram trainHist = generateHandHistogram( train.size(), getBoundary( train ) );
+    Contour train = makeImageFromData( trainNum, (int *)trainPts );
+    Histogram trainHist = generateHandHistogram( train, (Contour*)0 );
     Histogram trainFlat = flattenHistogram( trainHist );
     cv::Mat trainProj = pca.project( trainFlat );
 
@@ -354,7 +385,7 @@ void distancesC( Pointer mDistances,
 
     cv::Mat testSrc = makeMat( testImg, width, height, type );
     ContourSet testHands = getHands( testSrc );
-    HistogramSet hs = generateHandHistograms( testSrc.size(), testHands );
+    HistogramSet hs = generateHandHistograms( testHands );
     HistogramSet flats; flats.reserve( hs.size() );
     std::transform( hs.begin(), hs.end(), std::back_inserter( flats ),
                     boost::bind( flattenHistogram, _1 ) );
@@ -376,10 +407,8 @@ void centersC( double *xs, double *ys,
                int trainNum, int *trainPts,
                int type, char *imgArr ) {
 
-    cv::Mat train = makeHandFromPointList( w, h, trainNum, (Pointer)trainPts );
-    Contour boundary = getBoundary( train );
-    CenterPoint trainCenter = boundary.empty() ? CenterPoint(0,0) :
-                                                 center( boundary );
+    Contour train = makeImageFromData( trainNum, (int *)trainPts );
+    CenterPoint trainCenter = train.empty() ? CenterPoint(0,0) : center( train );
     *xs = trainCenter.x; *ys = trainCenter.y;
 
     type = image_types::gray;

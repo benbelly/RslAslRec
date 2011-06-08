@@ -9,6 +9,7 @@
 #include <iterator>
 #include <functional>
 #include <string>
+#include <boost/shared_ptr.hpp>
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
@@ -37,6 +38,7 @@ class FrameDB {
                   SD,
                   boundary;
             ContourSet hands;
+            boost::shared_ptr<HandPairCollection> handPairs;
             CenterSet handCenters;
             HistogramSet histograms;
             ProjectionSet projections;

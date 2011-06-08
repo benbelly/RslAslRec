@@ -93,6 +93,9 @@ COUNT_GENED = $(COUNT) $(COUNT).i $(COUNT)-types.sml $(COUNT).data $(COUNT)-labe
 SCORE = storeScores
 SRSL = $(SCORE).rsl
 
+SCORETRUTH = scoretruth
+TRUTHRSL = $(SCORETRUTH).rsl
+
 ###
 # Compiling
 ###
@@ -163,6 +166,11 @@ $(EXEC): $(OBJS) $(SMLS) $(RSLS)
 $(SCORE): $(OBJS) $(SMLS) $(SRSL)
 		@echo "\nMaking executable:"
 		$(RSLC) $(SRSL) $(MLTON_FLAGS) $(OBJS)
+		@echo "    executable $@ built."
+
+$(SCORETRUTH): $(OBJS) $(SMLS) $(SRSL)
+		@echo "\nMaking executable:"
+		$(RSLC) $(TRUTHRSL) $(MLTON_FLAGS) $(OBJS)
 		@echo "    executable $@ built."
 
 $(HANDS): $(OBJS) $(SMLS) $(HRSLS)

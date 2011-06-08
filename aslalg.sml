@@ -160,7 +160,7 @@ fun levelZero(itemMap) = fn(i) =>
     val { level, word, interval, score, prevs, testFrames } = i
     val nextLvl = 0
     val startIdx = indexOf itemMap Start
-    val zeroIdx = Vector.sub(testFrames, 0)
+    val zeroIdx = Vector.sub(testFrames, 0) - 1
     val zeroInterval = (zeroIdx, zeroIdx)
     val interpForInterval = (NONE, { level = nextLvl, word = startIdx,
                                      interval = zeroInterval,
@@ -182,7 +182,7 @@ fun levelUpMunge itemMap  = fn(is) =>
                                                    interval = (b,e), score = 0.0,
                                                    prevs = ([], 0.0) } )
                                            (goodWords itemMap)
-    val intervals = makeIntervals nextlvl testFrames
+    val intervals = makeIntervals (nextlvl - 1) testFrames
     val interpList = List.foldl op@ [] (Vector.foldl op:: []
                                                      (Vector.map wordsForInterval intervals))
     val consed = List.map (fn i => (NONE, Interp.rhcons(i))) interpList
