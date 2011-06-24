@@ -38,8 +38,10 @@ fun aslalgLoad t1 trainDir testDir =
   let
     val (candidateFrames, nums) = AslIO.getSortedCandidates testDir
     val root = AslIO.rootForDir trainDir
-    val skipSentences = [18, 19]
-    val candidate = 5 (* Test sentence instance 5 *)
+    (*val skipSentences = [18, 19]*)
+    val skipSentences = [3, 5, 6, 8, 9, 11, 12, 13, 14,
+                         15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+    val candidate = 4 (* Test sentence instance 5 *)
     val cleaned = cleanedRoot root skipSentences
     val (trainingS, _) = splitSentences cleaned candidate
     val _ = init( candidateFrames, Vector.map size candidateFrames, nums,
@@ -49,7 +51,11 @@ fun aslalgLoad t1 trainDir testDir =
   in
     findKeyframesC( t1, diffs );
     findHandsC();
-    (*Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;*)
+    Cvsl.saveAllImages "cvsl_out/original" "png" 0;
+    Cvsl.saveAllImages "cvsl_out/gray" "png" 1;
+    Cvsl.saveAllImages "cvsl_out/skin" "png" 2;
+    Cvsl.saveAllImages "cvsl_out/sd" "png" 3;
+    Cvsl.saveAllImages "cvsl_out/boundary" "png" 4;
     trainForRoot trainingS;
     root2grammar root
   end

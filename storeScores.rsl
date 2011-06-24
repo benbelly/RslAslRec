@@ -1,5 +1,6 @@
 inc "aslalg.mlb"
 inc "aslalg.sml"
+inc "storeScores-interp.sml"
 inc "levelbuilding-external.sml"
 
 (*
@@ -59,6 +60,30 @@ fn main ( testDir ) {
     print "Done scoring\n"
 
     finish( dumpFile )
-    print "DONE DONE DONE\n"
+
+    (*
+    [SignIntervals] if all observing interval
+                          truthInterval {
+        accept
+    }
+    else {
+        reject
+    }
+
+    [MadeTheCut] accept
+    *)
 }
 
+hfn report( testDir ) {
+    (*ML*)
+        val itemMap = itemIndexMap()
+    (*ML*)
+    (*
+    reject
+
+    print "History\n"
+
+    hadd["MadeTheCut"]
+    write observing word, interval, score to outFile: writeInterp(itemMap, testDir)
+    *)
+}

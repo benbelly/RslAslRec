@@ -163,7 +163,7 @@ $(EXEC): $(OBJS) $(SMLS) $(RSLS)
 		$(RSLC) $(RSL) $(MLTON_FLAGS) $(OBJS)
 		@echo "    executable $@ built."
 
-$(SCORE): $(OBJS) $(SMLS) $(SRSL)
+$(SCORE): $(OBJS) $(SMLS) $(SRSL) storeScores-interp.sml
 		@echo "\nMaking executable:"
 		$(RSLC) $(SRSL) $(MLTON_FLAGS) $(OBJS)
 		@echo "    executable $@ built."

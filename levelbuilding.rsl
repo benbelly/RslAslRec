@@ -18,22 +18,24 @@ interp:
 
 fn makeLevel(alpha, itemMap, grammar) {
     [NextLevel] munge: levelUpMunge(itemMap)
+    print all observing level: prlevelAt( "NextLevel" )
     (* LevelUp just created a set of interps at new highest level, so 
        only look at those *)
     [InternalLevelCheck] if all observing level atMax {
         [ScoreLevel] update score observing interval, word: scoreLevel(alpha, itemMap)
-        [KillHighScores] if observing score scoredOut {
-            reject
-        }
+        print all observing level: prlevelAt( "ScoreLevel" )
     }
 
     [GetPrevs] update all prevs
                observing score, interval, level, word: updatePrevs( itemMap, grammar)
+    print all observing level: prlevelAt( "GetPrevs" )
 
-    [InternalLevelCheck] if all observing level atMax {
+    [LevelCheckForTrim] if all observing level atMax {
         [TrimToBest] if all observing word, score, interval, prevs notBest {
+            print all observing level: prlevelAt( "ToTrim" )
             reject
         }
+        print all observing level: prlevelAt( "UnTrimmed" )
     }
 }
 
@@ -50,16 +52,18 @@ fn finish(itemMap, grammar) {
 }
 
 fn levelbuildingLoop( alpha, numLevels, itemMap, grammar ) {
-    [LevelCheck] while all observing level belowMaxLevel( numLevels ) {
+    [WhileLevel] while all observing level belowMaxLevel( numLevels ) {
         print all observing level: prlevel
         [OnlyHighestLevel] if all observing level atMax {
             makeLevel(alpha, itemMap, grammar)
             (* makeLevel() made a new, higher level. Drop the old one *)
             [DropOldLevels] if all observing level, interval, testFrames
                             oldIncompleteLevel {
+                print all observing level: prlevelAt( "DroppingOld" )
                 reject
             }
         }
+        [LevelEnd] accept
     }
 }
 
@@ -73,7 +77,8 @@ fn main ( alphaStr, levels, testDir ) {
         val grammar = aslalgLoad t1 train test
         val itemMap = itemIndexMap()
         val scoreFile = (testDir ^ "/allMahalanobisScore." ^ ".scores")
-        val _ = loadScores( scoreFile )
+        val str = loadScores( scoreFile )
+        val _ = print str
     (*ML*)
 
     [Init] munge: init
@@ -88,6 +93,7 @@ fn main ( alphaStr, levels, testDir ) {
     print "Done leveling\n"
 
     finish( itemMap, grammar )
+    [Finished] accept
 
     print: i2s(itemMap)
 
@@ -102,7 +108,7 @@ fn main ( alphaStr, levels, testDir ) {
     print "DONE DONE DONE\n"
 }
 
-hfn report ( alpha, levels, testDir ) {
+hfn report ( alphaStr, levels, testDir ) {
     test = testDir
     train = "/home/bholm/USF-ASL-Data-Set-v2"
     t1 = 300
@@ -110,8 +116,11 @@ hfn report ( alpha, levels, testDir ) {
         val alpha = valOf(Real.fromString alphaStr)
         val numLevels = valOf(Int.fromString(levels))
         val grammar = aslalgLoad t1 train test
-        val itemMap = itemIndexMap()
+        val ifilename = testDir ^ "/levelbuilding-" ^ alphaStr ^ "-ifile"
     (*ML*)
-    hadd ["OnlyBest"]
-    print: sPrintLevenshteinDistance(itemMap, testDir)
+    (* print: sPrintLevenshteinDistance(itemMap, testDir) *)
+    reject
+    hadd ["LevelEnd"]
+    hadd ["Finished"]
+    write ifile to ifilename
 }

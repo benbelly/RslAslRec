@@ -34,7 +34,7 @@ fun highestReachedLevel (is) =
 fun belowMaxLevel (max) = fn(is) =>
   let
     val reached = highestReachedLevel(is)
-    val below = Int.<(reached, max)
+    val below = Int.<=(reached, max)
   in
     (NONE, fn _ => (NONE, below))
   end
@@ -76,6 +76,14 @@ fun oldIncompleteLevel (is) =
 
 fun len (is) = (Int.toString(List.length(is)) ^ "\n")
 
+fun prlevelAt(loc) = fn (is) =>
+  let
+    val level = highestReachedLevel is
+  in
+    ("\t[" ^ loc ^ "] Level " ^ (Int.toString level) ^ " with " ^
+     (Int.toString(List.length(is))) ^ " interpretations\n")
+  end
+
 fun prlevel (is) =
   let
     val level = highestReachedLevel is
@@ -91,7 +99,7 @@ fun dumpScores(destFile) = fn ( _ ) =>
     "Dumped\n"
   end
 
-fun loadScores(srcFile) = fn (_) =>
+fun loadScores(srcFile) =
   let
     val _ = loadScoresC( srcFile, String.size srcFile )
   in

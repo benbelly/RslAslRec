@@ -8,10 +8,10 @@ const static int MAX_SIGN_LEN = 100;
 
 const static unsigned int T0 = 100;
 const static unsigned int T0_SQR = T0 * T0;
-const static unsigned int T2 = 2;
-const static unsigned int T3 = 4000;
+const static unsigned int T2 = 1;
+const static unsigned int T3 = 6000;
 
-const static int SMALLCOMPONENT = 100;
+const static int SMALLCOMPONENT = 50;
 
 extern double ALPHA_SCALE_FACTOR;
 

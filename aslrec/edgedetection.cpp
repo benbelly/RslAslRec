@@ -128,6 +128,7 @@ std::pair<Frame, ContourSet> getBoundaryImage( Frame f ) {
     Frame clean( f.id, f.size(), f.type() );
     ContourSet contours( getCompactAndSmallContours( f.mat ) );
     cv::drawContours( clean.mat, contours, allContours, cv::Scalar( 255 ) );
+    if( contours.empty() ) contours.push_back( Contour() );
     //clean.mat.row( clean.mat.rows / 2 ).col( clean.mat.cols / 2 ) = cv::Scalar( 255 );
     return std::pair<Frame, ContourSet>( clean, contours );
 }
@@ -155,6 +156,7 @@ FrameHandSet getBoundaryImages( FrameSet &fs ) {
 }
 
 CenterPoint center( Contour contour ) {
+    if( contour.empty() ) return cv::Point( 0, 0 );
     cv::Mat dst( contour );
     CenterPoint center;
     float radius;

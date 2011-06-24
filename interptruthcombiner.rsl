@@ -1,0 +1,47 @@
+
+inc "itc-report.sml"
+
+interp:
+    alpha : real
+    truth : (string * int * int) list
+    level : int
+    word : string
+    score : real
+    interval : int * int
+    prevs : (string * int * int) list * real
+
+fn main( outfile ) {
+    (* ML *)
+        val infile01 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-1.4-lipread-can-i/Full-Sentence/s5c1lipreadcani/levelbuilding-0.16-ifile"
+        val infile02 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-1.4-lipread-can-i/Full-Sentence/s5c1lipreadcani/levelbuilding-0.28-ifile"
+        val infile03 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-1.4-lipread-can-i/Full-Sentence/s5c1lipreadcani/levelbuilding-0.30-ifile"
+        val infile04 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-2.4-lipread-cannot-i/Full-Sentence/s5c2lipreadcannoti/levelbuilding-0.16-ifile"
+        val infile05 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-2.4-lipread-cannot-i/Full-Sentence/s5c2lipreadcannoti/levelbuilding-0.28-ifile"
+        val infile06 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-2.4-lipread-cannot-i/Full-Sentence/s5c2lipreadcannoti/levelbuilding-0.30-ifile"
+        val infile07 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-3.4-i-understand-not/Full-Sentence/s5c3youunderstand/levelbuilding-0.16-ifile"
+        val infile08 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-3.4-i-understand-not/Full-Sentence/s5c3youunderstand/levelbuilding-0.28-ifile"
+        val infile09 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-3.4-i-understand-not/Full-Sentence/s5c3youunderstand/levelbuilding-0.30-ifile"
+        val infile10 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-7.4-dontknow-i/Full-Sentence/s5c7idontknow/levelbuilding-0.16-ifile"
+        val infile11 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-7.4-dontknow-i/Full-Sentence/s5c7idontknow/levelbuilding-0.28-ifile"
+        val infile12 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-7.4-dontknow-i/Full-Sentence/s5c7idontknow/levelbuilding-0.30-ifile"
+        val infile13 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-10.4-i-need-that-i/Full-Sentence/s5c10ineedthatone/levelbuilding-0.16-ifile"
+        val infile14 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-10.4-i-need-that-i/Full-Sentence/s5c10ineedthatone/levelbuilding-0.28-ifile"
+        val infile15 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-10.4-i-need-that-i/Full-Sentence/s5c10ineedthatone/levelbuilding-0.30-ifile"
+    (* ML *)
+    add infile01
+    add infile02
+    add infile03
+    add infile04
+    add infile05
+    add infile06
+    add infile07
+    add infile08
+    add infile09
+    add infile10
+    add infile11
+    add infile12
+    add infile13
+    add infile14
+    add infile15
+    write ifile to outfile
+}
