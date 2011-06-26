@@ -1,0 +1,68 @@
+inc "ir-interp.sml"
+inc "ir-report.sml"
+
+interp:
+    wordMap : (string * int) list
+    alpha : real
+    truth : (string * int * int) list
+    range : int * int
+    level : int
+    word : string
+    score : real
+    interval : int * int
+    prevs : (string * int * int) list * real
+    editDistance: int
+    editError: real
+
+fn countAtAlpha( a ) {
+    if observing alpha atAlpha(a) {
+        print all: prForAlpha(a)
+        print all: prCount
+    }
+}
+
+fn threeCount() {
+    countAtAlpha( 0.16 )
+    countAtAlpha( 0.28 )
+    countAtAlpha( 0.30 )
+}
+
+fn statsAtAlpha( a ) {
+    if observing alpha atAlpha(a) {
+        print all: prForAlpha(a)
+        print "\n"
+        print all observing editError: prMinError
+        print all observing editError: prMaxError
+        print all observing editError: prAvgError
+    }
+}
+
+fn threeStats() {
+    statsAtAlpha( 0.16 )
+    statsAtAlpha( 0.28 )
+    statsAtAlpha( 0.30 )
+}
+
+fn main( interpfile ) {
+    add interpfile
+    update all wordMap observing truth, word, prevs: makewordmap
+    update editDistance observing wordMap, truth, word, prevs, range, interval : levenshteinDistance
+    update editError observing wordMap, truth, word, prevs, range, interval: levenshteinError
+
+    if observing word atEnd {
+        if isTruth {
+            print "\n\nTruth:\n"
+            threeCount()
+            threeStats()
+        }
+        else {
+            print "\n\n\nFailed:\n"
+            threeCount()
+            threeStats()
+        }
+    }
+    else {
+        (* These interps are not the final (end) interps *)
+        accept
+    }
+}

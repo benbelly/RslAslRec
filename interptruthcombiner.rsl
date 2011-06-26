@@ -2,8 +2,10 @@
 inc "itc-report.sml"
 
 interp:
+    file: string
     alpha : real
     truth : (string * int * int) list
+    range : int * int
     level : int
     word : string
     score : real
@@ -29,19 +31,64 @@ fn main( outfile ) {
         val infile15 = "/mnt/raid/bholm/USF-ASL-Data-Set-v2/Sentence-10.4-i-need-that-i/Full-Sentence/s5c10ineedthatone/levelbuilding-0.30-ifile"
     (* ML *)
     add infile01
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile01)
+    }
     add infile02
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile02)
+    }
     add infile03
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile03)
+    }
     add infile04
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile04)
+    }
     add infile05
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile05)
+    }
     add infile06
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile06)
+    }
     add infile07
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile07)
+    }
     add infile08
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile08)
+    }
     add infile09
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile09)
+    }
     add infile10
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile10)
+    }
     add infile11
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile11)
+    }
     add infile12
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile12)
+    }
     add infile13
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile13)
+    }
     add infile14
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile14)
+    }
     add infile15
+    if observing file nofile {
+        update alpha, file, truth, range: loadTruth(infile15)
+    }
     write ifile to outfile
 }

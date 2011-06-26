@@ -139,7 +139,7 @@ fun foundString itemMap testFrames sentence =
 fun sPrintLevenshteinDistance(itemMap, testDir) = fn (i : Interp.r) =>
   let
     val { prevs = (ps, _), word, testFrames, ... } = i
-    val sentence = foundString itemMap testFrames ps
+    val sentence = foundString itemMap testFrames (rev ps)
     val intervalStrings = List.map (fn (_,b,e) => intervalToString (b,e)) (rev ps)
     val sentenceLen = (length sentence)
     val truthSentence = truthString itemMap testFrames testDir

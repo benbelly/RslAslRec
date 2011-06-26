@@ -2,14 +2,13 @@ fun dirname file =
   let
     val elements = String.tokens (fn c => c = #"/") file
     val lastDropped = List.take(elements, (List.length elements)-1)
-    val dir = "/" ^ (String.concatWith "/" lastDropped)
+    val dir = String.concatWith "/" lastDropped
   in
     dir
   end
 
 fun lineToTuple line =
   let
-    (*val _ = print (line ^ "\n")*)
     val wrdNint = String.tokens Char.isSpace line
     val wrd = hd wrdNint
     val intStr = hd (tl wrdNint)
@@ -23,17 +22,24 @@ fun lineToTuple line =
 
 exception BadInterpretation of string
 
-fun alphaForFile file =
+fun alphaForFile file = valOf (Real.fromString (List.nth(
+                                    String.tokens (fn c => c = #"-") file, 1)))
+
+fun truthForFile file =
   let
-    (*val _ = print file*)
-    val fname = List.last (String.tokens (fn c => c = #"/") file)
-    val alpha = valOf (Real.fromString (List.nth(
-                                    String.tokens (fn c => c = #"-") fname, 1)))
+    val dir = dirname file
+    val full = "Full"
+    val instream = TextIO.openIn file
+    val readLine = fn() => TextIO.inputLine instream
+    val rec truths = fn(acc,NONE)=> rev acc
+                      |(acc,SOME line)=>
+                          if (String.isPrefix full line)
+                            then truths (acc, NONE)
+                            else truths ((lineToTuple line)::acc, readLine())
   in
-    alpha
+    truths([],(readLine()))
   end
 
-fun nofile {file} = (NONE, file = "NONE")
 
 fun alphaStr a = Real.toString a
 fun strAlpha astr = valOf (Real.fromString astr)
@@ -80,7 +86,6 @@ fun strTruth trth =
     truthList
   end
 
-
 fun prevsStr (ps, pscr) =
   let
     val _ = "[Lipread|(54, 68):Can|(72, 80)]@3.1415927"
@@ -100,45 +105,16 @@ fun strPrev pstr =
     (ps, pscr)
   end
 
-fun truthForFile infile =
-  let
-    val dir = dirname infile
-    val file = dir ^ "/intervals"
-    val full = "Full"
-    val instream = TextIO.openIn file
-    val readLine = fn() => TextIO.inputLine instream 
-    val rec truths = fn(b,e,acc,NONE)=> ((b,e),rev acc)
-                      |(_,_,acc,SOME line)=>
-                          if (String.isPrefix full line)
-                            then let
-                                   val (_, tb, te) = lineToTuple line
-                                 in
-                                   truths (tb, te, acc, NONE)
-                                 end
-                            else truths (0,0,(lineToTuple line)::acc, readLine())
-    val truth = truths(0,0,[],(readLine()))
-    val _ = TextIO.closeIn instream
-  in
-    truth
-  end
-
-fun loadTruth file = fn _ =>
-  let
-    val (range, truth) = truthForFile file
-    val alpha = alphaForFile file
-  in
-    (NONE, [(NONE, { alpha = alpha, file = file, range = range, truth = truth })])
-  end
-
 fun interpToString i =
   let
-    val { file = _, alpha, truth, range, level , word, score, interval, prevs } = i
+    val { alpha, truth, range, level , word, score, interval, prevs,
+          editDistance, editError } = i
   in
     (alphaStr alpha) ^ "\n" ^
     (truthStr truth) ^ "\n" ^
     (intervalStr range) ^ "\n" ^
     (levelStr level) ^ "\n" ^
-    (wordStr word) ^
+    (wordStr word) ^ "\n" ^
     (scoreStr score) ^ "\n" ^
     (intervalStr interval) ^ "\n" ^
     (prevsStr prevs)
@@ -148,21 +124,22 @@ fun streamToInterp strm =
   let
     val read = fn () => let
                           val line = valOf (TextIO.inputLine strm)
+                          val chomped = String.implode(List.filter (fn c => c <> #"\n") (String.explode line))
                           (*val _ = print (line)*)
                         in
-                          line
+                          chomped
                         end
-    (*
-     *val alpha = strAlpha (read())
-     *val truth = strTruth (read())
-     *)
+    val alpha = strAlpha (read())
+    val truth = strTruth (read())
+    val range = strInterval (read())
     val level = strLevel (read())
     val word = strWord (read())
     val score = strScore (read())
     val interval = strInterval (read())
     val prevs = strPrev (read())
   in
-    SOME (NONE, { file = "NONE", alpha = 0.0, truth = [], range = (0,0), level = level, word = word,
-                  score = score, interval = interval, prevs = prevs } )
+    SOME (NONE, { wordMap = [], alpha = alpha, truth = truth, range = range,
+                  level = level, word = word, score = score, interval = interval,
+                  prevs = prevs, editDistance = 0, editError = 0.0 } )
   end
 

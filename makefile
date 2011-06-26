@@ -150,7 +150,11 @@ RSLC = rslc # rslc needs to be in the PATH - see rsl NOTES file
 ##
 ## Targets
 ##
-all: $(OBJS) $(EXEC)
+reports: interpreports.rsl ir-interp.sml ir-report.sml levenshtein/levenshtein.o
+	$(RSLC) interpreports.rsl -default-ann 'allowFFI true' \
+		-link-opt '-lstdc++' levenshtein/levenshtein.o
+
+all: $(OBJS) $(EXEC) $(SCORE) $(SCORETRUTH) $(HANDS) $(COUNT)
 		@echo "\nBuild is complete."
 
 %.o: %.cpp
