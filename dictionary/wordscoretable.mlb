@@ -1,0 +1,10 @@
+local
+  $(SML_LIB)/basis/basis.mlb
+  lib-base-sig.sml
+  lib-base.sml
+  ord-key-sig.sml
+  ord-map-sig.sml
+  binary-map-fn.sml
+in
+  wordscoretable.sml
+end
