@@ -50,6 +50,8 @@ fun strWord ws = ws
 fun scoreStr s = Real.toString s
 fun strScore ss = valOf (Real.fromString ss)
 fun intervalStr (b,e) = "(" ^ (Int.toString b) ^ ", " ^ (Int.toString e) ^ ")"
+fun editDistanceStr distance = Int.toString distance
+fun editErrorStr err = Real.toString err
 fun strInterval is =
   let
     val strs = String.tokens Char.isSpace is
@@ -107,8 +109,8 @@ fun strPrev pstr =
 
 fun interpToString i =
   let
-    val { alpha, truth, range, level , word, score, interval, prevs,
-          editDistance, editError } = i
+    val { wordMap, alpha, truth, range, level, word,
+          score, interval, prevs, editDistance, editError } = i
   in
     (alphaStr alpha) ^ "\n" ^
     (truthStr truth) ^ "\n" ^
@@ -117,15 +119,17 @@ fun interpToString i =
     (wordStr word) ^ "\n" ^
     (scoreStr score) ^ "\n" ^
     (intervalStr interval) ^ "\n" ^
-    (prevsStr prevs)
+    (prevsStr prevs) ^ "\n" ^
+    (editDistanceStr editDistance) ^ "\n" ^
+    (editErrorStr editError) ^ "\n"
   end
 
 fun streamToInterp strm =
   let
     val read = fn () => let
                           val line = valOf (TextIO.inputLine strm)
-                          val chomped = String.implode(List.filter (fn c => c <> #"\n") (String.explode line))
                           (*val _ = print (line)*)
+                          val chomped = String.implode(List.filter (fn c => c <> #"\n") (String.explode line))
                         in
                           chomped
                         end

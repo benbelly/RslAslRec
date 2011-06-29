@@ -14,6 +14,7 @@ interp:
     editDistance: int
     editError: real
 
+(*-------------------Display Helpers-----------------------------------*)
 fn countAtAlpha( a ) {
     if observing alpha atAlpha(a) {
         print all: prForAlpha(a)
@@ -43,26 +44,124 @@ fn threeStats() {
     statsAtAlpha( 0.30 )
 }
 
+fn bests() {
+    if all observing score bestScore {
+        print "\tBest score\n"
+        print: interpToString
+        print "\n"
+    }
+    if all observing editError bestError {
+        print "\tBest edit distance\n"
+        print: interpToString
+        print "\n\n"
+    }
+}
+
+fn truthSoFarCount() {
+    if isTruthSoFar {
+        print "Truth so far "
+        print all: prCount
+    }
+}
+(*---------------------------------------------------------------------*)
+
+(*-----------------Recursive grouping functions------------------------*)
+(* 
+fn eachGroupStats() {
+    if all observing truth, alpha, level isNextGroup {
+        print all observing truth, alpha, level prOneGroup
+        print all prCount
+        truthSoFarCount()
+        bests()
+    }
+    else {
+        eachGroupStats()
+    }
+}
+*)
+
+fn eachTruthStats() {
+    if all observing truth isFirstTruth {
+        print "\tHandling truth: "
+        print all observing truth: prOneTruth
+        print all: prCount
+        threeStats()
+    }
+    else {
+        eachTruthStats()
+    }
+}
+
+fn eachTruthBestStats() {
+    if all observing truth isFirstTruth {
+        print "\tHandling truth: "
+        print all observing truth: prOneTruth
+        bests()
+    }
+    else {
+        eachTruthBestStats()
+    }
+}
+
+fn eachAlphaAndTruthBestStats() {
+    if all observing alpha isFirstAlpha {
+        eachTruthBestStats()
+    }
+    else {
+        eachAlphaAndTruthBestStats()
+    }
+}
+
+fn eachLevelAndTruthStats() {
+    if all observing level isFirstLevel {
+        print "Handling level: "
+        print all observing level: prOneLevel
+        print all: prCount
+        truthSoFarCount()
+        eachTruthStats()
+    }
+    else {
+        eachLevelAndTruthStats()
+    }
+}
+
+fn eachAlphaAndLevelAndTruthStats() {
+    if all observing alpha isFirstAlpha {
+        print "Handling alpha: "
+        print all observing alpha: prOneAlpha
+        eachLevelAndTruthStats()
+    }
+    else {
+        eachAlphaAndLevelAndTruthStats()
+    }
+}
+
+(*---------------------------------------------------------------------*)
+
 fn main( interpfile ) {
     add interpfile
     update all wordMap observing truth, word, prevs: makewordmap
     update editDistance observing wordMap, truth, word, prevs, range, interval : levenshteinDistance
-    update editError observing wordMap, truth, word, prevs, range, interval: levenshteinError
+    [Error] update editError observing wordMap, truth, word, prevs, range, interval: levenshteinError
 
     if observing word atEnd {
         if isTruth {
             print "\n\nTruth:\n"
             threeCount()
             threeStats()
+            eachAlphaAndTruthBestStats()
         }
         else {
             print "\n\n\nFailed:\n"
             threeCount()
             threeStats()
+            eachAlphaAndTruthBestStats()
         }
     }
-    else {
-        (* These interps are not the final (end) interps *)
-        accept
-    }
+
+    print "---------------Level and Truth-------------------\n"
+    eachAlphaAndLevelAndTruthStats()
+
+    print "---------------Truth and Best--------------------\n"
+    eachAlphaAndTruthBestStats()
 }

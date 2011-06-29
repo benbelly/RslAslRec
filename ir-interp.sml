@@ -20,6 +20,50 @@ fun wordsThru e ws =
     thru
   end
 
+fun isNextGroup is =
+  let
+    val {truth = firstTruth, alpha = firstAlpha, level = firstLevel} = hd is
+  in
+    (NONE, fn (truth, alpha, level) => (NONE, truth = firstTruth, level = firstLevel,
+                                              Real.==(alpha, firstAlpha)))
+  end
+
+fun isFirstTruth is =
+  let
+    val {truth = firstTruth} = hd is
+  in
+    (NONE, fn ({truth}) => (NONE, truth = firstTruth))
+  end
+
+fun isFirstLevel is =
+  let
+    val {level = firstLevel} = hd is
+  in
+    (NONE, fn {level} => (NONE, firstLevel = level))
+  end
+
+fun isFirstAlpha is =
+  let
+    val {alpha = firstAlpha} = hd is
+  in
+    (NONE, fn {alpha} => (NONE, Real.==(firstAlpha, alpha)))
+  end
+
+fun bestScore is =
+  let
+    val scores = List.map (fn {score} => score) is
+    val best = List.foldl Real.min Real.maxFinite scores
+  in
+    (NONE, fn {score} => (NONE, Real.==(score, best)))
+  end
+
+fun bestError is =
+  let
+    val errors = List.map (fn {editError} => editError) is
+    val best = List.foldl Real.min Real.maxFinite errors
+  in
+    (NONE, fn {editError} => (NONE, Real.==(editError, best)))
+  end
 
 fun isTruth ( i : Interp.r ) =
   let
@@ -43,9 +87,10 @@ fun isTruthSoFar (i: Interp.r) =
   end
 
 fun atAlpha(a) = fn { alpha } => (NONE, Real.==(a , alpha))
+
 fun prForAlpha(a) = fn _ => "For alpha " ^ (Real.toString a) ^ ": "
 
-fun prCount (is : Interp.r list) = (Int.toString(length is) ^ "\n")
+fun prCount (is : Interp.r list) = "Count: " ^ (Int.toString(length is) ^ "\n")
 
 fun prMaxError is =
   let
@@ -71,6 +116,38 @@ fun prAvgError is =
     val avg = sum / Real.fromInt(count)
   in
     "Average error = " ^ (Real.toString avg) ^ "\n"
+  end
+
+fun prOneTruth is =
+  let
+    val {truth} = hd is
+    val words = List.map stripInterval truth
+    val sentence = String.concatWith " " words
+  in
+    sentence ^ "\n"
+  end
+
+fun prOneLevel is =
+  let
+    val {level} = hd is
+  in
+    (Int.toString level) ^ "\n"
+  end
+
+fun prOneAlpha is =
+  let
+    val {alpha} = hd is
+  in
+    (Real.toString alpha) ^ "\n"
+  end
+  
+fun prOneGroup is =
+  let
+    val {truth, alpha, level} = hd is
+  in
+    "Truth: " ^ truth ^
+    "\nAlpha: " ^ (Real.toString alpha) ^
+    "\nLevel: " ^ (Int.toString level) ^ "\n"
   end
 
 fun rangeVec (b,e) =
