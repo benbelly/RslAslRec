@@ -66,102 +66,67 @@ fn truthSoFarCount() {
 (*---------------------------------------------------------------------*)
 
 (*-----------------Recursive grouping functions------------------------*)
-(* 
-fn eachGroupStats() {
+fn eachGroupStats( outfile ) {
     if all observing truth, alpha, level isNextGroup {
-        print all observing truth, alpha, level prOneGroup
-        print all prCount
-        truthSoFarCount()
-        bests()
-    }
-    else {
-        eachGroupStats()
-    }
-}
-*)
-
-fn eachTruthStats() {
-    if all observing truth isFirstTruth {
-        print "\tHandling truth: "
-        print all observing truth: prOneTruth
-        print all: prCount
-        threeStats()
-    }
-    else {
-        eachTruthStats()
-    }
-}
-
-fn eachTruthBestStats() {
-    if all observing truth isFirstTruth {
-        print "\tHandling truth: "
-        print all observing truth: prOneTruth
-        bests()
-    }
-    else {
-        eachTruthBestStats()
-    }
-}
-
-fn eachAlphaAndTruthBestStats() {
-    if all observing alpha isFirstAlpha {
-        eachTruthBestStats()
-    }
-    else {
-        eachAlphaAndTruthBestStats()
-    }
-}
-
-fn eachLevelAndTruthStats() {
-    if all observing level isFirstLevel {
-        print "Handling level: "
-        print all observing level: prOneLevel
+        (*
+        print all observing truth, alpha, level: prOneGroup
         print all: prCount
         truthSoFarCount()
-        eachTruthStats()
+        bests()
+        *)
+        write ++ all to outfile: prGroupReport
     }
     else {
-        eachLevelAndTruthStats()
-    }
-}
-
-fn eachAlphaAndLevelAndTruthStats() {
-    if all observing alpha isFirstAlpha {
-        print "Handling alpha: "
-        print all observing alpha: prOneAlpha
-        eachLevelAndTruthStats()
-    }
-    else {
-        eachAlphaAndLevelAndTruthStats()
+        eachGroupStats( outfile )
     }
 }
 
 (*---------------------------------------------------------------------*)
 
+fn writeReportLine( outfile ) {
+    write "Alpha\t Truth String\t Level\t Max Error\t Min Error\t Avg Error\t NumTruth\t NumInterps\t pctTruth\t Average Truth Error\t Average non-Truth Error\t fullMatch\n" to outfile
+}
+
 fn main( interpfile ) {
+    (* ML *)
+        oneSix = "cvsl_out/report-0.16-log"
+        twoEight = "cvsl_out/report-0.28-log"
+        threeOh = "cvsl_out/report-0.30-log"
+    (* ML *)
+
     add interpfile
     update all wordMap observing truth, word, prevs: makewordmap
     update editDistance observing wordMap, truth, word, prevs, range, interval : levenshteinDistance
     [Error] update editError observing wordMap, truth, word, prevs, range, interval: levenshteinError
 
+    (*
     if observing word atEnd {
         if isTruth {
             print "\n\nTruth:\n"
             threeCount()
             threeStats()
-            eachAlphaAndTruthBestStats()
+            eachGroupStats()
         }
         else {
             print "\n\n\nFailed:\n"
             threeCount()
             threeStats()
-            eachAlphaAndTruthBestStats()
+            eachGroupStats()
         }
     }
+    *)
 
-    print "---------------Level and Truth-------------------\n"
-    eachAlphaAndLevelAndTruthStats()
+    if observing alpha atAlpha( 0.16 ) {
+        writeReportLine( oneSix )
+        eachGroupStats( oneSix )
+    }
+    if observing alpha atAlpha( 0.28 ) {
+        writeReportLine( twoEight )
+        eachGroupStats( twoEight )
+    }
+    if observing alpha atAlpha( 0.30 ) {
+        writeReportLine( threeOh )
+        eachGroupStats( threeOh )
+    }
 
-    print "---------------Truth and Best--------------------\n"
-    eachAlphaAndTruthBestStats()
 }

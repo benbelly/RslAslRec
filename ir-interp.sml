@@ -12,7 +12,13 @@ fun isWord "**START**" = false
   | isWord "**ME**" = false
   | isWord _ = true
 
+fun isWords ws = List.filter isWord ws
+
 fun stripInterval (w,_,_) = w
+fun stripIntervals ws = List.map stripInterval ws
+
+fun wordStr ws = String.concatWith " " (isWords (stripIntervals ws))
+
 fun wordsThru e ws =
   let
     val (thru, _) = List.partition (fn (_, b, _) => b < e) ws
@@ -24,8 +30,8 @@ fun isNextGroup is =
   let
     val {truth = firstTruth, alpha = firstAlpha, level = firstLevel} = hd is
   in
-    (NONE, fn (truth, alpha, level) => (NONE, truth = firstTruth, level = firstLevel,
-                                              Real.==(alpha, firstAlpha)))
+    (NONE, fn {truth, alpha, level} => (NONE, truth = firstTruth andalso level = firstLevel
+                                              andalso Real.==(alpha, firstAlpha)))
   end
 
 fun isFirstTruth is =
@@ -75,15 +81,48 @@ fun isTruth ( i : Interp.r ) =
     (NONE, trueSent = testSent)
   end
 
+fun isTruthStr truth test =
+  let
+    val truStr = wordStr truth
+    val testStr = wordStr (rev test)
+  in
+    String.isPrefix testStr truStr
+  end
+
+fun truthStrCounts truth tests =
+  let
+    val trueStrs = List.filter (isTruthStr truth) tests
+    val cnt = List.length tests
+  in
+    (List.length trueStrs, cnt)
+  end
+
+fun isTruthSoFarTest truth test =
+  let
+    val (_,_,intervalEnd) = hd test
+    val trueSoFar = wordsThru intervalEnd truth
+    val pwords = List.map stripInterval test
+    val trueSent = List.map stripInterval trueSoFar
+    val testSent = List.filter isWord (rev pwords)
+  in
+    trueSent = testSent
+  end
+
+fun truthCounts truth tests =
+  let
+    val total = length tests
+    val truthCount = length (List.filter (isTruthSoFarTest truth) tests)
+  in
+    (truthCount, total)
+  end
+
 fun isTruthSoFar (i: Interp.r) =
   let
-    val { interval = (_, e), prevs = (ps, _), truth, word, ... } = i
-    val trueSoFar = wordsThru e truth
-    val pwords = List.map stripInterval ps
-    val trueSent = List.map stripInterval trueSoFar
-    val testSent = List.filter isWord (rev (word::pwords))
+    val { interval = (b, e), prevs = (ps, _), truth, word, ... } = i
+    val wordInterval = (word,b,e)
+    val testWords = wordInterval::ps
   in
-    (NONE, trueSent = testSent)
+    (NONE, isTruthSoFarTest truth testWords)
   end
 
 fun atAlpha(a) = fn { alpha } => (NONE, Real.==(a , alpha))
@@ -118,6 +157,106 @@ fun prAvgError is =
     "Average error = " ^ (Real.toString avg) ^ "\n"
   end
 
+fun averageError es =
+  let
+    val sum = List.foldl op+ 0.0 es
+    val count = List.length es
+    val avg = sum / (Real.fromInt(count))
+  in
+    avg
+  end
+
+fun averageErrorPartitioned truth is =
+  let
+    val wordsAndErrors = List.map (fn {word, prevs = (ps, _), interval = (tb, te), editError, ...} => ((word, tb, te)::ps, editError)) is
+    val (truths, falses) = List.partition (fn (test, _) => isTruthStr truth test) wordsAndErrors
+    val trueErrors = List.map (fn (_, editError) => editError) truths
+    val falseErrors = List.map (fn (_, editError) => editError) falses
+    val trueAvg = averageError trueErrors
+    val falseAvg = averageError falseErrors
+  in
+    (trueAvg, falseAvg)
+  end
+
+fun trueSentence truth =
+  let
+    val words = List.map stripInterval truth
+    val sentence = String.concatWith " " words
+  in
+    sentence
+  end
+
+fun anyTrues truth tests =
+  let
+    val trueSent = List.map stripInterval truth
+    val testsStripped = List.map stripIntervals tests
+    val trimSent = fn sent => List.filter isWord (rev (sent))
+    val trimmed = List.map trimSent testsStripped
+  in
+    List.exists (fn (s) => s = trueSent) trimmed
+  end
+
+(*
+ *interp:
+ *    wordMap : (string * int) list
+ *    alpha : real
+ *    truth : (string * int * int) list
+ *    range : int * int
+ *    level : int
+ *    word : string
+ *    score : real
+ *    interval : int * int
+ *    prevs : (string * int * int) list * real
+ *    editDistance: int
+ *    editError: real
+ *)
+ (* Alpha, Truth String, Level, Max Error, Min Error, Avg Error, NumTruth, NumInterps, pctTruth,
+    Average truth error, average non-truth error, isFullMatch, -- word, atEnd, score, isBest, isTruth *)
+fun prGroupReport (is : Interp.r list) =
+  let
+    val i = hd is
+    val {truth, alpha, level, ...} = i
+    val truthSentence = "\"" ^ (trueSentence truth) ^ "\""
+
+    val scores = List.map (fn ({score,...}) => score) is
+    val bestScore = List.foldl Real.min 0.0 scores
+
+    val errors = List.map (fn ({editError, ...} : Interp.r) => editError) is
+    val avgerr = averageError errors
+    val maxerr = List.foldl Real.max 0.0 errors
+    val minerr = List.foldl Real.min Real.maxFinite errors
+    val (averageTruthError, averageNonTruthError) = averageErrorPartitioned truth is
+
+    val allTests = List.map (fn {word, interval = (tb,te), prevs=(ps,_),...} => (word,tb,te)::ps) is
+    val (truthCount, total) = truthStrCounts truth allTests
+    val pctTruth = Real.fromInt(truthCount) / Real.fromInt(total)
+
+    val isFullMatch = anyTrues truth allTests
+    val groupStr = String.concatWith "\t" [ Real.toString alpha, truthSentence,
+                                           Int.toString level, Real.toString maxerr,
+                                           Real.toString minerr, Real.toString avgerr,
+                                           Int.toString truthCount, Int.toString total,
+                                           Real.toString pctTruth, Real.toString averageTruthError,
+                                           Real.toString averageNonTruthError,
+                                           Bool.toString isFullMatch ]
+    val reportLine = fn ({word, score, interval = (b,e), prevs = (ps,_), editError, ...} : Interp.r) =>
+        let
+          val testSentence = (word,b,e)::ps
+          val atEnd = "**END**" = word
+          val isBest = Real.<= (score, bestScore)
+          val isTruth = isTruthSoFarTest truth testSentence
+          val ifields = String.concatWith "\t" [ groupStr, "\"" ^ word ^ "\"",
+                                                Bool.toString atEnd, Real.toString score,
+                                                Bool.toString isBest, 
+                                                Bool.toString isTruth ]
+        in
+          ifields
+        end
+  in
+    (*(String.concatWith "\n" (List.map reportLine is)) ^ "\n"*)
+    groupStr ^ "\n"
+  end
+
 fun prOneTruth is =
   let
     val {truth} = hd is
@@ -144,8 +283,10 @@ fun prOneAlpha is =
 fun prOneGroup is =
   let
     val {truth, alpha, level} = hd is
+    val words = List.map stripInterval truth
+    val sentence = String.concatWith " " words
   in
-    "Truth: " ^ truth ^
+    "Truth: " ^ sentence ^
     "\nAlpha: " ^ (Real.toString alpha) ^
     "\nLevel: " ^ (Int.toString level) ^ "\n"
   end
