@@ -108,7 +108,7 @@ SMLS = $(ASLREC_SMLS) \
 	   $(DICTIONARY_SMLS) \
 	   aslalg.sml aslalg.mlb 
 
-OPENCV_PATH=/home/bholm/raid/OpenCV
+OPENCV_PATH=/home/ben/OpenCV
 
 ##
 ## C++ variables
