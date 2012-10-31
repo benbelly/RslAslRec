@@ -1,12 +1,8 @@
 #include "levenshtein.h"
 #include <vector>
 
-/*
-
-Levenshtein distance algorithm taken from http://www.merriampark.com/ldcpp.htm
-Referenced by http://www.merriampark.com/ld.htm
-
-*/
+/* Levenshtein distance algorithm made available without license
+ * at http://www.merriampark.com/ldcpp.htm */
 
 int levenshteinC( Pointer src, int srcLen, Pointer trgt, int trgtLen ) {
     std::vector<char> source( (char*)src, ((char*)src) + srcLen ),

@@ -2,12 +2,8 @@
 #ifndef LEVENSHTEIN_H__
 #define LEVENSHTEIN_H__
 
-/*
-
-Levenshtein distance algorithm taken from http://www.merriampark.com/ldcpp.htm
-Referenced by http://www.merriampark.com/ld.htm
-
-*/
+/* Levenshtein distance algorithm made available without license
+ * at http://www.merriampark.com/ldcpp.htm */
 #include <vector>
 
 // MLton stuff
